@@ -10,9 +10,12 @@ setup_image() {
     message "Installing Shaker image, will take some time"
 
     message "Downloading Ubuntu cloud image"
-    IMG_FILE="ubuntu-cloud.img"
-    wget -O ${IMG_FILE} ${UBUNTU_CLOUD_IMAGE_URL}
-    glance image-create --name ${IMG_FILE} --disk-format qcow2 --container-format bare --is-public True --file ${IMG_FILE}
+    IMG_FILE="shaker-template-image"
+    glance image-create --name ${IMG_FILE} --disk-format qcow2 --container-format bare --is-public True --copy-from ${UBUNTU_CLOUD_IMAGE_URL}
+
+    until [ -n "$(glance image-show ${IMG_FILE} | grep status | grep active)" ]; do
+        sleep 5
+    done
 
     message "Creating security group"
     SEC_GROUP="shaker-access"
@@ -25,9 +28,10 @@ setup_image() {
     nova flavor-create --is-public true m1.mini 6 1024 10 1
 
     message "Creating key pair"
-    KEY="shaker-key"
-    nova keypair-add ${KEY} > ${KEY}.pem
-    chmod og-rw ${KEY}.pem
+    KEY_NAME="shaker-key"
+    KEY="`mktemp`"
+    nova keypair-add ${KEY_NAME} > ${KEY_NAME}
+    chmod og-rw ${KEY}
 
     message "Booting VM"
     NETWORK_ID=`neutron net-show net04 -f value -c id`
@@ -36,17 +40,27 @@ setup_image() {
 
     message "Associating a floating IP with VM"
     FLOATING_IP=`neutron floatingip-create -f value -c floating_ip_address net04_ext | tail -1`
-    FLOATING_IP="172.18.161.251"
     nova floating-ip-associate ${VM} ${FLOATING_IP}
 
+    message "Waiting for VM to boot up"
+    until remote_shell ${FLOATING_IP} ${KEY} "echo"; do
+        sleep 5
+    done
+
     message "Installing packages into VM"
-    ssh -i ${KEY}.pem ubuntu@${FLOATING_IP} "sudo apt-add-repository \"deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse\""
-    ssh -i ${KEY}.pem ubuntu@${FLOATING_IP} "sudo apt-get update"
-    ssh -i ${KEY}.pem ubuntu@${FLOATING_IP} "sudo apt-get -y install iperf netperf python-pip"
-    ssh -i ${KEY}.pem ubuntu@${FLOATING_IP} "sudo pip install netperf-wrapper"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-add-repository \"deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse\""
+    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get update"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf python-pip python-dev"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo pip install netperf-wrapper numpy"
 
     message "Making VM snapshot"
     nova image-create --poll ${VM} ${IMAGE_NAME}
+
+    message "Destroy VM"
+    nova delete ${VM}
+
+    FP_ID=`neutron floatingip-list -f csv -c id -c floating_ip_address --quote none | grep ${FLOATING_IP} | awk -F "," '{print $1}'`
+    neutron floatingip-delete ${FP_ID}
 }
 
 main() {

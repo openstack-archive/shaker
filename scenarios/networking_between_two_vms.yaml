@@ -1,0 +1,5 @@
+deploy:
+  scenarios/deploy_two_vms.sh
+tests:
+  - netperf: tcp_bidirectional
+  - dummy-type: nope

@@ -16,10 +16,25 @@
 from oslo.config import cfg
 
 from shaker.engine import config
+from shaker.engine import heat
+from shaker.engine import keystone
 from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)
+
+
+def run():
+    keystone_kwargs = {'username': cfg.CONF.os_username,
+                       'password': cfg.CONF.os_password,
+                       'tenant_name': cfg.CONF.os_tenant_name,
+                       'auth_url': cfg.CONF.os_auth_url,
+                       }
+    keystone_client = keystone.create_keystone_client(keystone_kwargs)
+
+    heat_client = heat.create_heat_client(keystone_client)
+    for stack in heat_client.stacks.list():
+        LOG.info('Stacks: %s', stack)
 
 
 def main():
@@ -31,6 +46,8 @@ def main():
 
     logging.setup('shaker')
     LOG.info('Logging enabled')
+
+    run()
 
 
 if __name__ == '__main__':

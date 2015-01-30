@@ -14,10 +14,21 @@
 # limitations under the License.
 
 from oslo.config import cfg
+from shaker.engine import utils
 
 
 OPTS = [
-    cfg.StrOpt('scenario',
-               required=True,
-               help='Scenario to run'),
+    cfg.StrOpt('os-auth-url', metavar='<auth-url>',
+               default=utils.env('OS_AUTH_URL'),
+               help='Authentication URL, defaults to env[OS_AUTH_URL].'),
+    cfg.StrOpt('os-tenant-name', metavar='<auth-tenant-name>',
+               default=utils.env('OS_TENANT_NAME'),
+               help='Authentication tenant name, defaults to '
+                    'env[OS_TENANT_NAME].'),
+    cfg.StrOpt('os-username', metavar='<auth-username>',
+               default=utils.env('OS_USERNAME'),
+               help='Authentication username, defaults to env[OS_USERNAME].'),
+    cfg.StrOpt('os-password', metavar='<auth-password>',
+               default=utils.env('OS_PASSWORD'),
+               help='Authentication password, defaults to env[OS_PASSWORD].'),
 ]
