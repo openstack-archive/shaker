@@ -5,6 +5,6 @@
 # Hacking already pins down pep8, pyflakes and flake8
 hacking>=0.8.0,<0.9
 mock>=1.0
-python-subunit
-testrepository>=0.0.17
-testtools>=0.9.32
+python-subunit>=0.0.18
+testrepository>=0.0.18
+testtools>=0.9.36,!=1.2.0
