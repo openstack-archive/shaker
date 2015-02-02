@@ -18,6 +18,7 @@ from oslo.config import cfg
 from shaker.engine import config
 from shaker.engine import heat
 from shaker.engine import keystone
+from shaker.engine import nova
 from shaker.openstack.common import log as logging
 
 
@@ -35,6 +36,10 @@ def run():
     heat_client = heat.create_heat_client(keystone_client)
     for stack in heat_client.stacks.list():
         LOG.info('Stacks: %s', stack)
+
+    nova_client = nova.create_nova_client(keystone_kwargs)
+    compute_nodes = [svc.host for svc in nova.get_compute_nodes(nova_client)]
+    LOG.info('Compute nodes: %s', compute_nodes)
 
 
 def main():
