@@ -31,4 +31,8 @@ OPTS = [
     cfg.StrOpt('os-password', metavar='<auth-password>',
                default=utils.env('OS_PASSWORD'),
                help='Authentication password, defaults to env[OS_PASSWORD].'),
+
+    cfg.StrOpt('scenario',
+               required=True,
+               help='Scenario file name'),
 ]

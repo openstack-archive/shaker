@@ -26,3 +26,8 @@ def env(*_vars, **kwargs):
         if value:
             return value
     return kwargs.get('default', '')
+
+
+def read_file(file_name):
+    with open(file_name) as fd:
+        return fd.read()

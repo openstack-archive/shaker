@@ -13,8 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from heatclient import client as heat_client_pkg
 import time
+
+from heatclient import client as heat_client_pkg
+
+from shaker.openstack.common import log as logging
+
+
+LOG = logging.getLogger(__name__)
 
 
 HEAT_CLIENT_VERSION = '1'
@@ -29,12 +35,16 @@ def create_heat_client(keystone_client):
     return client
 
 
-def wait_stack_completion(stack):
-    # NOTE: expected empty status because status of stack
-    # maybe is not set in heat database
-    while stack.status in ['IN_PROGRESS', '']:
-        time.sleep(1)
-        stack.get()
+def wait_stack_completion(heat_client, stack_id):
+    status = None
 
-    if stack.status != 'COMPLETE':
-        raise Exception(stack.stack_status)
+    while True:
+        status = heat_client.stacks.get(stack_id).status
+        LOG.debug('Stack status: %s', status)
+        if status not in ['IN_PROGRESS', '']:
+            break
+
+        time.sleep(1)
+
+    if status != 'COMPLETE':
+        raise Exception(status)

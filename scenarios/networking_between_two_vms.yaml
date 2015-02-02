@@ -1,5 +1,14 @@
-deploy:
-  scenarios/deploy_two_vms.sh
+deployment:
+  template: scenarios/single_net.heat.template
+  template_parameters:
+    key_name: shaker-vm-key
+    image: TestVM
+    flavor: m1.nano
+    public_net: net04_ext
+    private_net_cidr: 10.0.0.0/24
+  mode: pairs
+  vm_count: 2
+
 tests:
   - netperf: tcp_bidirectional
   - dummy-type: nope

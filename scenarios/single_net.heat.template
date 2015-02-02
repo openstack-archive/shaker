@@ -1,0 +1,115 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to create a new neutron network plus a router to the public
+  network, and for deploying two servers into the new network. The template also
+  assigns floating IP addresses to each server so they are routable from the
+  public network.
+
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+  image:
+    type: string
+    description: Name of image to use for servers
+  flavor:
+    type: string
+    description: Flavor to use for servers
+  public_net:
+    type: string
+    description: >
+      ID or name of public network for which floating IP addresses will be allocated
+  private_net_name:
+    type: string
+    description: Name of private network to be created
+  private_net_cidr:
+    type: string
+    description: Private network address (CIDR notation)
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: private_net_name }
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: { get_param: private_net_cidr }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+{% for master in masters %}
+
+  {{ master.name }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ master.name }}
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      availability_zone: "nova:{{ master.node }}"
+      networks:
+        - port: { get_resource: {{ master.name }}_port }
+
+  {{ master.name }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  {{ master.name }}_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: public_net }
+      port_id: { get_resource: {{ master.name }}_port }
+
+{% endfor %}
+
+{% for slave in slaves %}
+
+  {{ slave.name }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ slave.name }}
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      availability_zone: "nova:{{ slave.node }}"
+      networks:
+        - port: { get_resource: {{ slave.name }}_port }
+
+  {{ slave.name }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+{% endfor %}
+
+outputs:
+{% for master in masters %}
+  {{ master.name }}_ip:
+    description: Floating IP address of {{ master.name }} in public network
+    value: { get_attr: [ {{ master.name }}_floating_ip, floating_ip_address ] }
+{% endfor %}
+
+{% for slave in slaves %}
+  {{ slave.name }}_ip:
+    description: IP address of {{ slave.name }} in private network
+    value: { get_attr: [ {{ slave.name }}, first_address ] }
+{% endfor %}
