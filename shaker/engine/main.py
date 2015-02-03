@@ -96,11 +96,17 @@ def run():
     outputs = dict((item['output_key'], item) for item in outputs_list)
 
     for i in range(vm_count):
-        masters[i]['ip'] = outputs[masters[i]['name'] + '_ip']['output_value']
-        slaves[i]['ip'] = outputs[slaves[i]['name'] + '_ip']['output_value']
+        masters[i]['public_ip'] = (outputs[masters[i]['name'] + '_public_ip']
+                                   ['output_value'])
+        slaves[i]['public_ip'] = (outputs[slaves[i]['name'] + '_public_ip']
+                                  ['output_value'])
+        slaves[i]['private_ip'] = (outputs[slaves[i]['name'] + '_private_ip']
+                                  ['output_value'])
 
     LOG.info('Masters: %s', masters)
     LOG.info('Slaves: %s', slaves)
+
+    # wait for ssh to nodes
 
 
 def main():
