@@ -15,6 +15,13 @@
 
 import os
 
+import six
+
+from shaker.openstack.common import log as logging
+
+
+LOG = logging.getLogger(__name__)
+
 
 def env(*_vars, **kwargs):
     """Returns the first environment variable set.
@@ -38,3 +45,15 @@ def split_address(address):
     if not port:
         raise Exception('Invalid address: %s', address)
     return host, port
+
+
+def read_uri(uri):
+    try:
+        req = six.moves.urllib.request.Request(url=uri)
+        fd = six.moves.urllib.request.urlopen(req)
+        raw = fd.read()
+        fd.close()
+        return raw
+    except Exception as e:
+        LOG.warn('Error "%(error)s" while reading uri %(uri)s',
+                 {'error': e, 'uri': uri})

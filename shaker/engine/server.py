@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
 import time
 
 from oslo.config import cfg
@@ -48,15 +47,16 @@ def main():
     context = zmq.Context()
     socket = context.socket(zmq.REP)
     socket.connect("tcp://%(host)s:%(port)s" % dict(host=host, port=port))
-    server_id = random.randrange(1, 10005)
 
     try:
         while True:
             #  Wait for next request from client
-            message = socket.recv()
+            message = socket.recv_json()
             LOG.debug('Received request: %s', message)
             time.sleep(1)
-            socket.send('World from server %s' % server_id)
+            socket.send_json({
+                'operation': 'none'
+            })
     except BaseException as e:
         if not isinstance(e, KeyboardInterrupt):
             LOG.exception(e)

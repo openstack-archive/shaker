@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import random
-
 from oslo.config import cfg
 import zmq
 
@@ -24,6 +22,33 @@ from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)
+
+
+INSTANCE_ID_URI = 'http://169.254.169.254/2009-04-04/meta-data/instance-id'
+
+
+def get_instance_id():
+    # return utils.read_uri(INSTANCE_ID_URI)
+    return 'i-0000005f'
+
+
+def poll_task(socket, instance_id):
+    payload = {'operation': 'poll_task', 'instance_id': instance_id, }
+    LOG.debug('Polling task: %s', payload)
+    socket.send_json(payload)
+    res = socket.recv_json()
+    LOG.debug('Received: %s', res)
+    return res
+
+
+def send_result(socket, instance_id, result):
+    payload = {'operation': 'send_result', 'instance_id': instance_id,
+               'data': result, }
+    LOG.debug('Sending result: %s', payload)
+    socket.send_json(payload)
+    res = socket.recv_json()
+    LOG.debug('Received: %s', res)
+    return res
 
 
 def main():
@@ -44,21 +69,25 @@ def main():
 
     host, port = utils.split_address(cfg.CONF.agent_endpoint)
 
+    instance_id = get_instance_id()
+    LOG.info('My instance id is: %s', instance_id)
+
     context = zmq.Context()
     LOG.info('Connecting to server: %s:%s', host, port)
 
     socket = context.socket(zmq.REQ)
     socket.connect('tcp://localhost:%s' % port)
-    client_id = random.randrange(1, 10005)
 
-    # Do 10 requests, waiting each time for a response
     try:
-        for request in range(10):
-            LOG.debug('Sending request %s' % request)
-            socket.send('Hello from %s' % client_id)
-            #  Get the reply.
-            message = socket.recv()
-            LOG.debug('Received reply %s [%s]', request, message)
+        while True:
+            task = poll_task(socket, instance_id)
+            if task['operation'] == 'none':
+                continue
+            if task['operation'] == 'execute':
+                LOG.info('Execute task: %s', task)
+                # do something useful
+                send_result(socket, instance_id, {'data': 'foo'})
+
     except BaseException as e:
         if not isinstance(e, KeyboardInterrupt):
             LOG.exception(e)
