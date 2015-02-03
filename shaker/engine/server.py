@@ -55,7 +55,8 @@ def main():
             LOG.debug('Received request: %s', message)
             time.sleep(1)
             socket.send_json({
-                'operation': 'none'
+                'operation': 'execute',
+                'command': 'ls -al',
             })
     except BaseException as e:
         if not isinstance(e, KeyboardInterrupt):

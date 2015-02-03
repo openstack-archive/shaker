@@ -13,6 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import shlex
+import time
+
+from oslo.concurrency import processutils
 from oslo.config import cfg
 import zmq
 
@@ -86,7 +90,13 @@ def main():
             if task['operation'] == 'execute':
                 LOG.info('Execute task: %s', task)
                 # do something useful
-                send_result(socket, instance_id, {'data': 'foo'})
+                command_stdout, command_stderr = processutils.execute(
+                    *shlex.split(task['command']))
+                send_result(socket, instance_id, {
+                    'stdout': command_stdout,
+                    'stderr': command_stderr,
+                })
+                time.sleep(1)
 
     except BaseException as e:
         if not isinstance(e, KeyboardInterrupt):
