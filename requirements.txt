@@ -13,3 +13,4 @@ python-keystoneclient>=1.0.0
 python-novaclient>=2.18.0
 python-heatclient>=0.2.9
 PyYAML>=3.1.0
+pyzmq

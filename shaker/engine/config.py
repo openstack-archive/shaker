@@ -36,3 +36,15 @@ OPTS = [
                required=True,
                help='Scenario file name'),
 ]
+
+AGENT_OPTS = [
+    cfg.StrOpt('agent-endpoint',
+               required=True,
+               help='Address for agent connections (host:port)'),
+]
+
+SERVER_OPTS = [
+    cfg.StrOpt('server-endpoint',
+               required=True,
+               help='Address for server connections (host:port)'),
+]

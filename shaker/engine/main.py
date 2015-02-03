@@ -101,7 +101,7 @@ def run():
         slaves[i]['public_ip'] = (outputs[slaves[i]['name'] + '_public_ip']
                                   ['output_value'])
         slaves[i]['private_ip'] = (outputs[slaves[i]['name'] + '_private_ip']
-                                  ['output_value'])
+                                   ['output_value'])
 
     LOG.info('Masters: %s', masters)
     LOG.info('Slaves: %s', slaves)

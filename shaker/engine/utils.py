@@ -31,3 +31,10 @@ def env(*_vars, **kwargs):
 def read_file(file_name):
     with open(file_name) as fd:
         return fd.read()
+
+
+def split_address(address):
+    host, port = address.split(':')
+    if not port:
+        raise Exception('Invalid address: %s', address)
+    return host, port
