@@ -4,6 +4,8 @@ TOP_DIR=$(cd $(dirname "$0") && pwd)
 source ${TOP_DIR}/functions.sh
 
 IMAGE_NAME="shaker-image"
+FLAVOR_NAME="shaker-flavor"
+
 UBUNTU_CLOUD_IMAGE_URL="https://cloud-images.ubuntu.com/releases/14.04.1/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img"
 
 setup_image() {
@@ -26,7 +28,9 @@ setup_image() {
     nova secgroup-add-rule ${SEC_GROUP} udp 1 65535 0.0.0.0/0
 
     message "Creating flavor"
-    FLAVOR_NAME="shaker-flavor"
+    if [ -n "$(nova flavor-list | grep ${FLAVOR_NAME})" ]; then
+        nova flavor-delete ${FLAVOR_NAME}
+    fi
     nova flavor-create --is-public true ${FLAVOR_NAME} auto 1024 10 1
 
     message "Creating key pair"
@@ -52,8 +56,9 @@ setup_image() {
     message "Installing packages into VM"
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-add-repository \"deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse\""
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get update"
-    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf python-pip git"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf python-pip git python-dev"
     remote_shell ${FLOATING_IP} ${KEY} "sudo pip install netperf-wrapper"
+    remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo python setup.py install"
 
     message "Making VM snapshot"
     nova image-create --poll ${VM} ${IMAGE_NAME}
@@ -77,7 +82,6 @@ setup_image() {
 
 main() {
     CHECK_IMAGE="`glance image-show ${IMAGE_NAME} || true`"
-    echo "-- ${CHECK_IMAGE} --"
     if [ "${CHECK_IMAGE}" == "" ]; then
         setup_image
     else
