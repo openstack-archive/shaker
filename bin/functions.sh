@@ -13,5 +13,5 @@ remote_shell() {
     host=$1
     key=$2
     command=$3
-    ssh -i ${key} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ubuntu@${host} "$command"
+    ssh -i ${key} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 ubuntu@${host} "$command"
 }
