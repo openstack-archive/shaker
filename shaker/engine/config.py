@@ -41,6 +41,8 @@ AGENT_OPTS = [
     cfg.StrOpt('agent-endpoint',
                required=True,
                help='Address for agent connections (host:port)'),
+    cfg.StrOpt('instance-id',
+               help='The id of instance where agent is running'),
 ]
 
 SERVER_OPTS = [

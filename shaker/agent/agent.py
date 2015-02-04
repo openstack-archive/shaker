@@ -32,8 +32,7 @@ INSTANCE_ID_URI = 'http://169.254.169.254/2009-04-04/meta-data/instance-id'
 
 
 def get_instance_id():
-    # return utils.read_uri(INSTANCE_ID_URI)
-    return 'i-0000005f'
+    return utils.read_uri(INSTANCE_ID_URI)
 
 
 def poll_task(socket, instance_id):
@@ -73,7 +72,7 @@ def main():
 
     host, port = utils.split_address(cfg.CONF.agent_endpoint)
 
-    instance_id = get_instance_id()
+    instance_id = cfg.CONF.instance_id or get_instance_id()
     LOG.info('My instance id is: %s', instance_id)
 
     context = zmq.Context()
@@ -103,7 +102,6 @@ def main():
             LOG.exception(e)
     finally:
         LOG.info('Shutting down')
-        context.term()
 
 
 if __name__ == "__main__":
