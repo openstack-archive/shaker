@@ -26,9 +26,9 @@ parameters:
   private_net_cidr:
     type: string
     description: Private network address (CIDR notation)
-  agent_endpoint:
+  server_endpoint:
     type: string
-    description: Agent endpoint at shaker-queue-device
+    description: Server endpoint address
 
 resources:
   private_net:
@@ -83,9 +83,9 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            shaker-agent --agent-endpoint=$AGENT_ENDPOINT --debug &
+            shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug &
           params:
-            "$AGENT_ENDPOINT": { get_param: agent_endpoint }
+            "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
   {{ master.name }}_port:
     type: OS::Neutron::Port
@@ -120,9 +120,9 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            shaker-agent --agent-endpoint=$AGENT_ENDPOINT --debug &
+            shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug &
           params:
-            "$AGENT_ENDPOINT": { get_param: agent_endpoint }
+            "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
   {{ slave.name }}_port:
     type: OS::Neutron::Port

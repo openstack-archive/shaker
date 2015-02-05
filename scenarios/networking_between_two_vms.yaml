@@ -6,11 +6,11 @@ deployment:
     flavor: shaker-flavor
     public_net: net04_ext
     private_net_cidr: 10.0.0.0/24
-    agent_endpoint: 172.18.76.4:5998
-  mode: pairs
-  vm_count: 1
+  vm_count: 2
 
-tests:
+execution:
+  nodes: [1, 2]
+  tests:
   - 
     class: netperf
     method: tcp_bidirectional

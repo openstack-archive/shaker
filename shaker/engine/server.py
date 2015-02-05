@@ -16,9 +16,11 @@
 import time
 
 from oslo.config import cfg
+import yaml
 import zmq
 
 from shaker.engine import config
+from shaker.engine import deploy
 from shaker.engine import utils
 from shaker.openstack.common import log as logging
 
@@ -155,11 +157,23 @@ def run(message_queue):
     LOG.info('Done')
 
 
+def read_scenario():
+    scenario_raw = utils.read_file(cfg.CONF.scenario)
+    scenario = yaml.safe_load(scenario_raw)
+    LOG.debug('Scenario: %s', scenario)
+    return scenario
+
+
+def execute(execution):
+    message_queue = MessageQueue(cfg.CONF.server_endpoint)
+    run(message_queue)
+
+
 def main():
     # init conf and logging
     conf = cfg.CONF
-    conf.register_cli_opts(config.SERVER_OPTS)
-    conf.register_opts(config.SERVER_OPTS)
+    conf.register_cli_opts(config.OPTS)
+    conf.register_opts(config.OPTS)
 
     try:
         conf(project='shaker')
@@ -171,8 +185,15 @@ def main():
     logging.setup('shaker')
     LOG.info('Logging enabled')
 
-    message_queue = MessageQueue(cfg.CONF.server_endpoint)
-    run(message_queue)
+    scenario = read_scenario()
+    deployment = deploy.Deployment(cfg.CONF.os_username,
+                                   cfg.CONF.os_password,
+                                   cfg.CONF.os_tenant_name,
+                                   cfg.CONF.os_auth_url,
+                                   cfg.CONF.server_endpoint)
+    deployment.deploy(scenario['deployment'])
+    execute(scenario['execution'])
+    deployment.cleanup()
 
 
 if __name__ == "__main__":
