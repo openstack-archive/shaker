@@ -46,7 +46,8 @@ def main():
 
     context = zmq.Context()
     socket = context.socket(zmq.REP)
-    socket.connect("tcp://%(host)s:%(port)s" % dict(host=host, port=port))
+    socket.bind("tcp://*:%s" % port)
+    LOG.info('Listening on *:%s', port)
 
     try:
         while True:
@@ -63,7 +64,6 @@ def main():
             LOG.exception(e)
     finally:
         LOG.info('Shutting down')
-        context.term()
 
 
 if __name__ == "__main__":

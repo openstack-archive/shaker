@@ -12,7 +12,7 @@ During installation the tool uploads Ubuntu cloud image, boots VM, installs all 
 into it and creates snapshot with name `shaker-image`.
 
 To install:
-1. Run `./bin/prepare.sh`
+ 1. Run `./bin/prepare.sh`
 
 How to run
 ----------

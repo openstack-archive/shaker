@@ -70,16 +70,16 @@ def main():
     logging.setup('shaker')
     LOG.info('Logging enabled')
 
-    host, port = utils.split_address(cfg.CONF.agent_endpoint)
+    endpoint = cfg.CONF.server_endpoint
 
     instance_id = cfg.CONF.instance_id or get_instance_id()
     LOG.info('My instance id is: %s', instance_id)
 
     context = zmq.Context()
-    LOG.info('Connecting to server: %s:%s', host, port)
+    LOG.info('Connecting to server: %s', endpoint)
 
     socket = context.socket(zmq.REQ)
-    socket.connect('tcp://localhost:%s' % port)
+    socket.connect('tcp://%s' % endpoint)
 
     try:
         while True:
