@@ -26,6 +26,9 @@ parameters:
   private_net_cidr:
     type: string
     description: Private network address (CIDR notation)
+  agent_endpoint:
+    type: string
+    description: Agent endpoint at shaker-queue-device
 
 resources:
   private_net:
@@ -75,6 +78,14 @@ resources:
       availability_zone: "nova:{{ master.node }}"
       networks:
         - port: { get_resource: {{ master.name }}_port }
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/sh
+            shaker-agent --agent-endpoint=$AGENT_ENDPOINT --debug &
+          params:
+            "$AGENT_ENDPOINT": { get_param: agent_endpoint }
 
   {{ master.name }}_port:
     type: OS::Neutron::Port
@@ -104,6 +115,14 @@ resources:
       availability_zone: "nova:{{ slave.node }}"
       networks:
         - port: { get_resource: {{ slave.name }}_port }
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/sh
+            shaker-agent --agent-endpoint=$AGENT_ENDPOINT --debug &
+          params:
+            "$AGENT_ENDPOINT": { get_param: agent_endpoint }
 
   {{ slave.name }}_port:
     type: OS::Neutron::Port
@@ -112,12 +131,6 @@ resources:
       fixed_ips:
         - subnet_id: { get_resource: private_subnet }
       security_groups: [{ get_resource: server_security_group }]
-
-  {{ slave.name }}_floating_ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network: { get_param: public_net }
-      port_id: { get_resource: {{ slave.name }}_port }
 
 {% endfor %}
 
@@ -129,10 +142,6 @@ outputs:
 {% endfor %}
 
 {% for slave in slaves %}
-  {{ slave.name }}_public_ip:
-    description: Floating IP address of {{ slave.name }} in public network
-    value: { get_attr: [ {{ slave.name }}_floating_ip, floating_ip_address ] }
-
   {{ slave.name }}_private_ip:
     description: IP address of {{ slave.name }} in private network
     value: { get_attr: [ {{ slave.name }}, first_address ] }

@@ -36,7 +36,10 @@ def get_instance_id():
 
 
 def poll_task(socket, instance_id):
-    payload = {'operation': 'poll_task', 'instance_id': instance_id, }
+    payload = {
+        'operation': 'poll',
+        'agent_id': instance_id,
+    }
     LOG.debug('Polling task: %s', payload)
     socket.send_json(payload)
     res = socket.recv_json()
@@ -44,11 +47,15 @@ def poll_task(socket, instance_id):
     return res
 
 
-def send_result(socket, instance_id, result):
-    payload = {'operation': 'send_result', 'instance_id': instance_id,
-               'data': result, }
-    LOG.debug('Sending result: %s', payload)
-    socket.send_json(payload)
+def send_reply(socket, instance_id, result):
+    message = {
+        'operation': 'reply',
+        'agent_id': instance_id,
+    }
+    message.update(result)
+
+    LOG.debug('Sending reply: %s', message)
+    socket.send_json(message)
     res = socket.recv_json()
     LOG.debug('Received: %s', res)
     return res
@@ -84,18 +91,24 @@ def main():
     try:
         while True:
             task = poll_task(socket, instance_id)
-            if task['operation'] == 'none':
-                continue
+
             if task['operation'] == 'execute':
-                LOG.info('Execute task: %s', task)
+                now = int(time.time())
+                start_at = task.get('start_at') or now
+                command = task.get('command')
+                LOG.debug('Scheduling command %s at %s', command, start_at)
+
+                time.sleep(start_at - now)
+
                 # do something useful
                 command_stdout, command_stderr = processutils.execute(
-                    *shlex.split(task['command']))
-                send_result(socket, instance_id, {
+                    *shlex.split(command))
+                send_reply(socket, instance_id, {
                     'stdout': command_stdout,
                     'stderr': command_stderr,
                 })
-                time.sleep(1)
+
+            time.sleep(10)
 
     except BaseException as e:
         if not isinstance(e, KeyboardInterrupt):

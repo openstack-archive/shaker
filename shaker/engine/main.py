@@ -98,8 +98,6 @@ def run():
     for i in range(vm_count):
         masters[i]['public_ip'] = (outputs[masters[i]['name'] + '_public_ip']
                                    ['output_value'])
-        slaves[i]['public_ip'] = (outputs[slaves[i]['name'] + '_public_ip']
-                                  ['output_value'])
         slaves[i]['private_ip'] = (outputs[slaves[i]['name'] + '_private_ip']
                                    ['output_value'])
 

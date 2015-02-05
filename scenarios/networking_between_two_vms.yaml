@@ -2,13 +2,18 @@ deployment:
   template: scenarios/single_net.heat.template
   template_parameters:
     key_name: shaker-vm-key
-    image: TestVM
-    flavor: m1.nano
+    image: shaker-image
+    flavor: shaker-flavor
     public_net: net04_ext
     private_net_cidr: 10.0.0.0/24
+    agent_endpoint: 172.18.76.4:5998
   mode: pairs
-  vm_count: 2
+  vm_count: 1
 
 tests:
-  - netperf: tcp_bidirectional
-  - dummy-type: nope
+  - 
+    class: netperf
+    method: tcp_bidirectional
+  - 
+    class: shell
+    method: ls -al
