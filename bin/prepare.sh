@@ -57,8 +57,8 @@ setup_image() {
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-add-repository \"deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse\""
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get update"
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf python-pip git python-dev"
-    remote_shell ${FLOATING_IP} ${KEY} "sudo pip install netperf-wrapper"
-    remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo python setup.py install"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo pip install pbr netperf-wrapper"
+    remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo python setup.py develop"
 
     message "Making VM snapshot"
     nova image-create --poll ${VM} ${IMAGE_NAME}
