@@ -66,18 +66,18 @@ resources:
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
 
-{% for master in masters %}
+{% for brigade in brigades %}
 
-  {{ master.name }}:
+  {{ brigade.master.name }}:
     type: OS::Nova::Server
     properties:
-      name: {{ master.name }}
+      name: {{ brigade.master.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
       key_name: { get_param: key_name }
-      availability_zone: "nova:{{ master.node }}"
+      availability_zone: "nova:{{ brigade.master.single_node }}"
       networks:
-        - port: { get_resource: {{ master.name }}_port }
+        - port: { get_resource: {{ brigade.master.name }}_port }
       user_data_format: RAW
       user_data:
         str_replace:
@@ -87,7 +87,7 @@ resources:
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
-  {{ master.name }}_port:
+  {{ brigade.master.name }}_port:
     type: OS::Neutron::Port
     properties:
       network_id: { get_resource: private_net }
@@ -95,26 +95,22 @@ resources:
         - subnet_id: { get_resource: private_subnet }
       security_groups: [{ get_resource: server_security_group }]
 
-  {{ master.name }}_floating_ip:
+  {{ brigade.master.name }}_floating_ip:
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: public_net }
-      port_id: { get_resource: {{ master.name }}_port }
+      port_id: { get_resource: {{ brigade.master.name }}_port }
 
-{% endfor %}
-
-{% for slave in slaves %}
-
-  {{ slave.name }}:
+  {{ brigade.slave.name }}:
     type: OS::Nova::Server
     properties:
-      name: {{ slave.name }}
+      name: {{ brigade.slave.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
       key_name: { get_param: key_name }
-      availability_zone: "nova:{{ slave.node }}"
+      availability_zone: "nova:{{ brigade.slave.single_node }}"
       networks:
-        - port: { get_resource: {{ slave.name }}_port }
+        - port: { get_resource: {{ brigade.slave.name }}_port }
       user_data_format: RAW
       user_data:
         str_replace:
@@ -124,7 +120,7 @@ resources:
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
-  {{ slave.name }}_port:
+  {{ brigade.slave.name }}_port:
     type: OS::Neutron::Port
     properties:
       network_id: { get_resource: private_net }
@@ -135,14 +131,15 @@ resources:
 {% endfor %}
 
 outputs:
-{% for master in masters %}
-  {{ master.name }}_public_ip:
-    description: Floating IP address of {{ master.name }} in public network
-    value: { get_attr: [ {{ master.name }}_floating_ip, floating_ip_address ] }
-{% endfor %}
-
-{% for slave in slaves %}
-  {{ slave.name }}_private_ip:
-    description: IP address of {{ slave.name }} in private network
-    value: { get_attr: [ {{ slave.name }}, first_address ] }
+{% for brigade in brigades %}
+  {{ brigade.master.name }}_public_ip:
+    description: Floating IP address of {{ brigade.master.name }} in public network
+    value: { get_attr: [ {{ brigade.master.name }}_floating_ip, floating_ip_address ] }
+  {{ brigade.master.name }}_instance_name:
+    value: { get_attr: [ {{ brigade.master.name }}, instance_name ] }
+  {{ brigade.slave.name }}_private_ip:
+    description: IP address of {{ brigade.slave.name }} in private network
+    value: { get_attr: [ {{ brigade.slave.name }}, first_address ] }
+  {{ brigade.slave.name }}_instance_name:
+    value: { get_attr: [ {{ brigade.slave.name }}, instance_name ] }
 {% endfor %}

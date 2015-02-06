@@ -26,6 +26,11 @@ from shaker.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
+# Every brigade defines the following parameters describing VM location:
+# single_node - master and slave live on different nodes
+# double_node - master lives together with its slave
+# mixed_node - master lives with slave of adjacent master
+
 
 class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
@@ -40,38 +45,56 @@ class Deployment(object):
         self.heat_client = heat.create_heat_client(self.keystone_client)
         self.nova_client = nova.create_nova_client(keystone_kwargs)
 
+        self.stack_name = 'shaker_%s' % uuid.uuid4()
+        self.brigades = []
+
     def _get_compute_nodes(self):
         return [svc.host for svc in nova.get_compute_nodes(self.nova_client)]
+
+    def _make_brigades(self, vm_count):
+        compute_nodes = self._get_compute_nodes()
+        cn_count = len(compute_nodes)
+        node_formulae = lambda x: compute_nodes[x % cn_count]
+
+        for i in range(vm_count):
+            self.brigades.append({
+                'master': dict(name='master_%s' % i,
+                               single_node=node_formulae(i * 2),
+                               double_node=node_formulae(i),
+                               mixed_node=node_formulae(i)),
+                'slave': dict(name='slave_%s' % i,
+                              single_node=node_formulae(i * 2 + 1),
+                              double_node=node_formulae(i),
+                              mixed_node=node_formulae(i + 1)),
+            })
+
+    def _get_output(self, vm, stack_outputs, vm_name, param):
+        o = stack_outputs.get(vm_name + '_' + param)
+        if o:
+            vm[param] = o['output_value']
+
+    def _copy_vm_attributes(self, vm, stack_outputs, attributes):
+        for attribute in attributes:
+            self._get_output(vm, stack_outputs, vm['name'], attribute)
 
     def deploy(self, specification):
         vm_count = specification['vm_count']
         heat_template_name = specification['template']
         template_parameters = specification['template_parameters']
-
         heat_template = utils.read_file(heat_template_name)
-        compute_nodes = self._get_compute_nodes()
+        self._make_brigades(vm_count)
 
-        # prepare jinja template
-        masters = []
-        slaves = []
-        for i in range(vm_count):
-            masters.append(dict(name='master_%s' % i, node=compute_nodes[i]))
-            slaves.append(dict(name='slave_%s' % i, node=compute_nodes[i]))
-
+        # render template by jinja
         vars_values = {
-            'masters': masters,
-            'slaves': slaves,
+            'brigades': self.brigades,
         }
-
         compiled_template = jinja2.Template(heat_template)
         rendered_template = compiled_template.render(vars_values)
+        LOG.debug('Rendered template: %s', rendered_template)
 
-        LOG.info('Rendered template: %s', rendered_template)
-
+        # create stack by Heat
         template_parameters['private_net_name'] = 'net_%s' % uuid.uuid4()
         template_parameters['server_endpoint'] = self.server_endpoint
-
-        self.stack_name = 'shaker_%s' % uuid.uuid4()
 
         stack_params = {
             'stack_name': self.stack_name,
@@ -84,19 +107,25 @@ class Deployment(object):
 
         heat.wait_stack_completion(self.heat_client, stack['id'])
 
+        # get info about deployed objects
         outputs_list = self.heat_client.stacks.get(
             stack['id']).to_dict()['outputs']
         outputs = dict((item['output_key'], item) for item in outputs_list)
 
         for i in range(vm_count):
-            masters[i]['public_ip'] = (
-                outputs[masters[i]['name'] + '_public_ip']['output_value'])
-            slaves[i]['private_ip'] = (
-                outputs[slaves[i]['name'] + '_private_ip']['output_value'])
+            brigade = self.brigades[i]
+            self._copy_vm_attributes(brigade['master'], outputs,
+                                     ['public_ip', 'private_ip',
+                                      'instance_name'])
+            self._copy_vm_attributes(brigade['slave'], outputs,
+                                     ['public_ip', 'private_ip',
+                                      'instance_name'])
 
-        LOG.info('Masters: %s', masters)
-        LOG.info('Slaves: %s', slaves)
+        LOG.debug('Brigades: %s', self.brigades)
 
     def cleanup(self):
         LOG.debug('Cleaning up the stack: %s', self.stack_name)
         self.heat_client.stacks.delete(self.stack_name)
+
+    def get_brigades(self):
+        return self.brigades

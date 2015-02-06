@@ -66,7 +66,7 @@ class Quorum(object):
             operation = message.get('operation')
 
             reply = {'operation': 'none'}
-            if operation == 'poll':
+            if (operation == 'poll') and (agent_id in self.master_agent_ids):
                 reply = {
                     'operation': 'execute',
                     'start_at': start_at,
@@ -82,7 +82,7 @@ class Quorum(object):
             LOG.debug('Working agents: %s', working_agents)
             LOG.debug('Replied agents: %s', replied_agents)
 
-            if replied_agents == self.master_agent_ids:
+            if replied_agents >= self.master_agent_ids:
                 LOG.info('Received all replies for test case: %s', test_case)
                 break
 
@@ -128,18 +128,8 @@ class MessageQueue(object):
             raise
 
 
-def run(message_queue):
+def run(message_queue, agents, execution):
     # sample data, will be picked from scenario
-    agents = [
-        {
-            'id': 'i-0000005f',
-            'mode': 'master'
-        },
-        {
-            'id': 'i-00000011',
-            'mode': 'slave'
-        },
-    ]
     tests = [
         # {'command': 'netperf-wrapper -H 172.18.76.77 tcp_bidirectional'},
         {'command': 'ls -al'},
@@ -164,9 +154,29 @@ def read_scenario():
     return scenario
 
 
-def execute(execution):
+def convert_instance_name_to_agent_id(instance_name):
+    return 'i-%s' % instance_name.split('-')[1]
+
+
+def execute(execution, brigades):
+    # define agents
+    agents = []
+    for brigade in brigades:
+        if brigade['master'].get('instance_name'):
+            agent_id = convert_instance_name_to_agent_id(
+                brigade['master'].get('instance_name'))
+            agents.append(dict(mode='master', id=agent_id))
+        if brigade['slave'].get('instance_name'):
+            agent_id = convert_instance_name_to_agent_id(
+                brigade['master'].get('instance_name'))
+            agents.append(dict(mode='slave', id=agent_id))
+
+    if not agents:
+        LOG.warning('No active agents. Is the stack deployed?')
+        return
+
     message_queue = MessageQueue(cfg.CONF.server_endpoint)
-    run(message_queue)
+    run(message_queue, agents, execution)
 
 
 def main():
@@ -192,7 +202,7 @@ def main():
                                    cfg.CONF.os_auth_url,
                                    cfg.CONF.server_endpoint)
     deployment.deploy(scenario['deployment'])
-    execute(scenario['execution'])
+    execute(scenario['execution'], deployment.get_brigades())
     deployment.cleanup()
 
 
