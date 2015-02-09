@@ -49,7 +49,7 @@ class Quorum(object):
 
             LOG.debug('Alive agents: %s', alive_agents)
 
-            if alive_agents == self.agent_ids:
+            if alive_agents >= self.agent_ids:
                 LOG.info('All expected agents are alive')
                 break
 
@@ -135,6 +135,7 @@ def run(message_queue, agents, execution):
         {'command': 'ls -al'},
     ]
 
+    LOG.debug('Creating quorum of agents: %s', agents)
     quorum = Quorum(message_queue, agents)
 
     LOG.debug('Waiting for quorum of agents')
@@ -168,7 +169,7 @@ def execute(execution, brigades):
             agents.append(dict(mode='master', id=agent_id))
         if brigade['slave'].get('instance_name'):
             agent_id = convert_instance_name_to_agent_id(
-                brigade['master'].get('instance_name'))
+                brigade['slave'].get('instance_name'))
             agents.append(dict(mode='slave', id=agent_id))
 
     if not agents:
