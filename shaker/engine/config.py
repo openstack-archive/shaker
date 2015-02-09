@@ -13,11 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 from oslo.config import cfg
 from shaker.engine import utils
 
 
-OPTS = [
+COMMON_OPTS = [
+    cfg.StrOpt('server-endpoint',
+               required=True,
+               help='Address for server connections (host:port)'),
+]
+
+SERVER_OPTS = [
     cfg.StrOpt('os-auth-url', metavar='<auth-url>',
                default=utils.env('OS_AUTH_URL'),
                help='Authentication URL, defaults to env[OS_AUTH_URL].'),
@@ -35,16 +43,15 @@ OPTS = [
     cfg.StrOpt('scenario',
                required=True,
                help='Scenario file name'),
-
-    cfg.StrOpt('server-endpoint',
-               required=True,
-               help='Address for server connections (host:port)'),
 ]
 
 AGENT_OPTS = [
-    cfg.StrOpt('server-endpoint',
-               required=True,
-               help='Address for server connections (host:port)'),
     cfg.StrOpt('instance-id',
                help='The id of instance where agent is running'),
 ]
+
+
+def list_opts():
+    yield (None, copy.deepcopy(COMMON_OPTS))
+    yield (None, copy.deepcopy(SERVER_OPTS))
+    yield (None, copy.deepcopy(AGENT_OPTS))

@@ -64,7 +64,9 @@ def send_reply(socket, instance_id, result):
 def main():
     # init conf and logging
     conf = cfg.CONF
+    conf.register_cli_opts(config.COMMON_OPTS)
     conf.register_cli_opts(config.AGENT_OPTS)
+    conf.register_opts(config.COMMON_OPTS)
     conf.register_opts(config.AGENT_OPTS)
 
     try:

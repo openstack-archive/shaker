@@ -183,8 +183,10 @@ def execute(execution, brigades):
 def main():
     # init conf and logging
     conf = cfg.CONF
-    conf.register_cli_opts(config.OPTS)
-    conf.register_opts(config.OPTS)
+    conf.register_cli_opts(config.COMMON_OPTS)
+    conf.register_cli_opts(config.SERVER_OPTS)
+    conf.register_opts(config.COMMON_OPTS)
+    conf.register_opts(config.SERVER_OPTS)
 
     try:
         conf(project='shaker')
