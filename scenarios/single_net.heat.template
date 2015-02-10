@@ -41,6 +41,7 @@ resources:
     properties:
       network_id: { get_resource: private_net }
       cidr: { get_param: private_net_cidr }
+      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
 
   router:
     type: OS::Neutron::Router
@@ -61,8 +62,8 @@ resources:
       rules: [
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: tcp,
-        port_range_min: 22,
-        port_range_max: 22},
+        port_range_min: 1,
+        port_range_max: 65535},
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
 
