@@ -31,7 +31,7 @@ setup_image() {
     if [ -n "$(nova flavor-list | grep ${FLAVOR_NAME})" ]; then
         nova flavor-delete ${FLAVOR_NAME}
     fi
-    nova flavor-create --is-public true ${FLAVOR_NAME} auto 1024 10 1
+    nova flavor-create --is-public true ${FLAVOR_NAME} auto 1024 3 1
 
     message "Creating key pair"
     KEY_NAME="shaker-key-${UUID}"
@@ -41,7 +41,7 @@ setup_image() {
 
     message "Booting VM"
     NETWORK_ID=`neutron net-show net04 -f value -c id`
-    VM="shaker-template"
+    VM="shaker-template-${UUID}"
     nova boot --poll --flavor ${FLAVOR_NAME} --image ${IMG_FILE} --key_name ${KEY_NAME} --nic net-id=${NETWORK_ID} --security-groups ${SEC_GROUP} ${VM}
 
     message "Associating a floating IP with VM"
@@ -56,7 +56,7 @@ setup_image() {
     message "Installing packages into VM"
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-add-repository \"deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse\""
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get update"
-    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf python-pip git python-dev"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf python-pip git python-dev libzmq-dev"
     remote_shell ${FLOATING_IP} ${KEY} "sudo pip install pbr netperf-wrapper"
     remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo python setup.py develop"
 
