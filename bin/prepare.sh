@@ -3,7 +3,7 @@
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 source ${TOP_DIR}/functions.sh
 
-NETWORK_NAME="net04"
+NETWORK_NAME=${NETWORK_NAME:-net04}
 IMAGE_NAME="shaker-image"
 FLAVOR_NAME="shaker-flavor"
 
