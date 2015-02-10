@@ -3,6 +3,7 @@
 TOP_DIR=$(cd $(dirname "$0") && pwd)
 source ${TOP_DIR}/functions.sh
 
+NETWORK_NAME="net04"
 IMAGE_NAME="shaker-image"
 FLAVOR_NAME="shaker-flavor"
 
@@ -40,7 +41,7 @@ setup_image() {
     chmod og-rw ${KEY}
 
     message "Booting VM"
-    NETWORK_ID=`neutron net-show net04 -f value -c id`
+    NETWORK_ID=`neutron net-show ${NETWORK_NAME} -f value -c id`
     VM="shaker-template-${UUID}"
     nova boot --poll --flavor ${FLAVOR_NAME} --image ${IMG_FILE} --key_name ${KEY_NAME} --nic net-id=${NETWORK_ID} --security-groups ${SEC_GROUP} ${VM}
 
@@ -59,7 +60,7 @@ setup_image() {
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf git python-dev libzmq-dev"
     remote_shell ${FLOATING_IP} ${KEY} "wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py"
     remote_shell ${FLOATING_IP} ${KEY} "sudo pip install pbr netperf-wrapper"
-    remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo python setup.py develop"
+    remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo pip install -r requirements.txt && sudo python setup.py develop"
 
     message "Making VM snapshot"
     nova image-create --poll ${VM} ${IMAGE_NAME}
