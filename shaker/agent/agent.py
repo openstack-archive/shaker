@@ -16,8 +16,8 @@
 import shlex
 import time
 
-from oslo.concurrency import processutils
-from oslo.config import cfg
+from oslo_concurrency import processutils
+from oslo_config import cfg
 import zmq
 
 from shaker.engine import config
