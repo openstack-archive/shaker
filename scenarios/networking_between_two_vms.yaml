@@ -11,9 +11,9 @@ deployment:
 execution:
   nodes: [1]
   tests:
-  - 
+  -
     class: netperf
     method: tcp_bidirectional
-  - 
+  -
     class: shell
     method: ls -al

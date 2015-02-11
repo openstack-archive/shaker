@@ -84,7 +84,7 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug &
+            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
@@ -117,7 +117,7 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug &
+            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 

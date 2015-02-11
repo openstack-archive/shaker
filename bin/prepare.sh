@@ -60,9 +60,9 @@ setup_image() {
     message "Installing packages into VM"
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-add-repository \"deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse\""
     remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get update"
-    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf git python-dev libzmq-dev"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo apt-get -y install iperf netperf git python-dev libzmq-dev screen"
     remote_shell ${FLOATING_IP} ${KEY} "wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py"
-    remote_shell ${FLOATING_IP} ${KEY} "sudo pip install pbr netperf-wrapper"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo pip install pbr numpy netperf-wrapper"
     remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo pip install -r requirements.txt && sudo python setup.py develop"
     remote_shell ${FLOATING_IP} ${KEY} "sudo shutdown -P -f now"
     sleep 10
