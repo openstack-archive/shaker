@@ -44,7 +44,7 @@ def wait_stack_completion(heat_client, stack_id):
         if status not in ['IN_PROGRESS', '']:
             break
 
-        time.sleep(1)
+        time.sleep(5)
 
     if status != 'COMPLETE':
         raise Exception(status)
