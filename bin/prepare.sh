@@ -4,6 +4,7 @@ TOP_DIR=$(cd $(dirname "$0") && pwd)
 source ${TOP_DIR}/functions.sh
 
 NETWORK_NAME=${NETWORK_NAME:-net04}
+CLOUD_IMAGE_NAME="shaker-cloud-image"
 IMAGE_NAME="shaker-image"
 FLAVOR_NAME="shaker-flavor"
 
@@ -12,14 +13,16 @@ UBUNTU_CLOUD_IMAGE_URL="https://cloud-images.ubuntu.com/releases/14.04.1/release
 setup_image() {
     message "Installing Shaker image, will take some time"
 
-    message "Downloading Ubuntu cloud image"
-    UUID=$(cat /proc/sys/kernel/random/uuid)
-    IMG_FILE="shaker-template-${UUID}"
-    glance image-create --name ${IMG_FILE} --disk-format qcow2 --container-format bare --is-public True --copy-from ${UBUNTU_CLOUD_IMAGE_URL}
+    if [ -z "$(glance image-show ${CLOUD_IMAGE_NAME})" ]; then
+        message "Downloading Ubuntu cloud image"
+        glance image-create --name ${CLOUD_IMAGE_NAME} --disk-format qcow2 --container-format bare --is-public True --copy-from ${UBUNTU_CLOUD_IMAGE_URL}
 
-    until [ -n "$(glance image-show ${IMG_FILE} | grep status | grep active)" ]; do
-        sleep 5
-    done
+        until [ -n "$(glance image-show ${CLOUD_IMAGE_NAME} | grep status | grep active)" ]; do
+            sleep 5
+        done
+    fi
+
+    UUID=$(cat /proc/sys/kernel/random/uuid)
 
     message "Creating security group"
     SEC_GROUP="shaker-access-${UUID}"
@@ -43,7 +46,7 @@ setup_image() {
     message "Booting VM"
     NETWORK_ID=`neutron net-show ${NETWORK_NAME} -f value -c id`
     VM="shaker-template-${UUID}"
-    nova boot --poll --flavor ${FLAVOR_NAME} --image ${IMG_FILE} --key_name ${KEY_NAME} --nic net-id=${NETWORK_ID} --security-groups ${SEC_GROUP} ${VM}
+    nova boot --poll --flavor ${FLAVOR_NAME} --image ${CLOUD_IMAGE_NAME} --key_name ${KEY_NAME} --nic net-id=${NETWORK_ID} --security-groups ${SEC_GROUP} ${VM}
 
     message "Associating a floating IP with VM"
     FLOATING_IP=`neutron floatingip-create -f value -c floating_ip_address net04_ext | tail -1`
@@ -61,6 +64,8 @@ setup_image() {
     remote_shell ${FLOATING_IP} ${KEY} "wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py"
     remote_shell ${FLOATING_IP} ${KEY} "sudo pip install pbr netperf-wrapper"
     remote_shell ${FLOATING_IP} ${KEY} "git clone git://github.com/Mirantis/shaker && cd shaker && sudo pip install -r requirements.txt && sudo python setup.py develop"
+    remote_shell ${FLOATING_IP} ${KEY} "sudo shutdown -P -f now"
+    sleep 10
 
     message "Making VM snapshot"
     nova image-create --poll ${VM} ${IMAGE_NAME}
@@ -83,11 +88,10 @@ setup_image() {
 }
 
 main() {
-    CHECK_IMAGE="`glance image-show ${IMAGE_NAME} || true`"
-    if [ "${CHECK_IMAGE}" == "" ]; then
+    if [ -z "$(glance image-show ${IMAGE_NAME})" ]; then
         setup_image
     else
-        message "Image ${IMAGE_NAME} already exists"
+        message "Image ${IMAGE_NAME} already exists."
     fi
 }
 
