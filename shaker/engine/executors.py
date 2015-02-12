@@ -43,7 +43,7 @@ class ShellExecutor(BaseExecutor):
 
 class NetperfExecutor(BaseExecutor):
     def get_command(self):
-        target_ip = self.agent['brigade']['slave']['private_ip']
+        target_ip = self.agent['group']['slave']['ip']
         return ('netperf-wrapper -H %(ip)s -f stats %(method)s' %
                 dict(ip=target_ip,
                      method=self.test_definition['method']))

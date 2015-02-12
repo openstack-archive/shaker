@@ -1,0 +1,136 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to create a new neutron network plus a router to the public
+  network, and for deploying servers into the new network.
+
+parameters:
+  key_name:
+    type: string
+    description: Name of keypair to assign to servers
+  image:
+    type: string
+    description: Name of image to use for servers
+  flavor:
+    type: string
+    description: Flavor to use for servers
+  public_net:
+    type: string
+    description: >
+      ID or name of public network for which floating IP addresses will be allocated
+  private_net_name:
+    type: string
+    description: Name of private network to be created
+  private_net_cidr:
+    type: string
+    description: Private network address (CIDR notation)
+  server_endpoint:
+    type: string
+    description: Server endpoint address
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: private_net_name }
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: { get_param: private_net_cidr }
+      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: public_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+  server_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      name: shaker_vm_access
+      rules: [
+        {remote_ip_prefix: 0.0.0.0/0,
+        protocol: tcp,
+        port_range_min: 1,
+        port_range_max: 65535},
+        {remote_ip_prefix: 0.0.0.0/0,
+        protocol: icmp}]
+
+{% for group in groups %}
+
+  {{ group.master.name }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ group.master.name }}
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      availability_zone: "nova:{{ group.master.node }}"
+      networks:
+        - port: { get_resource: {{ group.master.name }}_port }
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/sh
+            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+          params:
+            "$SERVER_ENDPOINT": { get_param: server_endpoint }
+
+  {{ group.master.name }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+      security_groups: [{ get_resource: server_security_group }]
+
+  {{ group.slave.name }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ group.slave.name }}
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      key_name: { get_param: key_name }
+      availability_zone: "nova:{{ group.slave.node }}"
+      networks:
+        - port: { get_resource: {{ group.slave.name }}_port }
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/sh
+            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+          params:
+            "$SERVER_ENDPOINT": { get_param: server_endpoint }
+
+  {{ group.slave.name }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+      security_groups: [{ get_resource: server_security_group }]
+
+{% endfor %}
+
+outputs:
+{% for group in groups %}
+  {{ group.master.name }}_ip:
+    value: { get_attr: [ {{ group.master.name }}, first_address ] }
+  {{ group.master.name }}_instance_name:
+    value: { get_attr: [ {{ group.master.name }}, instance_name ] }
+  {{ group.slave.name }}_ip:
+    value: { get_attr: [ {{ group.slave.name }}, first_address ] }
+  {{ group.slave.name }}_instance_name:
+    value: { get_attr: [ {{ group.slave.name }}, instance_name ] }
+{% endfor %}

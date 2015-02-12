@@ -139,21 +139,21 @@ def convert_instance_name_to_agent_id(instance_name):
     return 'i-%s' % instance_name.split('-')[1]
 
 
-def execute(execution, brigades):
+def execute(execution, groups):
     agents = {}
 
-    for brigade in brigades:
-        if brigade['master'].get('instance_name'):
+    for group in groups:
+        if group['master'].get('instance_name'):
             agent_id = convert_instance_name_to_agent_id(
-                brigade['master'].get('instance_name'))
+                group['master'].get('instance_name'))
             agents[agent_id] = dict(
-                mode='master', id=agent_id, brigade=brigade)
+                mode='master', id=agent_id, group=group)
 
-        if brigade['slave'].get('instance_name'):
+        if group['slave'].get('instance_name'):
             agent_id = convert_instance_name_to_agent_id(
-                brigade['slave'].get('instance_name'))
+                group['slave'].get('instance_name'))
             agents[agent_id] = dict(
-                mode='slave', id=agent_id, brigade=brigade)
+                mode='slave', id=agent_id, group=group)
 
     if not agents:
         LOG.warning('No master instances found. Is the stack deployed?')
@@ -206,8 +206,8 @@ def main():
                                    cfg.CONF.os_tenant_name,
                                    cfg.CONF.os_auth_url,
                                    cfg.CONF.server_endpoint)
-    deployment.deploy(scenario['deployment'])
-    execute(scenario['execution'], deployment.get_brigades())
+    groups = deployment.deploy(scenario['deployment'])
+    execute(scenario['execution'], groups)
     deployment.cleanup()
 
 

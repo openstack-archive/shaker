@@ -26,11 +26,6 @@ from shaker.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
-# Every brigade defines the following parameters describing VM location:
-# single_node - master and slave live on different nodes
-# double_node - master lives together with its slave
-# mixed_node - master lives with slave of adjacent master
-
 
 class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
@@ -46,27 +41,40 @@ class Deployment(object):
         self.nova_client = nova.create_nova_client(keystone_kwargs)
 
         self.stack_name = 'shaker_%s' % uuid.uuid4()
-        self.brigades = []
 
     def _get_compute_nodes(self):
         return [svc.host for svc in nova.get_compute_nodes(self.nova_client)]
 
-    def _make_brigades(self, vm_count):
+    def _make_groups(self, vm_accommodation):
         compute_nodes = self._get_compute_nodes()
         cn_count = len(compute_nodes)
+        iterations = cn_count
+        if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
+            iterations /= 2
         node_formulae = lambda x: compute_nodes[x % cn_count]
 
-        for i in range(vm_count):
-            self.brigades.append({
-                'master': dict(name='master_%s' % i,
-                               single_node=node_formulae(i * 2),
-                               double_node=node_formulae(i),
-                               mixed_node=node_formulae(i)),
-                'slave': dict(name='slave_%s' % i,
-                              single_node=node_formulae(i * 2 + 1),
-                              double_node=node_formulae(i),
-                              mixed_node=node_formulae(i + 1)),
-            })
+        groups = []
+
+        for i in range(iterations):
+            group = dict(master=dict(name='master_%s' % i),
+                         slave=dict(name='slave_%s' % i))
+
+            if 'pair' in vm_accommodation:
+                if 'single_room' in vm_accommodation:
+                    group['master']['node'] = node_formulae(i * 2)
+                    group['slave']['node'] = node_formulae(i * 2 + 1)
+                elif 'double_room' in vm_accommodation:
+                    group['master']['node'] = node_formulae(i)
+                    group['slave']['node'] = node_formulae(i)
+                elif 'mixed_room' in vm_accommodation:
+                    group['master']['node'] = node_formulae(i)
+                    group['slave']['node'] = node_formulae(i + 1)
+            else:
+                if 'single_room' in vm_accommodation:
+                    group['master']['node'] = node_formulae(i)
+            groups.append(group)
+
+        return groups
 
     def _get_output(self, vm, stack_outputs, vm_name, param):
         o = stack_outputs.get(vm_name + '_' + param)
@@ -78,15 +86,15 @@ class Deployment(object):
             self._get_output(vm, stack_outputs, vm['name'], attribute)
 
     def deploy(self, specification):
-        vm_count = specification['vm_count']
+        vm_accommodation = specification['vm_accommodation']
         heat_template_name = specification['template']
         template_parameters = specification['template_parameters']
         heat_template = utils.read_file(heat_template_name)
-        self._make_brigades(vm_count)
+        groups = self._make_groups(vm_accommodation)
 
         # render template by jinja
         vars_values = {
-            'brigades': self.brigades,
+            'groups': groups,
         }
         compiled_template = jinja2.Template(heat_template)
         rendered_template = compiled_template.render(vars_values)
@@ -112,20 +120,15 @@ class Deployment(object):
             stack['id']).to_dict()['outputs']
         outputs = dict((item['output_key'], item) for item in outputs_list)
 
-        for i in range(vm_count):
-            brigade = self.brigades[i]
-            self._copy_vm_attributes(brigade['master'], outputs,
-                                     ['public_ip', 'private_ip',
-                                      'instance_name'])
-            self._copy_vm_attributes(brigade['slave'], outputs,
-                                     ['public_ip', 'private_ip',
-                                      'instance_name'])
+        for group in groups:
+            self._copy_vm_attributes(group['master'], outputs,
+                                     ['ip', 'instance_name'])
+            self._copy_vm_attributes(group['slave'], outputs,
+                                     ['ip', 'instance_name'])
 
-        LOG.debug('Brigades: %s', self.brigades)
+        LOG.debug('Groups: %s', groups)
+        return groups
 
     def cleanup(self):
         LOG.debug('Cleaning up the stack: %s', self.stack_name)
         self.heat_client.stacks.delete(self.stack_name)
-
-    def get_brigades(self):
-        return self.brigades

@@ -1,0 +1,22 @@
+description: >
+  This scenario launches pairs of VMs in the same private network
+
+deployment:
+  template: scenarios/networking/same_net.hot
+  template_parameters:
+    key_name: shaker-vm-key
+    image: shaker-image
+    flavor: shaker-flavor
+    public_net: net04_ext
+    private_net_cidr: 10.0.0.0/24
+  vm_accommodation: [pair, single_room]
+
+execution:
+  nodes: [1]
+  tests:
+  -
+    class: netperf
+    method: tcp_bidirectional
+  -
+    class: shell
+    method: ls -al

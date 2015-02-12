@@ -2,14 +2,11 @@ heat_template_version: 2013-05-23
 
 description: >
   HOT template to create a new neutron network plus a router to the public
-  network, and for deploying two servers into the new network. The template also
+  network, and for deploying servers into the new network. The template also
   assigns floating IP addresses to each server so they are routable from the
   public network.
 
 parameters:
-  key_name:
-    type: string
-    description: Name of keypair to assign to servers
   image:
     type: string
     description: Name of image to use for servers
@@ -67,18 +64,17 @@ resources:
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
 
-{% for brigade in brigades %}
+{% for group in groups %}
 
-  {{ brigade.master.name }}:
+  {{ group.master.name }}:
     type: OS::Nova::Server
     properties:
-      name: {{ brigade.master.name }}
+      name: {{ group.master.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
-      availability_zone: "nova:{{ brigade.master.single_node }}"
+      availability_zone: "nova:{{ group.master.node }}"
       networks:
-        - port: { get_resource: {{ brigade.master.name }}_port }
+        - port: { get_resource: {{ group.master.name }}_port }
       user_data_format: RAW
       user_data:
         str_replace:
@@ -88,7 +84,7 @@ resources:
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
-  {{ brigade.master.name }}_port:
+  {{ group.master.name }}_port:
     type: OS::Neutron::Port
     properties:
       network_id: { get_resource: private_net }
@@ -96,22 +92,21 @@ resources:
         - subnet_id: { get_resource: private_subnet }
       security_groups: [{ get_resource: server_security_group }]
 
-  {{ brigade.master.name }}_floating_ip:
+  {{ group.master.name }}_floating_ip:
     type: OS::Neutron::FloatingIP
     properties:
       floating_network: { get_param: public_net }
-      port_id: { get_resource: {{ brigade.master.name }}_port }
+      port_id: { get_resource: {{ group.master.name }}_port }
 
-  {{ brigade.slave.name }}:
+  {{ group.slave.name }}:
     type: OS::Nova::Server
     properties:
-      name: {{ brigade.slave.name }}
+      name: {{ group.slave.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
-      availability_zone: "nova:{{ brigade.slave.single_node }}"
+      availability_zone: "nova:{{ group.slave.node }}"
       networks:
-        - port: { get_resource: {{ brigade.slave.name }}_port }
+        - port: { get_resource: {{ group.slave.name }}_port }
       user_data_format: RAW
       user_data:
         str_replace:
@@ -121,7 +116,7 @@ resources:
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
-  {{ brigade.slave.name }}_port:
+  {{ group.slave.name }}_port:
     type: OS::Neutron::Port
     properties:
       network_id: { get_resource: private_net }
@@ -132,15 +127,13 @@ resources:
 {% endfor %}
 
 outputs:
-{% for brigade in brigades %}
-  {{ brigade.master.name }}_public_ip:
-    description: Floating IP address of {{ brigade.master.name }} in public network
-    value: { get_attr: [ {{ brigade.master.name }}_floating_ip, floating_ip_address ] }
-  {{ brigade.master.name }}_instance_name:
-    value: { get_attr: [ {{ brigade.master.name }}, instance_name ] }
-  {{ brigade.slave.name }}_private_ip:
-    description: IP address of {{ brigade.slave.name }} in private network
-    value: { get_attr: [ {{ brigade.slave.name }}, first_address ] }
-  {{ brigade.slave.name }}_instance_name:
-    value: { get_attr: [ {{ brigade.slave.name }}, instance_name ] }
+{% for group in groups %}
+  {{ group.master.name }}_ip:
+    value: { get_attr: [ {{ group.master.name }}_floating_ip, floating_ip_address ] }
+  {{ group.master.name }}_instance_name:
+    value: { get_attr: [ {{ group.master.name }}, instance_name ] }
+  {{ group.slave.name }}_ip:
+    value: { get_attr: [ {{ group.slave.name }}, first_address ] }
+  {{ group.slave.name }}_instance_name:
+    value: { get_attr: [ {{ group.slave.name }}, instance_name ] }
 {% endfor %}
