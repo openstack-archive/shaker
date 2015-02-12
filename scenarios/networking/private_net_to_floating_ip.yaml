@@ -15,7 +15,7 @@ execution:
   nodes: [1]
   tests:
   -
-    class: netperf
+    class: netperf_wrapper
     method: ping
   -
     class: shell

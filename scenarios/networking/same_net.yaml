@@ -16,7 +16,7 @@ execution:
   tests:
   -
     class: netperf
-    method: tcp_bidirectional
+    method: TCP_STREAM
   -
     class: shell
     method: ls -al
