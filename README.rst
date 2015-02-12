@@ -16,6 +16,9 @@ To install:
  1. Run ``./bin/prepare.sh`` to configure the image inside OpenStack
  2. Run ``python setup.py install`` to install the tool on the master node
 
+Additional dependencies: tests that use netperf requires ``numpy`` and ``matplotlib`` Python modules
+to be installed on the master.
+
 How to run
 ----------
  1. ``shaker --scenario <scenario-file>``
