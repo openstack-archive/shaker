@@ -58,7 +58,6 @@ resources:
       name: {{ group.master.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
       availability_zone: "nova:{{ group.master.node }}"
       networks:
         - port: { get_resource: {{ group.master.name }}_port }
