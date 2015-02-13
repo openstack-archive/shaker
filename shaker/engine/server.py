@@ -53,6 +53,7 @@ class Quorum(object):
     def run_test_case(self, test_case):
         working_agents = set()
         replied_agents = set()
+        result = {}
 
         start_at = int(time.time()) + 30  # schedule tasks in a 30 sec from now
 
@@ -75,7 +76,7 @@ class Quorum(object):
                     working_agents.add(agent_id)
                 elif operation == 'reply':
                     replied_agents.add(agent_id)
-                    test.process_reply(message)
+                    result[agent_id] = test.process_reply(message)
 
             reply_handler(reply)
 
@@ -85,6 +86,8 @@ class Quorum(object):
             if replied_agents >= set(test_case.keys()):
                 LOG.info('Received all replies for test case: %s', test_case)
                 break
+
+        return result
 
 
 class MessageQueue(object):
@@ -133,6 +136,8 @@ def execute(execution, agents):
     LOG.debug('Waiting for quorum of agents')
     quorum.wait_join()
 
+    result = []
+
     for test_definition in execution['tests']:
         LOG.debug('Running test %s on all agents', test_definition)
 
@@ -143,9 +148,15 @@ def execute(execution, agents):
                 executors[agent_id] = executors_classes.get_executor(
                     test_definition, agent)
 
-        quorum.run_test_case(executors)
+        test_case_result = quorum.run_test_case(executors)
 
-    LOG.info('Done')
+        result.append({
+            'agent_results': test_case_result,
+            'test_definition': test_definition,
+        })
+
+    LOG.info('Execution is done')
+    return result
 
 
 def main():
@@ -180,7 +191,9 @@ def main():
 
     LOG.debug('Agents: %s', agents)
 
-    execute(scenario['execution'], agents)
+    result = execute(scenario['execution'], agents)
+    LOG.debug('Result: %s', result)
+
     deployment.cleanup()
 
 

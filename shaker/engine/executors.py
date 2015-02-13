@@ -29,7 +29,7 @@ class BaseExecutor(object):
         return None
 
     def process_reply(self, message):
-        pass
+        return None
 
 
 class ShellExecutor(BaseExecutor):
@@ -39,6 +39,7 @@ class ShellExecutor(BaseExecutor):
     def process_reply(self, message):
         LOG.debug('Test %s on agent %s finished with %s',
                   self.test_definition, self.agent, message)
+        return message.get('stdout')
 
 
 class NetperfExecutor(BaseExecutor):
@@ -51,6 +52,7 @@ class NetperfExecutor(BaseExecutor):
     def process_reply(self, message):
         LOG.debug('Test %s on agent %s finished with %s',
                   self.test_definition, self.agent, message)
+        return message.get('stdout')
 
 
 class NetperfWrapperExecutor(BaseExecutor):
