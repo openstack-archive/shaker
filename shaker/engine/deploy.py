@@ -85,7 +85,33 @@ class Deployment(object):
         for attribute in attributes:
             self._get_output(vm, stack_outputs, vm['name'], attribute)
 
-    def deploy(self, specification):
+    def convert_instance_name_to_agent_id(self, instance_name):
+        return 'i-%s' % instance_name.split('-')[1]
+
+    def _make_agents(self, groups, outputs):
+        agents = {}
+
+        for group in groups:
+            self._copy_vm_attributes(group['master'], outputs,
+                                     ['ip', 'instance_name'])
+            self._copy_vm_attributes(group['slave'], outputs,
+                                     ['ip', 'instance_name'])
+
+            if group['master'].get('instance_name'):
+                agent_id = self.convert_instance_name_to_agent_id(
+                    group['master'].get('instance_name'))
+                agents[agent_id] = dict(
+                    mode='master', id=agent_id, group=group)
+
+            if group['slave'].get('instance_name'):
+                agent_id = self.convert_instance_name_to_agent_id(
+                    group['slave'].get('instance_name'))
+                agents[agent_id] = dict(
+                    mode='slave', id=agent_id, group=group)
+
+        return agents
+
+    def _deploy_from_hot(self, specification):
         vm_accommodation = specification['vm_accommodation']
         heat_template_name = specification['template']
         template_parameters = specification['template_parameters']
@@ -120,14 +146,21 @@ class Deployment(object):
             stack['id']).to_dict()['outputs']
         outputs = dict((item['output_key'], item) for item in outputs_list)
 
-        for group in groups:
-            self._copy_vm_attributes(group['master'], outputs,
-                                     ['ip', 'instance_name'])
-            self._copy_vm_attributes(group['slave'], outputs,
-                                     ['ip', 'instance_name'])
+        # convert groups into agents
+        return self._make_agents(groups, outputs)
 
-        LOG.debug('Groups: %s', groups)
-        return groups
+    def deploy(self, specification):
+        agents = {}
+
+        if specification.get('template'):
+            # deploy topology specified by HOT
+            agents.update(self._deploy_from_hot(specification))
+
+        if specification.get('agents'):
+            # agents are specified explicitly
+            agents.update(specification.get('agents'))
+
+        return agents
 
     def cleanup(self):
         LOG.debug('Cleaning up the stack: %s', self.stack_name)

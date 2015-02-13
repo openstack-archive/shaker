@@ -135,30 +135,7 @@ def read_scenario():
     return scenario
 
 
-def convert_instance_name_to_agent_id(instance_name):
-    return 'i-%s' % instance_name.split('-')[1]
-
-
-def execute(execution, groups):
-    agents = {}
-
-    for group in groups:
-        if group['master'].get('instance_name'):
-            agent_id = convert_instance_name_to_agent_id(
-                group['master'].get('instance_name'))
-            agents[agent_id] = dict(
-                mode='master', id=agent_id, group=group)
-
-        if group['slave'].get('instance_name'):
-            agent_id = convert_instance_name_to_agent_id(
-                group['slave'].get('instance_name'))
-            agents[agent_id] = dict(
-                mode='slave', id=agent_id, group=group)
-
-    if not agents:
-        LOG.warning('No master instances found. Is the stack deployed?')
-        return
-
+def execute(execution, agents):
     message_queue = MessageQueue(cfg.CONF.server_endpoint)
 
     LOG.debug('Creating quorum of agents: %s', agents)
@@ -206,8 +183,15 @@ def main():
                                    cfg.CONF.os_tenant_name,
                                    cfg.CONF.os_auth_url,
                                    cfg.CONF.server_endpoint)
-    groups = deployment.deploy(scenario['deployment'])
-    execute(scenario['execution'], groups)
+    agents = deployment.deploy(scenario['deployment'])
+
+    if not agents:
+        LOG.warning('No agents specified. Exiting.')
+        return
+
+    LOG.debug('Agents: %s', agents)
+
+    execute(scenario['execution'], agents)
     deployment.cleanup()
 
 
