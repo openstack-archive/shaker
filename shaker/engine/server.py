@@ -87,17 +87,6 @@ class Quorum(object):
                 break
 
 
-class TestCase(object):
-    def __init__(self):
-        super(TestCase, self).__init__()
-
-    def to_command(self):
-        pass
-
-    def store_result(self):
-        pass
-
-
 class MessageQueue(object):
     def __init__(self, endpoint):
         _, port = utils.split_address(endpoint)
