@@ -21,4 +21,4 @@ to be installed on the master.
 
 How to run
 ----------
- 1. ``shaker --scenario <scenario-file>``
+ 1. ``shaker --scenario <scenario-file> --report <report-file>``

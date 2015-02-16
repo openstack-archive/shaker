@@ -29,17 +29,17 @@ class BaseExecutor(object):
         return None
 
     def process_reply(self, message):
-        return None
+        LOG.debug('Test %s on agent %s finished with %s',
+                  self.test_definition, self.agent, message)
+        return dict(stdout=message.get('stdout'),
+                    stderr=message.get('stderr'),
+                    command=self.get_command(),
+                    agent=self.agent)
 
 
 class ShellExecutor(BaseExecutor):
     def get_command(self):
         return self.test_definition['method']
-
-    def process_reply(self, message):
-        LOG.debug('Test %s on agent %s finished with %s',
-                  self.test_definition, self.agent, message)
-        return message.get('stdout')
 
 
 class NetperfExecutor(BaseExecutor):
@@ -49,11 +49,6 @@ class NetperfExecutor(BaseExecutor):
                 dict(ip=target_ip,
                      method=self.test_definition['method']))
 
-    def process_reply(self, message):
-        LOG.debug('Test %s on agent %s finished with %s',
-                  self.test_definition, self.agent, message)
-        return message.get('stdout')
-
 
 class NetperfWrapperExecutor(BaseExecutor):
     def get_command(self):
@@ -61,10 +56,6 @@ class NetperfWrapperExecutor(BaseExecutor):
         return ('netperf-wrapper -H %(ip)s -f stats %(method)s' %
                 dict(ip=target_ip,
                      method=self.test_definition['method']))
-
-    def process_reply(self, message):
-        LOG.debug('Test %s on agent %s finished with %s',
-                  self.test_definition, self.agent, message)
 
 
 EXECUTORS = {

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Shaker report</title>
+</head>
+<body>
+
+<h1>Report</h1>
+
+<h5>Scenario:</h5>
+<pre>{{ report.scenario }}
+</pre>
+
+{% for test in report.result %}
+    <h2>Test {{ test.test_definition }}</h2>
+
+    <h5>Test specification:</h5>
+    <pre>
+        title: {{ test.test_definition.title }}
+        class: {{ test.test_definition.class }}
+        method: {{ test.test_definition.method }}
+    </pre>
+
+    {% for test_result in test.results %}
+        <h3>{{ test_result.agents|length }} agents</h3>
+
+        <h5>Selected agents:</h5>
+        <ul>
+            {% for agent in test_result.agents %}
+            <li>ID: {{ agent.id }}, IP: {{ agent.ip }}, mode: {{ agent.mode }}</li>
+            {% endfor %}
+        </ul>
+
+        {% for result in test_result.results %}
+            {% if result.agent %}
+                <h4>Agent {{ result.agent.id }} ({{ result.agent.ip }})</h4>
+
+                {% if result.command %}
+                    <h5>Command</h5>
+                    <pre>{{ result.command }}</pre>
+                {% endif %}
+
+                {% if result.stdout %}
+                    <h5>stdout</h5>
+                    <pre>{{ result.stdout }}</pre>
+                {% endif %}
+
+                {% if result.stderr %}
+                    <h5>stderr</h5>
+                    <pre>{{ result.stderr }}</pre>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+
+    {% endfor %}
+
+{% endfor %}
+
+</body>
+</html>

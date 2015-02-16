@@ -103,12 +103,14 @@ class Deployment(object):
                     group['master'].get('instance_name'))
                 agents[agent_id] = dict(
                     mode='master', id=agent_id, group=group)
+                agents[agent_id].update(group['master'])
 
             if group['slave'].get('instance_name'):
                 agent_id = self.convert_instance_name_to_agent_id(
                     group['slave'].get('instance_name'))
                 agents[agent_id] = dict(
                     mode='slave', id=agent_id, group=group)
+                agents[agent_id].update(group['slave'])
 
         return agents
 

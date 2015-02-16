@@ -43,6 +43,12 @@ SERVER_OPTS = [
     cfg.StrOpt('scenario',
                required=True,
                help='Scenario file name'),
+
+    cfg.StrOpt('report-template',
+               default='shaker/engine/report.template',
+               help='Report template file name (Jinja format)'),
+    cfg.StrOpt('report',
+               help='Report file name. If not specified print to stdout'),
 ]
 
 AGENT_OPTS = [

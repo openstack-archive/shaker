@@ -22,6 +22,7 @@ import zmq
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
+from shaker.engine import report
 from shaker.engine import utils
 from shaker.openstack.common import log as logging
 
@@ -127,6 +128,11 @@ def read_scenario():
     return scenario
 
 
+def _pick_agents(agents):
+    # todo iterate over agents and pick some of them (e.g. from 1 to all)
+    return [agents]
+
+
 def execute(execution, agents):
     message_queue = MessageQueue(cfg.CONF.server_endpoint)
 
@@ -141,17 +147,23 @@ def execute(execution, agents):
     for test_definition in execution['tests']:
         LOG.debug('Running test %s on all agents', test_definition)
 
-        executors = dict()
-        for agent_id, agent in agents.items():
-            if agent['mode'] == 'master':
-                # tests are executed on master agents only
-                executors[agent_id] = executors_classes.get_executor(
-                    test_definition, agent)
+        results_per_test = []
+        for selected_agents in _pick_agents(agents):
+            executors = dict()
+            for agent_id, agent in selected_agents.items():
+                if agent['mode'] == 'master':
+                    # tests are executed on master agents only
+                    executors[agent_id] = executors_classes.get_executor(
+                        test_definition, agent)
 
-        test_case_result = quorum.run_test_case(executors)
+            test_case_result = quorum.run_test_case(executors)
+            results_per_test.append({
+                'agents': selected_agents.values(),
+                'results': test_case_result.values(),
+            })
 
         result.append({
-            'agent_results': test_case_result,
+            'results': results_per_test,
             'test_definition': test_definition,
         })
 
@@ -193,6 +205,10 @@ def main():
 
     result = execute(scenario['execution'], agents)
     LOG.debug('Result: %s', result)
+
+    report.generate_report(cfg.CONF.report_template,
+                           cfg.CONF.report,
+                           dict(scenario=yaml.dump(scenario), result=result))
 
     deployment.cleanup()
 
