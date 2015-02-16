@@ -43,7 +43,8 @@ class Deployment(object):
         self.stack_name = 'shaker_%s' % uuid.uuid4()
 
     def _get_compute_nodes(self):
-        return [svc.host for svc in nova.get_compute_nodes(self.nova_client)]
+        return [svc.host for svc in nova.get_compute_nodes(self.nova_client)
+                if svc.state == 'up']
 
     def _make_groups(self, vm_accommodation):
         compute_nodes = self._get_compute_nodes()
