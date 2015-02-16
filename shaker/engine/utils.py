@@ -41,9 +41,10 @@ def read_file(file_name):
 
 
 def split_address(address):
-    host, port = address.split(':')
-    if not port:
-        raise Exception('Invalid address: %s', address)
+    try:
+        host, port = address.split(':')
+    except ValueError:
+        raise ValueError('Invalid address: %s, "host:port" expected', address)
     return host, port
 
 
