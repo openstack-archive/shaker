@@ -214,7 +214,9 @@ def main():
 
     report.generate_report(cfg.CONF.report_template,
                            cfg.CONF.report,
-                           dict(scenario=yaml.dump(scenario), result=result))
+                           dict(scenario=yaml.dump(scenario),
+                                agents=agents,
+                                result=result))
 
     deployment.cleanup()
 

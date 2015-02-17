@@ -26,25 +26,38 @@
 <pre>{{ report.scenario }}
 </pre>
 
+<h5>Agents:</h5>
+<ul>
+    {% for agent in report.agents %}
+    <li>ID: {{ agent.id }}, IP: {{ agent.ip }}, mode: {{ agent.mode }}</li>
+    {% endfor %}
+</ul>
+
 {% for test in report.result %}
-    <h2>Test {{ test.test_definition }}</h2>
+    <h2>Test
+        {% if test.test_definition.title %}
+            {{ test.test_definition.title }}
+        {% else %}
+            {{ test.test_definition }}
+        {% endif %}
+    </h2>
 
     <h5>Test specification:</h5>
-    <pre>
-        title: {{ test.test_definition.title }}
-        class: {{ test.test_definition.class }}
-        method: {{ test.test_definition.method }}
-    </pre>
+{#    <pre>#}
+{#        title: {{ test.test_definition.title }}#}
+{#        class: {{ test.test_definition.class }}#}
+{#        method: {{ test.test_definition.method }}#}
+{#    </pre>#}
 
     {% for test_result in test.results %}
         <h3>{{ test_result.agents|length }} agents</h3>
 
-        <h5>Selected agents:</h5>
-        <ul>
-            {% for agent in test_result.agents %}
-            <li>ID: {{ agent.id }}, IP: {{ agent.ip }}, mode: {{ agent.mode }}</li>
-            {% endfor %}
-        </ul>
+{#        <h5>Selected agents:</h5>#}
+{#        <ul>#}
+{#            {% for agent in test_result.agents %}#}
+{#            <li>ID: {{ agent.id }}, IP: {{ agent.ip }}, mode: {{ agent.mode }}</li>#}
+{#            {% endfor %}#}
+{#        </ul>#}
 
         {% for result in test_result.results %}
             {% if result.agent %}
