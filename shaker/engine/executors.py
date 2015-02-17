@@ -44,10 +44,11 @@ class ShellExecutor(BaseExecutor):
 
 class NetperfExecutor(BaseExecutor):
     def get_command(self):
-        target_ip = self.agent['slave']['ip']
-        return ('netperf -H %(ip)s -l 30 -t %(method)s' %
-                dict(ip=target_ip,
-                     method=self.test_definition['method']))
+        target = self.agent['slave']['ip']
+        return ('netperf -H %(target)s -l %(len)s -t %(method)s' %
+                dict(target=self.test_definition.get('target') or target,
+                     method=self.test_definition.get('method') or 'TCP_STREAM',
+                     len=self.test_definition.get('len') or 30))
 
 
 class NetperfWrapperExecutor(BaseExecutor):
