@@ -137,7 +137,7 @@ def execute(execution, agents):
     message_queue = MessageQueue(cfg.CONF.server_endpoint)
 
     LOG.debug('Creating quorum of agents: %s', agents)
-    quorum = Quorum(message_queue, agents.values())
+    quorum = Quorum(message_queue, agents)
 
     LOG.debug('Waiting for quorum of agents')
     quorum.wait_join()
@@ -150,15 +150,15 @@ def execute(execution, agents):
         results_per_test = []
         for selected_agents in _pick_agents(agents):
             executors = dict()
-            for agent_id, agent in selected_agents.items():
+            for agent in selected_agents:
                 if agent['mode'] == 'master':
                     # tests are executed on master agents only
-                    executors[agent_id] = executors_classes.get_executor(
+                    executors[agent['id']] = executors_classes.get_executor(
                         test_definition, agent)
 
             test_case_result = quorum.run_test_case(executors)
             results_per_test.append({
-                'agents': selected_agents.values(),
+                'agents': selected_agents,
                 'results': test_case_result.values(),
             })
 
@@ -198,7 +198,7 @@ def main():
     agents = deployment.deploy(scenario['deployment'])
 
     if not agents:
-        LOG.warning('No agents specified. Exiting.')
+        LOG.warning('No agents exist. Exiting.')
         return
 
     LOG.debug('Agents: %s', agents)
