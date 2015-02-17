@@ -135,9 +135,24 @@ def _resolve_agent_ids(agents):
             agent['master'] = id_to_agent[agent['master_id']]
 
 
-def _pick_agents(agents):
-    # todo iterate over agents and pick some of them (e.g. from 1 to all)
-    return [agents]
+def _pick_agents(agents, size):
+    # tests are executed on master agents only
+    agents = [a for a in agents if a['mode'] == 'master']
+
+    if not size or size == 'full':
+        yield agents
+    elif size == 'linear_progression':
+        for i in range(len(agents)):
+            yield agents[:i]
+    elif size == 'quadratic_progression':
+        n = len(agents)
+        seq = [n]
+        while n > 1:
+            n /= 2
+            seq.append(n)
+        seq.reverse()
+        for i in seq:
+            yield agents[:i]
 
 
 def execute(execution, agents):
@@ -150,17 +165,13 @@ def execute(execution, agents):
 
     result = []
 
-    for test_definition in execution['tests']:
-        LOG.debug('Running test %s on all agents', test_definition)
+    for test in execution['tests']:
+        LOG.debug('Running test %s on all agents', test)
 
         results_per_test = []
-        for selected_agents in _pick_agents(agents):
-            executors = dict()
-            for agent in selected_agents:
-                if agent['mode'] == 'master':
-                    # tests are executed on master agents only
-                    executors[agent['id']] = executors_classes.get_executor(
-                        test_definition, agent)
+        for selected_agents in _pick_agents(agents, execution.get('size')):
+            executors = dict((a['id'], executors_classes.get_executor(test, a))
+                             for a in selected_agents)
 
             test_case_result = quorum.run_test_case(executors)
             results_per_test.append({
@@ -170,7 +181,7 @@ def execute(execution, agents):
 
         result.append({
             'results': results_per_test,
-            'test_definition': test_definition,
+            'test_definition': test,
         })
 
     LOG.info('Execution is done')

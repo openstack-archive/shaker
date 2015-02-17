@@ -12,7 +12,6 @@ deployment:
   vm_accommodation: [pair, double_room]
 
 execution:
-  nodes: [1]
   tests:
   -
     class: netperf_wrapper

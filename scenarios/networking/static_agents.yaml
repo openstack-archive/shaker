@@ -15,7 +15,6 @@ deployment:
     master_id: a-001
 
 execution:
-  nodes: [1]
   tests:
   -
     class: netperf

@@ -11,7 +11,7 @@ deployment:
   vm_accommodation: [pair, single_room]
 
 execution:
-  nodes: [1]
+  size: 'quadratic_progression'
   tests:
   -
     class: netperf
