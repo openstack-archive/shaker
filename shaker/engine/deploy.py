@@ -41,6 +41,7 @@ class Deployment(object):
         self.nova_client = nova.create_nova_client(keystone_kwargs)
 
         self.stack_name = 'shaker_%s' % uuid.uuid4()
+        self.stack_deployed = False
 
     def _get_compute_nodes(self):
         return [svc.host for svc in nova.get_compute_nodes(self.nova_client)
@@ -77,40 +78,50 @@ class Deployment(object):
 
         return groups
 
-    def _get_output(self, vm, stack_outputs, vm_name, param):
-        o = stack_outputs.get(vm_name + '_' + param)
-        if o:
-            vm[param] = o['output_value']
-
-    def _copy_vm_attributes(self, vm, stack_outputs, attributes):
-        for attribute in attributes:
-            self._get_output(vm, stack_outputs, vm['name'], attribute)
+    def _get_outputs(self, stack_outputs, vm_name, params):
+        result = {}
+        for param in params:
+            o = stack_outputs.get(vm_name + '_' + param)
+            if o:
+                result[param] = o['output_value']
+        return result
 
     def convert_instance_name_to_agent_id(self, instance_name):
         return 'i-%s' % instance_name.split('-')[1]
 
     def _make_agents(self, groups, outputs):
-        agents = {}
+        agents = []
 
         for group in groups:
-            self._copy_vm_attributes(group['master'], outputs,
-                                     ['ip', 'instance_name'])
-            self._copy_vm_attributes(group['slave'], outputs,
-                                     ['ip', 'instance_name'])
+            master = self._get_outputs(outputs, group['master']['name'],
+                                       ['ip', 'instance_name'])
+            if not master.get('instance_name'):
+                LOG.info('Group is not deployed: %s. Ignoring', group)
+                continue
 
-            if group['master'].get('instance_name'):
-                agent_id = self.convert_instance_name_to_agent_id(
-                    group['master'].get('instance_name'))
-                agents[agent_id] = dict(
-                    mode='master', id=agent_id, group=group)
-                agents[agent_id].update(group['master'])
+            master.update(dict(mode='master',
+                               id=self.convert_instance_name_to_agent_id(
+                                   master['instance_name'])))
 
-            if group['slave'].get('instance_name'):
-                agent_id = self.convert_instance_name_to_agent_id(
-                    group['slave'].get('instance_name'))
-                agents[agent_id] = dict(
-                    mode='slave', id=agent_id, group=group)
-                agents[agent_id].update(group['slave'])
+            slave = self._get_outputs(outputs, group['slave']['name'],
+                                      ['ip', 'instance_name'])
+
+            # todo workaround of Nova bug 1422686
+            if slave.get('instance_name') and not slave.get('ip'):
+                LOG.info('Ignoring group because of missing IP: %s', group)
+                continue
+
+            agents.append(master)
+
+            if slave.get('instance_name'):
+                # slave is deployed
+                slave.update(dict(mode='slave',
+                                  id=self.convert_instance_name_to_agent_id(
+                                      slave['instance_name'])))
+
+                master['slave_id'] = slave['id']
+                slave['master_id'] = master['id']
+                agents.append(slave)
 
         return agents
 
@@ -143,6 +154,7 @@ class Deployment(object):
         LOG.info('New stack: %s', stack)
 
         heat.wait_stack_completion(self.heat_client, stack['id'])
+        self.stack_deployed = True
 
         # get info about deployed objects
         outputs_list = self.heat_client.stacks.get(
@@ -152,19 +164,20 @@ class Deployment(object):
         # convert groups into agents
         return self._make_agents(groups, outputs)
 
-    def deploy(self, specification):
-        agents = {}
+    def deploy(self, deployment):
+        agents = []
 
-        if specification.get('template'):
+        if deployment.get('template'):
             # deploy topology specified by HOT
-            agents.update(self._deploy_from_hot(specification))
+            agents += self._deploy_from_hot(deployment)
 
-        if specification.get('agents'):
-            # agents are specified explicitly
-            agents.update(specification.get('agents'))
+        if deployment.get('agents'):
+            # agents are specified statically
+            agents += deployment.get('agents')
 
         return agents
 
     def cleanup(self):
-        LOG.debug('Cleaning up the stack: %s', self.stack_name)
-        self.heat_client.stacks.delete(self.stack_name)
+        if self.stack_deployed:
+            LOG.debug('Cleaning up the stack: %s', self.stack_name)
+            self.heat_client.stacks.delete(self.stack_name)

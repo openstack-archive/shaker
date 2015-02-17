@@ -31,13 +31,11 @@ LOG = logging.getLogger(__name__)
 
 
 class Quorum(object):
-    def __init__(self, message_queue, agents):
+    def __init__(self, message_queue):
         self.message_queue = message_queue
-        self.agents = agents
 
-        self.agent_ids = set(a['id'] for a in agents)
-
-    def wait_join(self):
+    def wait_join(self, agent_ids):
+        LOG.debug('Waiting for quorum of agents: %s', agent_ids)
         alive_agents = set()
         for message, reply_handler in self.message_queue:
             agent_id = message.get('agent_id')
@@ -47,7 +45,7 @@ class Quorum(object):
 
             LOG.debug('Alive agents: %s', alive_agents)
 
-            if alive_agents >= self.agent_ids:
+            if alive_agents >= agent_ids:
                 LOG.info('All expected agents are alive')
                 break
 
@@ -128,19 +126,27 @@ def read_scenario():
     return scenario
 
 
+def _resolve_agent_ids(agents):
+    id_to_agent = dict((ag['id'], ag) for ag in agents)
+    for agent in agents:
+        if agent.get('slave_id'):
+            agent['slave'] = id_to_agent[agent['slave_id']]
+        if agent.get('master_id'):
+            agent['master'] = id_to_agent[agent['master_id']]
+
+
 def _pick_agents(agents):
     # todo iterate over agents and pick some of them (e.g. from 1 to all)
     return [agents]
 
 
 def execute(execution, agents):
+    _resolve_agent_ids(agents)
+
     message_queue = MessageQueue(cfg.CONF.server_endpoint)
 
-    LOG.debug('Creating quorum of agents: %s', agents)
-    quorum = Quorum(message_queue, agents.values())
-
-    LOG.debug('Waiting for quorum of agents')
-    quorum.wait_join()
+    quorum = Quorum(message_queue)
+    quorum.wait_join(set(a['id'] for a in agents))
 
     result = []
 
@@ -150,15 +156,15 @@ def execute(execution, agents):
         results_per_test = []
         for selected_agents in _pick_agents(agents):
             executors = dict()
-            for agent_id, agent in selected_agents.items():
+            for agent in selected_agents:
                 if agent['mode'] == 'master':
                     # tests are executed on master agents only
-                    executors[agent_id] = executors_classes.get_executor(
+                    executors[agent['id']] = executors_classes.get_executor(
                         test_definition, agent)
 
             test_case_result = quorum.run_test_case(executors)
             results_per_test.append({
-                'agents': selected_agents.values(),
+                'agents': selected_agents,
                 'results': test_case_result.values(),
             })
 
@@ -198,7 +204,7 @@ def main():
     agents = deployment.deploy(scenario['deployment'])
 
     if not agents:
-        LOG.warning('No agents specified. Exiting.')
+        LOG.info('No agents deployed. Exit.')
         return
 
     LOG.debug('Agents: %s', agents)

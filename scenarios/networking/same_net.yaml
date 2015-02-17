@@ -1,4 +1,4 @@
-description: >
+description:
   This scenario launches pairs of VMs in the same private network
 
 deployment:

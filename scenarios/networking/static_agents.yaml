@@ -1,0 +1,25 @@
+description:
+  This scenario runs tests on pre-deployed static agents
+
+deployment:
+  agents:
+  -
+    id: a-001
+    ip: 10.20.1.2
+    mode: master
+    slave_id: a-002
+  -
+    id: a-002
+    ip: 10.20.1.8
+    mode: slave
+    master_id: a-001
+
+execution:
+  nodes: [1]
+  tests:
+  -
+    class: netperf
+    method: TCP_STREAM
+  -
+    class: shell
+    method: ls -al
