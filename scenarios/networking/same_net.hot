@@ -5,9 +5,6 @@ description: >
   network, and for deploying servers into the new network.
 
 parameters:
-  key_name:
-    type: string
-    description: Name of keypair to assign to servers
   image:
     type: string
     description: Name of image to use for servers
@@ -73,7 +70,6 @@ resources:
       name: {{ group.master.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
       availability_zone: "nova:{{ group.master.node }}"
       networks:
         - port: { get_resource: {{ group.master.name }}_port }
@@ -100,7 +96,6 @@ resources:
       name: {{ group.slave.name }}
       image: { get_param: image }
       flavor: { get_param: flavor }
-      key_name: { get_param: key_name }
       availability_zone: "nova:{{ group.slave.node }}"
       networks:
         - port: { get_resource: {{ group.slave.name }}_port }

@@ -4,7 +4,6 @@ description: >
 deployment:
   template: scenarios/networking/same_net.hot
   template_parameters:
-    key_name: shaker-vm-key
     image: shaker-image
     flavor: shaker-flavor
     public_net: net04_ext
