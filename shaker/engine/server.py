@@ -211,6 +211,7 @@ def main():
                                    cfg.CONF.os_password,
                                    cfg.CONF.os_tenant_name,
                                    cfg.CONF.os_auth_url,
+                                   cfg.CONF.os_region_name or 'RegionOne',
                                    cfg.CONF.server_endpoint)
     agents = deployment.deploy(scenario['deployment'])
 

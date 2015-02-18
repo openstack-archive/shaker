@@ -13,15 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from keystoneclient.auth.identity import v2
-from keystoneclient import session
 from novaclient import client as nova_client_pkg
 
 
-def create_nova_client(keystone_client):
-    auth = v2.Password(**keystone_client)
-    sess = session.Session(auth=auth)
-    return nova_client_pkg.Client('2', session=sess)
+NOVA_VERSION = '2'
+
+
+def create_nova_client(keystone_client, os_region_name):
+    compute_api_url = keystone_client.service_catalog.url_for(
+        service_type='compute', region_name=os_region_name)
+    client = nova_client_pkg.Client(NOVA_VERSION,
+                                    auth_token=keystone_client.auth_token)
+    client.set_management_url(compute_api_url)
+    return client
 
 
 def get_compute_nodes(nova_client):

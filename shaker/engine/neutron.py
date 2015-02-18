@@ -21,13 +21,13 @@ from shaker.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 
-NEUTRON_CLIENT_VERSION = '2.0'
+NEUTRON_VERSION = '2.0'
 
 
-def create_neutron_client(keystone_client):
+def create_neutron_client(keystone_client, os_region_name):
     network_api_url = keystone_client.service_catalog.url_for(
-        service_type='network')
-    client = neutron_client_pkg.Client(NEUTRON_CLIENT_VERSION,
+        service_type='network', region_name=os_region_name)
+    client = neutron_client_pkg.Client(NEUTRON_VERSION,
                                        endpoint_url=network_api_url,
                                        token=keystone_client.auth_token, )
     return client

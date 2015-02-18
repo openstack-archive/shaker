@@ -39,6 +39,10 @@ SERVER_OPTS = [
     cfg.StrOpt('os-password', metavar='<auth-password>',
                default=utils.env('OS_PASSWORD'),
                help='Authentication password, defaults to env[OS_PASSWORD].'),
+    cfg.StrOpt('os-region-name', metavar='<auth-region-name>',
+               default=utils.env('OS_REGION_NAME'),
+               help='Authentication region name, defaults to '
+                    'env[OS_REGION_NAME].'),
 
     cfg.StrOpt('scenario',
                required=True,

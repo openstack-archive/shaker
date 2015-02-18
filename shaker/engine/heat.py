@@ -23,13 +23,13 @@ from shaker.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 
-HEAT_CLIENT_VERSION = '1'
+HEAT_VERSION = '1'
 
 
-def create_heat_client(keystone_client):
+def create_heat_client(keystone_client, os_region_name):
     orchestration_api_url = keystone_client.service_catalog.url_for(
-        service_type='orchestration')
-    client = heat_client_pkg.Client(HEAT_CLIENT_VERSION,
+        service_type='orchestration', region_name=os_region_name)
+    client = heat_client_pkg.Client(HEAT_VERSION,
                                     endpoint=orchestration_api_url,
                                     token=keystone_client.auth_token, )
     return client

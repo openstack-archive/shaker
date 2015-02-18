@@ -30,7 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
-                 server_endpoint):
+                 os_region_name, server_endpoint):
         self.server_endpoint = server_endpoint
         keystone_kwargs = {'username': os_username,
                            'password': os_password,
@@ -38,10 +38,12 @@ class Deployment(object):
                            'auth_url': os_auth_url,
                            }
         self.keystone_client = keystone.create_keystone_client(keystone_kwargs)
-        self.heat_client = heat.create_heat_client(self.keystone_client)
-        self.nova_client = nova.create_nova_client(keystone_kwargs)
+        self.heat_client = heat.create_heat_client(
+            self.keystone_client, os_region_name)
+        self.nova_client = nova.create_nova_client(
+            self.keystone_client, os_region_name)
         self.neutron_client = neutron.create_neutron_client(
-            self.keystone_client)
+            self.keystone_client, os_region_name)
 
         self.stack_name = 'shaker_%s' % uuid.uuid4()
         self.stack_deployed = False
