@@ -19,6 +19,7 @@ import jinja2
 
 from shaker.engine import heat
 from shaker.engine import keystone
+from shaker.engine import neutron
 from shaker.engine import nova
 from shaker.engine import utils
 from shaker.openstack.common import log as logging
@@ -39,6 +40,8 @@ class Deployment(object):
         self.keystone_client = keystone.create_keystone_client(keystone_kwargs)
         self.heat_client = heat.create_heat_client(self.keystone_client)
         self.nova_client = nova.create_nova_client(keystone_kwargs)
+        self.neutron_client = neutron.create_neutron_client(
+            self.keystone_client)
 
         self.stack_name = 'shaker_%s' % uuid.uuid4()
         self.stack_deployed = False
@@ -125,6 +128,17 @@ class Deployment(object):
 
         return agents
 
+    def _fill_missing_template_parameters(self, template_parameters):
+        template_parameters['private_net_name'] = 'net_%s' % uuid.uuid4()
+        template_parameters['server_endpoint'] = self.server_endpoint
+
+        if not template_parameters.get('public_net'):
+            ext_nets = self.neutron_client.list_networks(
+                **{'router:external': True})['networks']
+            if not ext_nets:
+                raise Exception('No external networks found')
+            template_parameters['public_net'] = ext_nets[0]['name']
+
     def _deploy_from_hot(self, specification):
         vm_accommodation = specification['vm_accommodation']
         heat_template_name = specification['template']
@@ -141,8 +155,7 @@ class Deployment(object):
         LOG.debug('Rendered template: %s', rendered_template)
 
         # create stack by Heat
-        template_parameters['private_net_name'] = 'net_%s' % uuid.uuid4()
-        template_parameters['server_endpoint'] = self.server_endpoint
+        self._fill_missing_template_parameters(template_parameters)
 
         stack_params = {
             'stack_name': self.stack_name,
