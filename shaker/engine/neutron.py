@@ -31,3 +31,11 @@ def create_neutron_client(keystone_client, os_region_name):
                                        endpoint_url=network_api_url,
                                        token=keystone_client.auth_token, )
     return client
+
+
+def choose_external_net(neutron_client):
+    ext_nets = neutron_client.list_networks(
+        **{'router:external': True})['networks']
+    if not ext_nets:
+        raise Exception('No external networks found')
+    return ext_nets[0]['name']

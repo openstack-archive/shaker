@@ -212,7 +212,8 @@ def main():
                                    cfg.CONF.os_tenant_name,
                                    cfg.CONF.os_auth_url,
                                    cfg.CONF.os_region_name or 'RegionOne',
-                                   cfg.CONF.server_endpoint)
+                                   cfg.CONF.server_endpoint,
+                                   cfg.CONF.external_net)
     agents = deployment.deploy(scenario['deployment'])
 
     if not agents:

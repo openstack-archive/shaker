@@ -30,8 +30,7 @@ LOG = logging.getLogger(__name__)
 
 class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
-                 os_region_name, server_endpoint):
-        self.server_endpoint = server_endpoint
+                 os_region_name, server_endpoint, external_net):
         keystone_kwargs = {'username': os_username,
                            'password': os_password,
                            'tenant_name': os_tenant_name,
@@ -44,6 +43,10 @@ class Deployment(object):
             self.keystone_client, os_region_name)
         self.neutron_client = neutron.create_neutron_client(
             self.keystone_client, os_region_name)
+
+        self.server_endpoint = server_endpoint
+        self.external_net = (external_net or
+                             neutron.choose_external_net(self.neutron_client))
 
         self.stack_name = 'shaker_%s' % uuid.uuid4()
         self.stack_deployed = False
@@ -134,12 +137,8 @@ class Deployment(object):
         template_parameters['private_net_name'] = 'net_%s' % uuid.uuid4()
         template_parameters['server_endpoint'] = self.server_endpoint
 
-        if not template_parameters.get('public_net'):
-            ext_nets = self.neutron_client.list_networks(
-                **{'router:external': True})['networks']
-            if not ext_nets:
-                raise Exception('No external networks found')
-            template_parameters['public_net'] = ext_nets[0]['name']
+        if not template_parameters.get('external_net'):
+            template_parameters['external_net'] = self.external_net
 
     def _deploy_from_hot(self, specification):
         vm_accommodation = specification['vm_accommodation']

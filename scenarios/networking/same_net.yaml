@@ -6,7 +6,6 @@ deployment:
   template_parameters:
     image: shaker-image
     flavor: shaker-flavor
-    public_net: net04_ext
     private_net_cidr: 10.0.0.0/24
   vm_accommodation: [pair, single_room]
 

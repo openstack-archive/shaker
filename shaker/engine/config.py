@@ -44,6 +44,10 @@ SERVER_OPTS = [
                help='Authentication region name, defaults to '
                     'env[OS_REGION_NAME].'),
 
+    cfg.StrOpt('external-net',
+               help='Name or ID of external network. If not set the network '
+                    'is chosen randomly.'),
+
     cfg.StrOpt('scenario',
                required=True,
                help='Scenario file name'),
