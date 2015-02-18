@@ -14,9 +14,15 @@ execution:
   size: 'quadratic_progression'
   tests:
   -
+    title: iperf TCP test
+    class: iperf
+    time: 60
+  -
+    class: iperf
+    udp: 1
+    mss: 1406
+    threads: 5
+  -
     class: netperf
     method: TCP_STREAM
-    len: 60
-  -
-    class: shell
-    method: ls -al
+    time: 60

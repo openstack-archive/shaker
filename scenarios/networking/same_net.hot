@@ -60,6 +60,10 @@ resources:
         port_range_min: 1,
         port_range_max: 65535},
         {remote_ip_prefix: 0.0.0.0/0,
+        protocol: udp,
+        port_range_min: 1,
+        port_range_max: 65535},
+        {remote_ip_prefix: 0.0.0.0/0,
         protocol: icmp}]
 
 {% for group in groups %}
@@ -105,6 +109,7 @@ resources:
           template: |
             #!/bin/sh
             screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+            screen -dmS sudo nice -n -20 iperf -s --nodelay
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 

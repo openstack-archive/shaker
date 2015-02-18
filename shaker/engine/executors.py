@@ -45,10 +45,10 @@ class ShellExecutor(BaseExecutor):
 class NetperfExecutor(BaseExecutor):
     def get_command(self):
         target = self.agent['slave']['ip']
-        return ('netperf -H %(target)s -l %(len)s -t %(method)s' %
+        return ('netperf -H %(target)s -l %(time)s -t %(method)s' %
                 dict(target=self.test_definition.get('target') or target,
                      method=self.test_definition.get('method') or 'TCP_STREAM',
-                     len=self.test_definition.get('len') or 30))
+                     time=self.test_definition.get('time') or 60))
 
 
 class NetperfWrapperExecutor(BaseExecutor):
@@ -59,9 +59,25 @@ class NetperfWrapperExecutor(BaseExecutor):
                      method=self.test_definition['method']))
 
 
+class IperfExecutor(BaseExecutor):
+    def get_command(self):
+        target = self.agent['slave']['ip']
+        mss = self.test_definition.get('mss')
+        return ('sudo nice -n -20 iperf --client %(target)s --format m'
+                '%(mss)s --len %(bs)s --print_mss --nodelay'
+                '%(udp)s --time %(time)s --parallel %(threads)s' %
+                dict(target=self.test_definition.get('target') or target,
+                     mss=mss and '--mss %s' % mss or '',
+                     bs=self.test_definition.get('buffer_size') or '8k',
+                     udp=self.test_definition.get('udp') and '--udp' or '',
+                     threads=self.test_definition.get('threads') or 1,
+                     time=self.test_definition.get('time') or 60))
+
+
 EXECUTORS = {
     'shell': ShellExecutor,
     'netperf': NetperfExecutor,
+    'iperf': IperfExecutor,
     'netperf_wrapper': NetperfWrapperExecutor,
     '_default': ShellExecutor,
 }
