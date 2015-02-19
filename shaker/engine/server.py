@@ -192,8 +192,10 @@ def main():
     # init conf and logging
     conf = cfg.CONF
     conf.register_cli_opts(config.COMMON_OPTS)
+    conf.register_cli_opts(config.OPENSTACK_OPTS)
     conf.register_cli_opts(config.SERVER_OPTS)
     conf.register_opts(config.COMMON_OPTS)
+    conf.register_opts(config.OPENSTACK_OPTS)
     conf.register_opts(config.SERVER_OPTS)
 
     try:
