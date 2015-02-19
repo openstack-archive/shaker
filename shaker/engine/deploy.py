@@ -17,11 +17,11 @@ import uuid
 
 import jinja2
 
-from shaker.engine import heat
-from shaker.engine import keystone
-from shaker.engine import neutron
-from shaker.engine import nova
 from shaker.engine import utils
+from shaker.openstack.clients import heat
+from shaker.openstack.clients import keystone
+from shaker.openstack.clients import neutron
+from shaker.openstack.clients import nova
 from shaker.openstack.common import log as logging
 
 
