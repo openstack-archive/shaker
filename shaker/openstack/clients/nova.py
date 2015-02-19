@@ -13,13 +13,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import time
+
 from novaclient import client as nova_client_pkg
 
+from shaker.openstack.common import log as logging
+
+
+LOG = logging.getLogger(__name__)
 
 NOVA_VERSION = '2'
 
 
-def create_nova_client(keystone_client, os_region_name):
+def create_client(keystone_client, os_region_name):
     compute_api_url = keystone_client.service_catalog.url_for(
         service_type='compute', region_name=os_region_name)
     client = nova_client_pkg.Client(NOVA_VERSION,
@@ -30,3 +36,43 @@ def create_nova_client(keystone_client, os_region_name):
 
 def get_compute_nodes(nova_client):
     return nova_client.services.list(binary='nova-compute')
+
+
+def is_flavor_exists(nova_client, flavor_name):
+    for flavor in nova_client.flavors.list():
+        if flavor.to_dict()['name'] == flavor_name:
+            return True
+    return False
+
+
+def _poll_for_status(poll_fn, obj_id, final_ok_states, poll_period=20,
+                     status_field="status"):
+    LOG.debug('Poll server %(id)s, waiting for any of statuses %(statuses)s',
+              dict(id=obj_id, statuses=final_ok_states))
+    while True:
+        obj = poll_fn(obj_id)
+        status = getattr(obj, status_field)
+        if status:
+            status = status.lower()
+
+        LOG.debug('Server %(id)s has status %(status)s',
+                  dict(id=obj_id, status=status))
+
+        if status in final_ok_states:
+            break
+        elif status == "error":
+            raise Exception(obj.fault['message'])
+
+        time.sleep(poll_period)
+
+
+def wait_server_shutdown(nova_client, server_id):
+    _poll_for_status(nova_client.servers.get, server_id, ['shutoff'])
+
+
+def wait_server_snapshot(nova_client, server_id):
+    task_state_field = "OS-EXT-STS:task_state"
+    server = nova_client.servers.get(server_id)
+    if hasattr(server, task_state_field):
+        _poll_for_status(nova_client.servers.get, server.id, [None, '-', ''],
+                         status_field=task_state_field)

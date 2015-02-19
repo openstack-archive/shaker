@@ -1,0 +1,113 @@
+# Copyright (c) 2015 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import uuid
+
+from oslo_config import cfg
+
+from shaker.engine import config
+from shaker.engine import utils
+from shaker.openstack.clients import glance
+from shaker.openstack.clients import heat
+from shaker.openstack.clients import neutron
+from shaker.openstack.clients import nova
+from shaker.openstack.clients import openstack
+from shaker.openstack.common import log as logging
+
+
+LOG = logging.getLogger(__name__)
+
+
+def init():
+    # init conf and logging
+    conf = cfg.CONF
+    conf.register_cli_opts(config.OPENSTACK_OPTS)
+    conf.register_opts(config.OPENSTACK_OPTS)
+    conf(project='shaker')
+
+    logging.setup('shaker')
+    LOG.info('Logging enabled')
+
+    openstack_client = openstack.OpenStackClient(
+        username=cfg.CONF.os_username, password=cfg.CONF.os_password,
+        tenant_name=cfg.CONF.os_tenant_name, auth_url=cfg.CONF.os_auth_url,
+        region_name=cfg.CONF.os_region_name)
+    return openstack_client
+
+
+def build_image():
+    openstack_client = init()
+    flavor_name = cfg.CONF.flavor_name
+    image_name = cfg.CONF.image_name
+
+    if nova.is_flavor_exists(openstack_client.nova, flavor_name):
+        LOG.info('Using existing flavor: %s', flavor_name)
+    else:
+        openstack_client.nova.flavors.create(name=flavor_name,
+                                             ram=1024, vcpus=1, disk=3)
+        LOG.info('Created flavor %s', flavor_name)
+
+    if glance.get_image(openstack_client.glance, image_name):
+        LOG.info('Using existing image: %s', image_name)
+    else:
+        external_net = (cfg.CONF.external_net or
+                        neutron.choose_external_net(openstack_client.neutron))
+        stack_params = {
+            'stack_name': 'shaker_%s' % uuid.uuid4(),
+            'parameters': {'external_net': external_net,
+                           'flavor': flavor_name},
+            'template': utils.read_file('shaker/engine/installer.yaml'),
+        }
+
+        stack = openstack_client.heat.stacks.create(**stack_params)['stack']
+        LOG.debug('New stack: %s', stack)
+
+        heat.wait_stack_completion(openstack_client.heat, stack['id'])
+
+        outputs = heat.get_stack_outputs(openstack_client.heat, stack['id'])
+        LOG.debug('Stack outputs: %s', outputs)
+
+        LOG.debug('Waiting for server to shutdown')
+        server_id = outputs['server_info'].get('id')
+        nova.wait_server_shutdown(openstack_client.nova, server_id)
+
+        LOG.debug('Making snapshot')
+        openstack_client.nova.servers.create_image(
+            server_id, image_name)
+
+        LOG.debug('Waiting for server to snapshot')
+        nova.wait_server_snapshot(openstack_client.nova, server_id)
+
+        LOG.debug('Clearing up')
+        openstack_client.heat.stacks.delete(stack['id'])
+
+        LOG.info('Created image: %s', image_name)
+
+
+def cleanup():
+    openstack_client = init()
+    flavor_name = cfg.CONF.flavor_name
+    image_name = cfg.CONF.image_name
+
+    image = glance.get_image(openstack_client.glance, image_name)
+    if image:
+        openstack_client.glance.images.delete(image)
+
+    if nova.is_flavor_exists(openstack_client.nova, flavor_name):
+        openstack_client.nova.flavors.delete(name=flavor_name)
+
+
+if __name__ == "__main__":
+    build_image()

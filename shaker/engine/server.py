@@ -192,8 +192,10 @@ def main():
     # init conf and logging
     conf = cfg.CONF
     conf.register_cli_opts(config.COMMON_OPTS)
+    conf.register_cli_opts(config.OPENSTACK_OPTS)
     conf.register_cli_opts(config.SERVER_OPTS)
     conf.register_opts(config.COMMON_OPTS)
+    conf.register_opts(config.OPENSTACK_OPTS)
     conf.register_opts(config.SERVER_OPTS)
 
     try:
@@ -211,9 +213,11 @@ def main():
                                    cfg.CONF.os_password,
                                    cfg.CONF.os_tenant_name,
                                    cfg.CONF.os_auth_url,
-                                   cfg.CONF.os_region_name or 'RegionOne',
+                                   cfg.CONF.os_region_name,
                                    cfg.CONF.server_endpoint,
-                                   cfg.CONF.external_net)
+                                   cfg.CONF.external_net,
+                                   cfg.CONF.flavor_name,
+                                   cfg.CONF.image_name)
     agents = deployment.deploy(scenario['deployment'])
 
     if not agents:

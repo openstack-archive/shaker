@@ -25,7 +25,7 @@ COMMON_OPTS = [
                help='Address for server connections (host:port)'),
 ]
 
-SERVER_OPTS = [
+OPENSTACK_OPTS = [
     cfg.StrOpt('os-auth-url', metavar='<auth-url>',
                default=utils.env('OS_AUTH_URL'),
                help='Authentication URL, defaults to env[OS_AUTH_URL].'),
@@ -40,7 +40,7 @@ SERVER_OPTS = [
                default=utils.env('OS_PASSWORD'),
                help='Authentication password, defaults to env[OS_PASSWORD].'),
     cfg.StrOpt('os-region-name', metavar='<auth-region-name>',
-               default=utils.env('OS_REGION_NAME'),
+               default=utils.env('OS_REGION_NAME') or 'RegionOne',
                help='Authentication region name, defaults to '
                     'env[OS_REGION_NAME].'),
 
@@ -48,6 +48,17 @@ SERVER_OPTS = [
                help='Name or ID of external network. If not set the network '
                     'is chosen randomly.'),
 
+    cfg.StrOpt('image-name',
+               default='shaker-image',
+               help='Name of image to use. The default is created by '
+                    'shaker-image-builder'),
+    cfg.StrOpt('flavor-name',
+               default='shaker-flavor',
+               help='Name of image flavor. The default is created by '
+                    'shaker-image-builder'),
+]
+
+SERVER_OPTS = [
     cfg.StrOpt('scenario',
                required=True,
                help='Scenario file name'),
@@ -67,5 +78,6 @@ AGENT_OPTS = [
 
 def list_opts():
     yield (None, copy.deepcopy(COMMON_OPTS))
+    yield (None, copy.deepcopy(OPENSTACK_OPTS))
     yield (None, copy.deepcopy(SERVER_OPTS))
     yield (None, copy.deepcopy(AGENT_OPTS))

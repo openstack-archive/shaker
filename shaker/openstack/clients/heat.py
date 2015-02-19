@@ -26,13 +26,12 @@ LOG = logging.getLogger(__name__)
 HEAT_VERSION = '1'
 
 
-def create_heat_client(keystone_client, os_region_name):
+def create_client(keystone_client, os_region_name):
     orchestration_api_url = keystone_client.service_catalog.url_for(
         service_type='orchestration', region_name=os_region_name)
-    client = heat_client_pkg.Client(HEAT_VERSION,
-                                    endpoint=orchestration_api_url,
-                                    token=keystone_client.auth_token, )
-    return client
+    return heat_client_pkg.Client(HEAT_VERSION,
+                                  endpoint=orchestration_api_url,
+                                  token=keystone_client.auth_token)
 
 
 def wait_stack_completion(heat_client, stack_id):
@@ -48,3 +47,9 @@ def wait_stack_completion(heat_client, stack_id):
 
     if status != 'COMPLETE':
         raise Exception(status)
+
+
+def get_stack_outputs(heat_client, stack_id):
+    outputs_list = heat_client.stacks.get(stack_id).to_dict()['outputs']
+    return dict((item['output_key'], item['output_value'])
+                for item in outputs_list)
