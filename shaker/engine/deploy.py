@@ -17,6 +17,7 @@ import uuid
 
 import jinja2
 
+from shaker.engine import const
 from shaker.engine import utils
 from shaker.openstack.clients import heat
 from shaker.openstack.clients import keystone
@@ -31,17 +32,14 @@ LOG = logging.getLogger(__name__)
 class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
                  os_region_name, server_endpoint, external_net):
-        keystone_kwargs = {'username': os_username,
-                           'password': os_password,
-                           'tenant_name': os_tenant_name,
-                           'auth_url': os_auth_url,
-                           }
-        self.keystone_client = keystone.create_keystone_client(keystone_kwargs)
-        self.heat_client = heat.create_heat_client(
+        self.keystone_client = keystone.create_keystone_client(
+            username=os_username, password=os_password,
+            tenant_name=os_tenant_name, auth_url=os_auth_url)
+        self.heat_client = heat.create_client(
             self.keystone_client, os_region_name)
-        self.nova_client = nova.create_nova_client(
+        self.nova_client = nova.create_client(
             self.keystone_client, os_region_name)
-        self.neutron_client = neutron.create_neutron_client(
+        self.neutron_client = neutron.create_client(
             self.keystone_client, os_region_name)
 
         self.server_endpoint = server_endpoint
@@ -91,7 +89,7 @@ class Deployment(object):
         for param in params:
             o = stack_outputs.get(vm_name + '_' + param)
             if o:
-                result[param] = o['output_value']
+                result[param] = o
         return result
 
     def convert_instance_name_to_agent_id(self, instance_name):
@@ -133,13 +131,6 @@ class Deployment(object):
 
         return agents
 
-    def _fill_missing_template_parameters(self, template_parameters):
-        template_parameters['private_net_name'] = 'net_%s' % uuid.uuid4()
-        template_parameters['server_endpoint'] = self.server_endpoint
-
-        if not template_parameters.get('external_net'):
-            template_parameters['external_net'] = self.external_net
-
     def _deploy_from_hot(self, specification):
         vm_accommodation = specification['vm_accommodation']
         heat_template_name = specification['template']
@@ -156,7 +147,15 @@ class Deployment(object):
         LOG.debug('Rendered template: %s', rendered_template)
 
         # create stack by Heat
-        self._fill_missing_template_parameters(template_parameters)
+        merged_parameters = {
+            'private_net_name': 'net_%s' % uuid.uuid4(),
+            'private_net_cidr': '10.0.0.0/16',
+            'server_endpoint': self.server_endpoint,
+            'external_net': self.external_net,
+            'image': const.SHAKER_IMAGE_NAME,
+            'flavor': const.SHAKER_FLAVOR_NAME,
+        }
+        merged_parameters.update(template_parameters)
 
         stack_params = {
             'stack_name': self.stack_name,
@@ -171,9 +170,7 @@ class Deployment(object):
         self.stack_deployed = True
 
         # get info about deployed objects
-        outputs_list = self.heat_client.stacks.get(
-            stack['id']).to_dict()['outputs']
-        outputs = dict((item['output_key'], item) for item in outputs_list)
+        outputs = heat.get_stack_outputs(self.heat_client, stack['id'])
 
         # convert groups into agents
         return self._make_agents(groups, outputs)

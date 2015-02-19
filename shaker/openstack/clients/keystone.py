@@ -18,13 +18,13 @@ from keystoneclient.v2_0 import client as keystone_v2
 from keystoneclient.v3 import client as keystone_v3
 
 
-def create_keystone_client(args):
-    discover = keystone_discover.Discover(**args)
+def create_keystone_client(**kwargs):
+    discover = keystone_discover.Discover(**kwargs)
     for version_data in discover.version_data():
         version = version_data["version"]
         if version[0] <= 2:
-            return keystone_v2.Client(**args)
+            return keystone_v2.Client(**kwargs)
         elif version[0] == 3:
-            return keystone_v3.Client(**args)
+            return keystone_v3.Client(**kwargs)
     raise Exception(
-        'Failed to discover keystone version for url %(auth_url)s.', **args)
+        'Failed to discover keystone version for url %(auth_url)s.', **kwargs)
