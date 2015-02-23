@@ -154,7 +154,7 @@ class Deployment(object):
             'image': self.image_name,
             'flavor': self.flavor_name,
         }
-        merged_parameters.update(specification['template_parameters'])
+        merged_parameters.update(specification.get('template_parameters', {}))
 
         stack_params = {
             'stack_name': self.stack_name,

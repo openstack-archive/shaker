@@ -122,6 +122,7 @@ class MessageQueue(object):
 def read_scenario():
     scenario_raw = utils.read_file(cfg.CONF.scenario)
     scenario = yaml.safe_load(scenario_raw)
+    scenario['file_name'] = cfg.CONF.scenario
     LOG.debug('Scenario: %s', scenario)
     return scenario
 
@@ -168,20 +169,20 @@ def execute(execution, agents):
     for test in execution['tests']:
         LOG.debug('Running test %s on all agents', test)
 
-        results_per_test = []
+        results_per_iteration = []
         for selected_agents in _pick_agents(agents, execution.get('size')):
             executors = dict((a['id'], executors_classes.get_executor(test, a))
                              for a in selected_agents)
 
             test_case_result = quorum.run_test_case(executors)
-            results_per_test.append({
+            results_per_iteration.append({
                 'agents': selected_agents,
-                'results': test_case_result.values(),
+                'results_per_agent': test_case_result.values(),
             })
 
         result.append({
-            'results': results_per_test,
-            'test_definition': test,
+            'results_per_iteration': results_per_iteration,
+            'definition': test,
         })
 
     LOG.info('Execution is done')

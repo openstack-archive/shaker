@@ -11,7 +11,7 @@ parameters:
   flavor:
     type: string
     description: Flavor to use for servers
-  public_net:
+  external_net:
     type: string
     description: >
       ID or name of public network for which floating IP addresses will be allocated
@@ -42,7 +42,7 @@ resources:
     type: OS::Neutron::Router
     properties:
       external_gateway_info:
-        network: { get_param: public_net }
+        network: { get_param: external_net }
 
   router_interface:
     type: OS::Neutron::RouterInterface

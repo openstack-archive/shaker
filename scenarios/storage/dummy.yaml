@@ -1,17 +1,13 @@
-description: >
-  This scenario launches pairs of VMs in the same private network
+description:
+  This scenario launches VMs in the same private network
 
 deployment:
   template: scenarios/storage/dummy.hot
-  template_parameters:
-    image: shaker-image
-    flavor: shaker-flavor
-    public_net: net04_ext
-    private_net_cidr: 10.0.0.0/24
   vm_accommodation: [single_room]
 
 execution:
   tests:
   -
+    title: directory listing
     class: shell
     method: ls -al

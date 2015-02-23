@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <title>Shaker Report</title>
 
     <!-- Latest compiled and minified CSS -->
@@ -14,61 +15,184 @@
     <link rel="stylesheet"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
-    <!-- Latest compiled and minified JavaScript -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+    <style type="text/css">
+        body {
+            padding-top: 50px;
+        }
+
+        .navbar-fixed-top {
+            border: 0 none;
+        }
+
+        .navbar-inverse .navbar-brand {
+            color: white;
+        }
+
+        .sidebar {
+            display: none;
+        }
+
+        @media (min-width: 768px) {
+            .sidebar {
+                background-color: #f5f5f5;
+                border-right: 1px solid #ccc;
+                bottom: 0;
+                display: block;
+                left: 0;
+                overflow-x: hidden;
+                overflow-y: auto;
+                padding: 12px;
+                position: fixed;
+                top: 51px;
+                z-index: 1000;
+            }
+        }
+
+        .nav-sidebar {
+            margin-bottom: 10px;
+            margin-left: -20px;
+            margin-right: -21px;
+        }
+
+        .nav-sidebar > li > a {
+            padding: 5px 20px;
+        }
+
+        .nav-sidebar > .active > a, .nav-sidebar > .active > a:hover, .nav-sidebar > .active > a:focus {
+            background-color: #428bca;
+            color: #fff;
+        }
+
+        .main {
+            padding: 10px;
+        }
+
+        @media (min-width: 768px) {
+            .main {
+                padding-left: 40px;
+                padding-right: 40px;
+            }
+        }
+
+        h5 {
+            font-weight: bold;
+        }
+
+    </style>
+
 </head>
+
 <body>
-<div class="container">
 
-<h1>Shaker Report</h1>
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed"
+                    data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+            </button>
+            <a class="navbar-brand">Shaker Report</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="https://github.com/stackforge/shaker">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
 
-<h5>Scenario:</h5>
-<pre>{{ report.scenario }}
-</pre>
+<div class="container-fluid">
+    <div class="row tabbable">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="#scenario" data-toggle="tab">Overview</a>
+                </li>
 
-<h5>Agents:</h5>
-<ul>
-    {% for agent in report.agents %}
-    <li>ID: {{ agent.id }}, IP: {{ agent.ip }}, mode: {{ agent.mode }}</li>
-    {% endfor %}
-</ul>
+                {% set tests = report.result %}
 
-{% for test in report.result %}
-    <h2>{% if test.test_definition.title %}
-            {{ test.test_definition.title }}
-        {% else %}
-            Test {{ test.test_definition }}
-        {% endif %}
-    </h2>
+                {% for test in tests %}
+                    <li><a href="#test-{{ test.definition.uuid }}" data-toggle="tab">
+                        {% if test.definition.title %}
+                            {{ test.definition.title|title }}
+                        {% else %}
+                            Test {{ test.definition }}
+                        {% endif %}
+                    </a></li>
 
-    {% for test_result in test.results %}
-        <h3>Concurrency: {{ test_result.agents|length }}</h3>
+                    {% for result_per_iteration in test.results_per_iteration %}
+                        {% set cnt = result_per_iteration.agents|length %}
+                        <li class="col-md-offset-1"><a href="#test-{{ test.definition.uuid }}-{{ cnt }}" data-toggle="tab">
+                            {% if cnt == 1 %}
+                                Single Thread
+                            {% else %}
+                                {{ cnt }} Threads
+                            {% endif %}
+                        </a></li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
 
-        {% for result in test_result.results %}
-            {% if result.agent %}
-                <h4>Agent {{ result.agent.id }} ({{ result.agent.ip }})</h4>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="tab-content">
+                <div id="scenario" class="tab-pane active">
+                    <h4>Scenario:</h4>
+                    <pre>{{ report.scenario }}</pre>
 
-                {% if result.command %}
-                    <h5>Command:</h5>
-                    <pre>{{ result.command }}</pre>
-                {% endif %}
+                    <h4>Agents:</h4>
+                    <ul>
+                        {% for agent in report.agents %}
+                            <li>ID: {{ agent.id }}, IP: {{ agent.ip }},
+                                mode: {{ agent.mode }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
 
-                {% if result.stdout %}
-                    <h5>Stdout:</h5>
-                    <pre>{{ result.stdout }}</pre>
-                {% endif %}
+                {% set tests = report.result %}
+                {% for test in tests %}
+                    <div id="test-{{ test.definition.uuid }}" class="tab-pane">
+                        <h4>Test Case</h4>
+                        <pre>{{ test.definition|pprint }}</pre>
+                    </div>
 
-                {% if result.stderr %}
-                    <h5>Stderr:</h5>
-                    <pre>{{ result.stderr }}</pre>
-                {% endif %}
-            {% endif %}
-        {% endfor %}
+                    {% for result_per_iteration in test.results_per_iteration %}
+                        {% set cnt = result_per_iteration.agents|length %}
+                        <div id="test-{{ test.definition.uuid }}-{{ cnt }}" class="tab-pane">
+                            {% for result_per_agent in result_per_iteration.results_per_agent %}
+                                <h4>Agent {{ result_per_agent.agent.id }}
+                                    ({{ result_per_agent.agent.ip }})</h4>
 
-    {% endfor %}
+                                {% if result_per_agent.command %}
+                                    <h5>Command:</h5>
+                                    <pre>{{ result_per_agent.command }}</pre>
+                                {% endif %}
 
-{% endfor %}
+                                {% if result_per_agent.stdout %}
+                                    <h5>Stdout:</h5>
+                                    <pre>{{ result_per_agent.stdout }}</pre>
+                                {% endif %}
 
+                                {% if result_per_agent.stderr %}
+                                    <h5>Stderr:</h5>
+                                    <pre>{{ result_per_agent.stderr }}</pre>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 </body>
 </html>
