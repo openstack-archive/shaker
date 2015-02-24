@@ -1,0 +1,25 @@
+description:
+  This scenario launches pairs of VMs on the same compute node. VMs are in
+  the different networks connected via different routers, master accesses slave
+  by floating ip
+
+deployment:
+  template: scenarios/networking/two_routers.hot
+  vm_accommodation: [pair, double_room]
+
+execution:
+  size: 'quadratic_progression'
+  tests:
+  -
+    title: iperf TCP test
+    class: iperf
+    time: 60
+  -
+    class: iperf
+    udp: 1
+    mss: 1406
+    threads: 5
+  -
+    class: netperf
+    method: TCP_STREAM
+    time: 60

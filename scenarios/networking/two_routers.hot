@@ -30,13 +30,13 @@ resources:
   private_net:
     type: OS::Neutron::Net
     properties:
-      name: { get_param: private_net_name }
+      name: two_routers_private_net
 
   private_subnet:
     type: OS::Neutron::Subnet
     properties:
       network_id: { get_resource: private_net }
-      cidr: { get_param: private_net_cidr }
+      cidr: 10.1.0.0/16
       dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
 
   router:
@@ -50,6 +50,30 @@ resources:
     properties:
       router_id: { get_resource: router }
       subnet_id: { get_resource: private_subnet }
+
+  private_net_2:
+    type: OS::Neutron::Net
+    properties:
+      name: two_routers_private_net_2
+
+  private_subnet_2:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net_2 }
+      cidr: 10.2.0.0/16
+      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+
+  router_2:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  router_interface_2:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router_2 }
+      subnet_id: { get_resource: private_subnet_2 }
 
   server_security_group:
     type: OS::Neutron::SecurityGroup
@@ -91,12 +115,6 @@ resources:
         - subnet_id: { get_resource: private_subnet }
       security_groups: [{ get_resource: server_security_group }]
 
-  {{ group.master.name }}_floating_ip:
-    type: OS::Neutron::FloatingIP
-    properties:
-      floating_network: { get_param: public_net }
-      port_id: { get_resource: {{ group.master.name }}_port }
-
   {{ group.slave.name }}:
     type: OS::Nova::Server
     properties:
@@ -118,21 +136,27 @@ resources:
   {{ group.slave.name }}_port:
     type: OS::Neutron::Port
     properties:
-      network_id: { get_resource: private_net }
+      network_id: { get_resource: private_net_2 }
       fixed_ips:
-        - subnet_id: { get_resource: private_subnet }
+        - subnet_id: { get_resource: private_subnet_2 }
       security_groups: [{ get_resource: server_security_group }]
+
+  {{ group.slave.name }}_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: external_net }
+      port_id: { get_resource: {{ group.slave.name }}_port }
 
 {% endfor %}
 
 outputs:
 {% for group in groups %}
   {{ group.master.name }}_ip:
-    value: { get_attr: [ {{ group.master.name }}_floating_ip, floating_ip_address ] }
+    value: { get_attr: [ {{ group.master.name }}, first_address ] }
   {{ group.master.name }}_instance_name:
     value: { get_attr: [ {{ group.master.name }}, instance_name ] }
   {{ group.slave.name }}_ip:
-    value: { get_attr: [ {{ group.slave.name }}, first_address ] }
+    value: { get_attr: [ {{ group.slave.name }}_floating_ip, floating_ip_address ] }
   {{ group.slave.name }}_instance_name:
     value: { get_attr: [ {{ group.slave.name }}, instance_name ] }
 {% endfor %}
