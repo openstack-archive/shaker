@@ -15,6 +15,11 @@
     <link rel="stylesheet"
           href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.9/c3.min.js"></script>
 
     <style type="text/css">
         body {
@@ -79,6 +84,224 @@
             font-weight: bold;
         }
 
+/*-- Chart --*/
+
+
+.c3 svg {
+  font: 10px sans-serif;
+}
+.c3 path, .c3 line {
+  fill: none;
+  stroke: #000;
+}
+.c3 text {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+.c3-legend-item-tile,
+.c3-xgrid-focus,
+.c3-ygrid,
+.c3-event-rect,
+.c3-bars path {
+  shape-rendering: crispEdges;
+}
+
+.c3-chart-arc path {
+  stroke: #fff;
+
+}
+.c3-chart-arc text {
+  fill: #fff;
+  font-size: 13px;
+}
+
+/*-- Axis --*/
+
+.c3-axis-x .tick {
+}
+.c3-axis-x-label {
+}
+
+.c3-axis-y .tick {
+}
+.c3-axis-y-label {
+}
+
+.c3-axis-y2 .tick {
+}
+.c3-axis-y2-label {
+}
+
+/*-- Grid --*/
+
+.c3-grid line {
+  stroke: #aaa;
+}
+.c3-grid text {
+  fill: #aaa;
+}
+.c3-xgrid, .c3-ygrid {
+  stroke-dasharray: 3 3;
+}
+.c3-xgrid-focus {
+}
+
+/*-- Text on Chart --*/
+
+.c3-text {
+}
+
+.c3-text.c3-empty {
+  fill: #808080;
+  font-size: 2em;
+}
+
+/*-- Line --*/
+
+.c3-line {
+  stroke-width: 1px;
+}
+/*-- Point --*/
+
+.c3-circle._expanded_ {
+  stroke-width: 1px;
+  stroke: white;
+}
+.c3-selected-circle {
+  fill: white;
+  stroke-width: 2px;
+}
+
+/*-- Bar --*/
+
+.c3-bar {
+  stroke-width: 0;
+}
+.c3-bar._expanded_ {
+  fill-opacity: 0.75;
+}
+
+/*-- Arc --*/
+
+.c3-chart-arcs-title {
+  font-size: 1.3em;
+}
+
+/*-- Focus --*/
+
+.c3-target.c3-focused {
+  opacity: 1;
+}
+.c3-target.c3-focused path.c3-line, .c3-target.c3-focused path.c3-step {
+  stroke-width: 2px;
+}
+.c3-target.c3-defocused {
+  opacity: 0.3 !important;
+}
+
+
+/*-- Region --*/
+
+.c3-region {
+  fill: steelblue;
+  fill-opacity: .1;
+}
+
+/*-- Brush --*/
+
+.c3-brush .extent {
+  fill-opacity: .1;
+}
+
+/*-- Select - Drag --*/
+
+.c3-dragarea {
+}
+
+/*-- Legend --*/
+
+.c3-legend-item {
+  font-size: 12px;
+}
+.c3-legend-item-hidden {
+  opacity: 0.15;
+}
+
+.c3-legend-background {
+  opacity: 0.75;
+  fill: white;
+  stroke: lightgray;
+  stroke-width: 1
+}
+
+/*-- Tooltip --*/
+
+.c3-tooltip-container {
+  z-index: 10;
+}
+.c3-tooltip {
+  border-collapse:collapse;
+  border-spacing:0;
+  background-color:#fff;
+  empty-cells:show;
+  -webkit-box-shadow: 7px 7px 12px -9px rgb(119,119,119);
+     -moz-box-shadow: 7px 7px 12px -9px rgb(119,119,119);
+          box-shadow: 7px 7px 12px -9px rgb(119,119,119);
+  opacity: 0.9;
+}
+.c3-tooltip tr {
+  border:1px solid #CCC;
+}
+.c3-tooltip th {
+  background-color: #aaa;
+  font-size:14px;
+  padding:2px 5px;
+  text-align:left;
+  color:#FFF;
+}
+.c3-tooltip td {
+  font-size:13px;
+  padding: 3px 6px;
+  background-color:#fff;
+  border-left:1px dotted #999;
+}
+.c3-tooltip td > span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+}
+.c3-tooltip td.value{
+  text-align: right;
+}
+
+.c3-area {
+  stroke-width: 0;
+  opacity: 0.2;
+}
+
+.c3-chart-arcs .c3-chart-arcs-background {
+  fill: #e0e0e0;
+  stroke: none;
+}
+.c3-chart-arcs .c3-chart-arcs-gauge-unit {
+  fill: #000;
+  font-size: 16px;
+}
+.c3-chart-arcs .c3-chart-arcs-gauge-max {
+  fill: #777;
+}
+.c3-chart-arcs .c3-chart-arcs-gauge-min {
+  fill: #777;
+}
+
+.c3-chart-arc .c3-gauge-value {
+  fill: #000;
+/*  font-size: 28px !important;*/
+}
+
     </style>
 
 </head>
@@ -116,7 +339,7 @@
                 {% for test in tests %}
                     <li><a href="#test-{{ test.definition.uuid }}" data-toggle="tab">
                         {% if test.definition.title %}
-                            {{ test.definition.title|title }}
+                            {{ test.definition.title }}
                         {% else %}
                             Test {{ test.definition }}
                         {% endif %}
@@ -165,6 +388,33 @@
                                 <h4>Agent {{ result_per_agent.agent.id }}
                                     ({{ result_per_agent.agent.ip }})</h4>
 
+                                {% if result_per_agent.samples %}
+{#                                    <div>{{ result_per_agent.samples }}</div>#}
+                                    <div id="chart-{{ result_per_agent.uuid }}"></div>
+                                    <script type="application/javascript">
+                                        var chart = c3.generate({
+                                            bindto: '#chart-{{ result_per_agent.uuid }}',
+                                            data: {
+                                                x: 'x',
+                                                columns: [
+{#                                                    {% set first_row = first(result_per_agent.samples) %}#}
+{#                                                    ['x', {{ first_row|map(attribute='time')|join(', ') }}],#}
+
+                                                    {% for thread, array in result_per_agent.samples.items() %}
+                                                        ['x', {{ array|map(attribute='time')|join(', ') }}],
+                                                        ['thread{{ thread }}', {{ array|map(attribute='bandwidth')|join(', ') }}]
+                                                    {% endfor %}
+                                                ],
+                                                types: { thread3: 'area' }
+                                            },
+                                            axis: {
+                                                x: { label: 'time' },
+                                                y: { label: 'Bandwidth, bps' }
+                                            }
+                                        });
+                                    </script>
+                                {% endif %}
+
                                 {% if result_per_agent.command %}
                                     <h5>Command:</h5>
                                     <pre>{{ result_per_agent.command }}</pre>
@@ -188,11 +438,5 @@
     </div>
 </div>
 
-<!-- Bootstrap core JavaScript
-================================================== -->
-<!-- Placed at the end of the document so the pages load faster -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<!-- Latest compiled and minified JavaScript -->
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 </body>
 </html>

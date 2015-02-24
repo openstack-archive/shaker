@@ -17,8 +17,8 @@ To install:
  3. ``shaker-image-builder`` - builds image for agent VMs inside OpenStack
 
 Note: image builder is able to create Nova flavor optimized for the image and this requires
- admin user privileges. However if the flavor is already exists then it can be provided via
- ``flavor-name`` config parameter and the tool executed from an ordinary user.
+admin user privileges. However if the flavor is already exists then it can be provided via
+``flavor-name`` config parameter and the tool executed from an ordinary user.
 
 How to run
 ----------
