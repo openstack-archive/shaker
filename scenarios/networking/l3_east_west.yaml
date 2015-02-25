@@ -1,0 +1,24 @@
+description:
+  This scenario launches pairs of in the different networks connected to one
+  router (L3 east-west)
+
+deployment:
+  template: scenarios/networking/l3_east_west.hot
+  vm_accommodation: [pair, single_room]
+
+execution:
+  tests:
+  -
+    title: iperf TCP test
+    class: iperf_graph
+    time: 60
+    mss: 536
+  -
+    class: iperf
+    udp: 1
+    mss: 536
+    threads: 5
+  -
+    class: netperf
+    method: TCP_STREAM
+    time: 60

@@ -12,11 +12,12 @@ execution:
     title: Iperf TCP test
     class: iperf_graph
     time: 60
+    mss: 1300
   -
     title: Iperf UDP 5 threads
     class: iperf
     udp: 1
-    mss: 1406
+    mss: 1300
     threads: 5
   -
     title: Netperf TCP_STREAM

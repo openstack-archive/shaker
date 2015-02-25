@@ -81,6 +81,10 @@ class IperfExecutor(BaseExecutor):
                      interval=interval and '--interval %s' % interval or ''))
 
 
+def _calc_stats(array):
+    return dict(max=max(array), min=min(array), avg=sum(array) / len(array))
+
+
 class IperfGraphExecutor(IperfExecutor):
     def get_command(self):
         self.test_definition['css'] = True
@@ -91,32 +95,30 @@ class IperfGraphExecutor(IperfExecutor):
         result = super(IperfGraphExecutor, self).process_reply(message)
 
         samples = collections.defaultdict(list)
+        streams = {}
+        stream_count = 0
 
         for row in csv.reader(result['stdout'].split('\n')):
             if row:
                 thread = row[5]
-                samples[thread].append(dict(
-                    time=float(row[6].split('-')[1]),
-                    transfer=int(row[7]),
-                    bandwidth=int(row[8]),
-                ))
+                if thread not in streams:
+                    streams[thread] = stream_count
+                    stream_count += 1
+
+                samples['time'].append(float(row[6].split('-')[1]))
+                samples['bandwidth_%s' % streams[thread]].append(
+                    float(row[8]) / 1024 / 1024)
+
+        # the last line is summary, remove its items
+        for arr in samples.values():
+            arr.pop()
 
         result['samples'] = samples
 
-        # calc max, min, avg per thread
-        bandwidth_max = collections.defaultdict(float)
-        bandwidth_min = collections.defaultdict(float)
-        bandwidth_avg = collections.defaultdict(float)
-
-        for thread, data in samples.items():
-            arr = [s['bandwidth'] for s in samples[thread]]
-            bandwidth_max[thread] = max(arr)
-            bandwidth_min[thread] = min(arr)
-            bandwidth_avg[thread] = sum(arr) / len(arr)
-
-        result['bandwidth_max'] = bandwidth_max
-        result['bandwidth_min'] = bandwidth_min
-        result['bandwidth_avg'] = bandwidth_avg
+        # todo calculate stats correctly for multiple threads
+        for stream in streams.values():
+            result['stats'] = _calc_stats(
+                samples['bandwidth_%s' % stream])
 
         return result
 
