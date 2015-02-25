@@ -36,25 +36,23 @@ class TestIperfGraphExecutor(testtools.TestCase):
         executor = executors.IperfGraphExecutor({}, AGENT)
         message = {
             'stdout': """
-20150224134955,172.1.7.77,47351,172.1.76.77,5001,3,0.0-1.0,500686848,4005494784
-20150224134956,172.1.7.77,47351,172.1.76.77,5001,3,1.0-2.0,516055040,4128440320
-20150224134957,172.1.7.77,47351,172.1.76.77,5001,3,2.0-3.0,508436480,4067491840
+20150224134955,172.1.7.77,47351,172.1.76.77,5001,3,0.0-1.0,50068684,399507456
+20150224134956,172.1.7.77,47351,172.1.76.77,5001,3,1.0-2.0,51605504,412090368
+20150224134957,172.1.7.77,47351,172.1.76.77,5001,3,2.0-3.0,50843648,405798912
+20150224134957,172.1.7.77,47351,172.1.76.77,5001,3,0.0-3.0,150843648,400000002
 """
         }
         expected = {
             'samples': {
-                '3': [
-                    dict(time=1.0, transfer=500686848, bandwidth=4005494784),
-                    dict(time=2.0, transfer=516055040, bandwidth=4128440320),
-                    dict(time=3.0, transfer=508436480, bandwidth=4067491840),
-                ]
+                'time': [1.0, 2.0, 3.0],
+                'bandwidth_0': [381.0, 393.0, 387.0],
             },
-            'bandwidth_max': {'3': 4128440320},
-            'bandwidth_min': {'3': 4005494784},
-            'bandwidth_avg': {'3': (4005494784 + 4128440320 + 4067491840) / 3},
+            'stats': {
+                'max': 393.0,
+                'min': 381.0,
+                'avg': (381.0 + 393.0 + 387.0) / 3
+            },
         }
         reply = executor.process_reply(message)
         self.assertEqual(expected['samples'], reply['samples'])
-        self.assertEqual(expected['bandwidth_max'], reply['bandwidth_max'])
-        self.assertEqual(expected['bandwidth_min'], reply['bandwidth_min'])
-        self.assertEqual(expected['bandwidth_avg'], reply['bandwidth_avg'])
+        self.assertEqual(expected['stats'], reply['stats'])

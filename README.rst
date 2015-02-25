@@ -7,9 +7,9 @@ Installation
 ------------
 
 The tool consists of a single server running on master node and set of dynamically
- provisioned agents. In order to run the server needs to know OpenStack parameters
- (credentials, auth_url), they can be set via environment (e.g. by sourcing openrc file)
- or via parameters.
+provisioned agents. In order to run the server needs to know OpenStack parameters
+(credentials, auth_url), they can be set via environment (e.g. by sourcing openrc file)
+or via parameters.
 
 To install:
  1. ``git clone git://git.openstack.org/stackforge/shaker``

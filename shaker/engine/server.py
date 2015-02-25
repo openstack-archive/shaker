@@ -178,13 +178,13 @@ def execute(execution, agents):
             test_case_result = quorum.run_test_case(executors)
             values = test_case_result.values()
             for v in values:
-                v['uuid'] = uuid.uuid4()
+                v['uuid'] = str(uuid.uuid4())
             results_per_iteration.append({
                 'agents': selected_agents,
                 'results_per_agent': values,
             })
 
-        test['uuid'] = uuid.uuid4()
+        test['uuid'] = str(uuid.uuid4())
         result.append({
             'results_per_iteration': results_per_iteration,
             'definition': test,

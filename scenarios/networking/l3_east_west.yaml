@@ -1,25 +1,26 @@
 description:
-  This scenario launches pairs of VMs in the same private network. Every VM is
-  hosted on a separate compute node.
+  This scenario launches pairs of in the different networks connected to one
+  router (L3 east-west)
 
 deployment:
-  template: scenarios/networking/same_net.hot
+  template: scenarios/networking/l3_east_west.hot
   vm_accommodation: [pair, single_room]
 
 execution:
   tests:
   -
-    title: Iperf TCP test
+    title: Iperf TCP
     class: iperf_graph
     time: 60
+    mss: 1300
   -
     title: Iperf UDP 5 threads
     class: iperf
     udp: 1
-    mss: 1406
+    mss: 1300
     threads: 5
   -
-    title: Netperf TCP_STREAM
+    title: Netperf TCP
     class: netperf
     method: TCP_STREAM
     time: 60
