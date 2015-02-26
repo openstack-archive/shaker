@@ -73,6 +73,7 @@ resources:
             wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
             sudo pip install pbr netperf-wrapper
             git clone git://git.openstack.org/stackforge/shaker && cd shaker && sudo pip install -r requirements.txt && sudo python setup.py develop
+            F=/etc/network/if-up.d/mtu && echo -e '#!/bin/sh\nip link set mtu 1458 dev eth0' | sudo tee $F && sudo chmod +x $F
             sudo shutdown -P -f now
           params:
             "$UNUSED": foo
