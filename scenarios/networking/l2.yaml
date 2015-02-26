@@ -3,7 +3,7 @@ description:
   hosted on a separate compute node.
 
 deployment:
-  template: scenarios/networking/same_net.hot
+  template: scenarios/networking/l2.hot
   vm_accommodation: [pair, single_room]
 
 execution:
