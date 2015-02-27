@@ -13,12 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+import time
+
 from shaker.openstack.clients import glance
 from shaker.openstack.clients import heat
 from shaker.openstack.clients import keystone
 from shaker.openstack.clients import neutron
 from shaker.openstack.clients import nova
 
+
+# As of now only Nova and Neutron clients support Keystone sessions.
+# Thus the only way to create clients is from keystone client instance
+# and auth token. The token gets expired in an hour and there is no
+# way to automatically refresh it. So the current implementation is to
+# recreate keystone client from scratch
 
 CLIENT_MAKERS = {
     'glance': glance.create_client,
@@ -27,22 +36,49 @@ CLIENT_MAKERS = {
     'nova': nova.create_client,
 }
 
+KEYSTONE_AUTH_EXPIRATION = 60
+
+
+class OpenStackClientProxy(object):
+    def __init__(self, keystone_creator, client_creator):
+        self.keystone_creator = keystone_creator
+        self.client_creator = client_creator
+        self.last_update_time = 0
+
+    def __getattribute__(self, name):
+        if name in ['keystone_creator', 'client_creator',
+                    'client', 'last_update_time']:
+            return super(OpenStackClientProxy, self).__getattribute__(name)
+        else:
+            now = int(time.time())
+            if now > self.last_update_time + KEYSTONE_AUTH_EXPIRATION:
+                self.last_update_time = now
+                self.client = self.client_creator(
+                    keystone_client=self.keystone_creator())
+            return self.client.__getattribute__(name)
+
 
 class OpenStackClient(object):
     def __init__(self, username, password, tenant_name, auth_url, region_name):
-        super(OpenStackClient, self).__init__()
-
         self.username = username
         self.password = password
         self.tenant_name = tenant_name
         self.auth_url = auth_url
         self.region_name = region_name or 'RegionOne'
+        self.proxies = {}
 
     def __getattribute__(self, name):
         if name in CLIENT_MAKERS:
-            keystone_client = keystone.create_keystone_client(
+            if name in self.proxies:
+                return self.proxies[name]
+            keystone_creator = functools.partial(
+                keystone.create_keystone_client,
                 username=self.username, password=self.password,
                 tenant_name=self.tenant_name, auth_url=self.auth_url)
-            return CLIENT_MAKERS[name](keystone_client, self.region_name)
+            client_creator = functools.partial(
+                CLIENT_MAKERS[name], os_region_name=self.region_name)
+            proxy = OpenStackClientProxy(keystone_creator, client_creator)
+            self.proxies[name] = proxy
+            return proxy
         else:
             return super(OpenStackClient, self).__getattribute__(name)
