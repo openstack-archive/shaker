@@ -34,8 +34,10 @@ def create_client(keystone_client, os_region_name):
     return client
 
 
-def get_compute_nodes(nova_client):
-    return nova_client.services.list(binary='nova-compute')
+def get_available_compute_nodes(nova_client):
+        return [svc.host
+                for svc in nova_client.services.list(binary='nova-compute')
+                if svc.state == 'up']
 
 
 def is_flavor_exists(nova_client, flavor_name):

@@ -32,13 +32,17 @@ class OpenStackClient(object):
     def __init__(self, username, password, tenant_name, auth_url, region_name):
         super(OpenStackClient, self).__init__()
 
-        self.keystone_client = keystone.create_keystone_client(
-            username=username, password=password, tenant_name=tenant_name,
-            auth_url=auth_url)
+        self.username = username
+        self.password = password
+        self.tenant_name = tenant_name
+        self.auth_url = auth_url
         self.region_name = region_name or 'RegionOne'
 
     def __getattribute__(self, name):
         if name in CLIENT_MAKERS:
-            return CLIENT_MAKERS[name](self.keystone_client, self.region_name)
+            keystone_client = keystone.create_keystone_client(
+                username=self.username, password=self.password,
+                tenant_name=self.tenant_name, auth_url=self.auth_url)
+            return CLIENT_MAKERS[name](keystone_client, self.region_name)
         else:
             return super(OpenStackClient, self).__getattribute__(name)

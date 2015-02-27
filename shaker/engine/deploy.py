@@ -19,9 +19,9 @@ import jinja2
 
 from shaker.engine import utils
 from shaker.openstack.clients import heat
-from shaker.openstack.clients import keystone
 from shaker.openstack.clients import neutron
 from shaker.openstack.clients import nova
+from shaker.openstack.clients import openstack
 from shaker.openstack.common import log as logging
 
 
@@ -32,31 +32,24 @@ class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
                  os_region_name, server_endpoint, external_net, flavor_name,
                  image_name):
-        self.keystone_client = keystone.create_keystone_client(
+        self.openstack_client = openstack.OpenStackClient(
             username=os_username, password=os_password,
-            tenant_name=os_tenant_name, auth_url=os_auth_url)
-        self.heat_client = heat.create_client(
-            self.keystone_client, os_region_name)
-        self.nova_client = nova.create_client(
-            self.keystone_client, os_region_name)
-        self.neutron_client = neutron.create_client(
-            self.keystone_client, os_region_name)
+            tenant_name=os_tenant_name, auth_url=os_auth_url,
+            region_name=os_region_name)
 
         self.server_endpoint = server_endpoint
         self.external_net = (external_net or
-                             neutron.choose_external_net(self.neutron_client))
+                             neutron.choose_external_net(
+                                 self.openstack_client.neutron))
         self.flavor_name = flavor_name
         self.image_name = image_name
 
         self.stack_name = 'shaker_%s' % uuid.uuid4()
         self.stack_deployed = False
 
-    def _get_compute_nodes(self):
-        return [svc.host for svc in nova.get_compute_nodes(self.nova_client)
-                if svc.state == 'up']
-
     def _make_groups(self, vm_accommodation):
-        compute_nodes = self._get_compute_nodes()
+        compute_nodes = nova.get_available_compute_nodes(
+            self.openstack_client.nova)
         cn_count = len(compute_nodes)
         iterations = cn_count
         if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
@@ -163,14 +156,16 @@ class Deployment(object):
         }
         LOG.debug('Creating stack with parameters: %s', stack_params)
 
-        stack = self.heat_client.stacks.create(**stack_params)['stack']
+        stack = self.openstack_client.heat.stacks.create(
+            **stack_params)['stack']
         LOG.info('New stack: %s', stack)
 
-        heat.wait_stack_completion(self.heat_client, stack['id'])
+        heat.wait_stack_completion(self.openstack_client.heat, stack['id'])
         self.stack_deployed = True
 
         # get info about deployed objects
-        outputs = heat.get_stack_outputs(self.heat_client, stack['id'])
+        outputs = heat.get_stack_outputs(self.openstack_client.heat,
+                                         stack['id'])
 
         # convert groups into agents
         return self._make_agents(groups, outputs)
@@ -191,4 +186,4 @@ class Deployment(object):
     def cleanup(self):
         if self.stack_deployed:
             LOG.debug('Cleaning up the stack: %s', self.stack_name)
-            self.heat_client.stacks.delete(self.stack_name)
+            self.openstack_client.heat.stacks.delete(self.stack_name)
