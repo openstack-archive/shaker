@@ -29,11 +29,13 @@ from shaker.openstack.clients import nova
 # way to automatically refresh it. So the current implementation is to
 # recreate keystone client from scratch
 
-CLIENT_MAKERS = {
-    'glance': glance.create_client,
-    'heat': heat.create_client,
+MODERN_CLIENT_MAKERS = {
     'neutron': neutron.create_client,
     'nova': nova.create_client,
+}
+OLD_CLIENT_MAKERS = {
+    'glance': glance.create_client,
+    'heat': heat.create_client,
 }
 
 KEYSTONE_AUTH_EXPIRATION = 60
@@ -60,25 +62,33 @@ class OpenStackClientProxy(object):
 
 class OpenStackClient(object):
     def __init__(self, username, password, tenant_name, auth_url, region_name):
-        self.username = username
-        self.password = password
-        self.tenant_name = tenant_name
-        self.auth_url = auth_url
         self.region_name = region_name or 'RegionOne'
-        self.proxies = {}
+        self._osc_cache = {}
+        self.keystone_creator = functools.partial(
+            keystone.create_keystone_client,
+            username=username, password=password,
+            tenant_name=tenant_name, auth_url=auth_url)
+        self.session_creator = functools.partial(
+            keystone.create_keystone_session,
+            username=username, password=password,
+            tenant_name=tenant_name, auth_url=auth_url)
 
     def __getattribute__(self, name):
-        if name in CLIENT_MAKERS:
-            if name in self.proxies:
-                return self.proxies[name]
-            keystone_creator = functools.partial(
-                keystone.create_keystone_client,
-                username=self.username, password=self.password,
-                tenant_name=self.tenant_name, auth_url=self.auth_url)
+        if name != '_osc_cache' and name in self._osc_cache:
+            return self._osc_cache[name]
+
+        client = None
+        if name in MODERN_CLIENT_MAKERS:
+            session = self.session_creator()
+            client = MODERN_CLIENT_MAKERS[name](session, self.region_name)
+        elif name in OLD_CLIENT_MAKERS:
             client_creator = functools.partial(
-                CLIENT_MAKERS[name], os_region_name=self.region_name)
-            proxy = OpenStackClientProxy(keystone_creator, client_creator)
-            self.proxies[name] = proxy
-            return proxy
+                OLD_CLIENT_MAKERS[name], os_region_name=self.region_name)
+            client = OpenStackClientProxy(self.keystone_creator,
+                                          client_creator)
+
+        if client:
+            self._osc_cache[name] = client
+            return client
         else:
             return super(OpenStackClient, self).__getattribute__(name)

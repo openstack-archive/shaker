@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from keystoneclient.auth.identity import v2 as auth_v2
 from keystoneclient import discover as keystone_discover
+from keystoneclient import session
 from keystoneclient.v2_0 import client as keystone_v2
 from keystoneclient.v3 import client as keystone_v3
 
@@ -28,3 +30,8 @@ def create_keystone_client(**kwargs):
             return keystone_v3.Client(**kwargs)
     raise Exception(
         'Failed to discover keystone version for url %(auth_url)s.', **kwargs)
+
+
+def create_keystone_session(**kwargs):
+    auth = auth_v2.Password(**kwargs)
+    return session.Session(auth=auth)

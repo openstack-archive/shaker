@@ -25,13 +25,9 @@ LOG = logging.getLogger(__name__)
 NOVA_VERSION = '2'
 
 
-def create_client(keystone_client, os_region_name):
-    compute_api_url = keystone_client.service_catalog.url_for(
-        service_type='compute', region_name=os_region_name)
-    client = nova_client_pkg.Client(NOVA_VERSION,
-                                    auth_token=keystone_client.auth_token)
-    client.set_management_url(compute_api_url)
-    return client
+def create_client(keystone_session, os_region_name):
+    return nova_client_pkg.Client(NOVA_VERSION, session=keystone_session,
+                                  region_name=os_region_name)
 
 
 def get_available_compute_nodes(nova_client):
