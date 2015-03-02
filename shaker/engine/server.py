@@ -227,7 +227,7 @@ def main():
     agents = deployment.deploy(scenario['deployment'])
 
     if not agents:
-        LOG.info('No agents deployed. Exit.')
+        LOG.info('No agents deployed. Terminating.')
         return
 
     LOG.debug('Agents: %s', agents)

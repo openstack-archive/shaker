@@ -82,7 +82,7 @@ resources:
 outputs:
 {% for group in groups %}
   {{ group.master.name }}_ip:
-    value: { get_attr: [ {{ group.master.name }}, first_address ] }
+    value: { get_attr: [ {{ group.master.name }}, networks, private_net, 0 ] }
   {{ group.master.name }}_instance_name:
     value: { get_attr: [ {{ group.master.name }}, instance_name ] }
 {% endfor %}

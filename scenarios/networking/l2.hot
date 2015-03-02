@@ -108,7 +108,6 @@ resources:
           template: |
             #!/bin/sh
             screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
-            screen -dmS sudo nice -n -20 iperf -s --nodelay
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
@@ -125,11 +124,11 @@ resources:
 outputs:
 {% for group in groups %}
   {{ group.master.name }}_ip:
-    value: { get_attr: [ {{ group.master.name }}, first_address ] }
+    value: { get_attr: [ {{ group.master.name }}, networks, { get_param: private_net_name }, 0 ] }
   {{ group.master.name }}_instance_name:
     value: { get_attr: [ {{ group.master.name }}, instance_name ] }
   {{ group.slave.name }}_ip:
-    value: { get_attr: [ {{ group.slave.name }}, first_address ] }
+    value: { get_attr: [ {{ group.slave.name }}, networks, { get_param: private_net_name }, 0 ] }
   {{ group.slave.name }}_instance_name:
     value: { get_attr: [ {{ group.slave.name }}, instance_name ] }
 {% endfor %}

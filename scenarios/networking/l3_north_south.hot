@@ -1,7 +1,7 @@
 heat_template_version: 2013-05-23
 
 description: >
-  HOT template to create a new neutron network plus a router to the public
+  HOT template to create a new neutron network plus a north_router to the public
   network, and for deploying servers into the new network. The template also
   assigns floating IP addresses to each server so they are routable from the
   public network.
@@ -27,19 +27,19 @@ parameters:
     description: Server endpoint address
 
 resources:
-  private_net:
+  north_private_net:
     type: OS::Neutron::Net
     properties:
-      name: two_routers_private_net
+      name: north_private_net_name
 
-  private_subnet:
+  north_private_subnet:
     type: OS::Neutron::Subnet
     properties:
-      network_id: { get_resource: private_net }
+      network_id: { get_resource: north_private_net }
       cidr: 10.1.0.0/16
       dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
 
-  router:
+  north_router:
     type: OS::Neutron::Router
     properties:
       external_gateway_info:
@@ -48,22 +48,22 @@ resources:
   router_interface:
     type: OS::Neutron::RouterInterface
     properties:
-      router_id: { get_resource: router }
-      subnet_id: { get_resource: private_subnet }
+      router_id: { get_resource: north_router }
+      subnet_id: { get_resource: north_private_subnet }
 
-  private_net_2:
+  south_private_net:
     type: OS::Neutron::Net
     properties:
-      name: two_routers_private_net_2
+      name: south_private_net_name
 
-  private_subnet_2:
+  south_private_subnet:
     type: OS::Neutron::Subnet
     properties:
-      network_id: { get_resource: private_net_2 }
+      network_id: { get_resource: south_private_net }
       cidr: 10.2.0.0/16
       dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
 
-  router_2:
+  south_router:
     type: OS::Neutron::Router
     properties:
       external_gateway_info:
@@ -72,8 +72,8 @@ resources:
   router_interface_2:
     type: OS::Neutron::RouterInterface
     properties:
-      router_id: { get_resource: router_2 }
-      subnet_id: { get_resource: private_subnet_2 }
+      router_id: { get_resource: south_router }
+      subnet_id: { get_resource: south_private_subnet }
 
   server_security_group:
     type: OS::Neutron::SecurityGroup
@@ -114,9 +114,9 @@ resources:
   {{ group.master.name }}_port:
     type: OS::Neutron::Port
     properties:
-      network_id: { get_resource: private_net }
+      network_id: { get_resource: north_private_net }
       fixed_ips:
-        - subnet_id: { get_resource: private_subnet }
+        - subnet_id: { get_resource: north_private_subnet }
       security_groups: [{ get_resource: server_security_group }]
 
   {{ group.slave.name }}:
@@ -134,16 +134,15 @@ resources:
           template: |
             #!/bin/sh
             screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
-            screen -dmS sudo nice -n -20 iperf -s --nodelay
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
 
   {{ group.slave.name }}_port:
     type: OS::Neutron::Port
     properties:
-      network_id: { get_resource: private_net_2 }
+      network_id: { get_resource: south_private_net }
       fixed_ips:
-        - subnet_id: { get_resource: private_subnet_2 }
+        - subnet_id: { get_resource: south_private_subnet }
       security_groups: [{ get_resource: server_security_group }]
 
   {{ group.slave.name }}_floating_ip:
@@ -157,7 +156,7 @@ resources:
 outputs:
 {% for group in groups %}
   {{ group.master.name }}_ip:
-    value: { get_attr: [ {{ group.master.name }}, first_address ] }
+    value: { get_attr: [ {{ group.master.name }}, networks, north_private_net, 0 ] }
   {{ group.master.name }}_instance_name:
     value: { get_attr: [ {{ group.master.name }}, instance_name ] }
   {{ group.slave.name }}_ip:
