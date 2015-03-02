@@ -27,9 +27,18 @@ class TestIperfGraphExecutor(testtools.TestCase):
     def test_get_command(self):
         executor = executors.IperfGraphExecutor({}, AGENT)
 
-        expected = ('sudo nice -n -20 iperf --client %s --format m '
-                    '--len 8k --nodelay --time 60 --parallel 1 '
-                    '-y C --interval 1') % IP
+        expected = ('sudo nice -n -20 iperf --client %s --format m --nodelay '
+                    '--len 8k --time 60 --parallel 1 '
+                    '--reportstyle C --interval 1') % IP
+        self.assertEqual(expected, executor.get_command())
+
+    def test_get_command_udp(self):
+        executor = executors.IperfGraphExecutor(
+            {'udp': True, 'time': 30}, AGENT)
+
+        expected = ('sudo nice -n -20 iperf --client %s --format m --nodelay '
+                    '--len 8k --udp --time 30 --parallel 1 '
+                    '--reportstyle C --interval 1') % IP
         self.assertEqual(expected, executor.get_command())
 
     def test_process_reply(self):

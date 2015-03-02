@@ -22,6 +22,19 @@ from shaker.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 
+class CommandLine(object):
+    def __init__(self, command):
+        self.commands = [command]
+
+    def add(self, param_name, param_value=None):
+        self.commands.append('%s' % param_name)
+        if param_value:
+            self.commands.append(str(param_value))
+
+    def make(self):
+        return ' '.join(self.commands)
+
+
 class BaseExecutor(object):
     def __init__(self, test_definition, agent):
         super(BaseExecutor, self).__init__()
@@ -47,11 +60,11 @@ class ShellExecutor(BaseExecutor):
 
 class NetperfExecutor(BaseExecutor):
     def get_command(self):
-        target = self.agent['slave']['ip']
-        return ('netperf -H %(target)s -l %(time)s -t %(method)s' %
-                dict(target=self.test_definition.get('target') or target,
-                     method=self.test_definition.get('method') or 'TCP_STREAM',
-                     time=self.test_definition.get('time') or 60))
+        cmd = CommandLine('netperf')
+        cmd.add('-H', self.agent['slave']['ip'])
+        cmd.add('-l', self.test_definition.get('time') or 60)
+        cmd.add('-t', self.test_definition.get('method') or 'TCP_STREAM')
+        return cmd.make()
 
 
 class NetperfWrapperExecutor(BaseExecutor):
@@ -64,21 +77,22 @@ class NetperfWrapperExecutor(BaseExecutor):
 
 class IperfExecutor(BaseExecutor):
     def get_command(self):
-        target = self.agent['slave']['ip']
-        mss = self.test_definition.get('mss')
-        interval = self.test_definition.get('interval')
-        return ('sudo nice -n -20 iperf --client %(target)s --format m'
-                '%(mss)s --len %(bs)s --nodelay'
-                '%(udp)s --time %(time)s --parallel %(threads)s'
-                '%(css)s %(interval)s' %
-                dict(target=self.test_definition.get('target') or target,
-                     mss=mss and ' --mss %s' % mss or '',
-                     bs=self.test_definition.get('buffer_size') or '8k',
-                     udp=self.test_definition.get('udp') and ' --udp' or '',
-                     threads=self.test_definition.get('threads') or 1,
-                     time=self.test_definition.get('time') or 60,
-                     css=self.test_definition.get('css') and ' -y C' or '',
-                     interval=interval and '--interval %s' % interval or ''))
+        cmd = CommandLine('sudo nice -n -20 iperf')
+        cmd.add('--client', self.agent['slave']['ip'])
+        cmd.add('--format', 'm')
+        cmd.add('--nodelay')
+        if self.test_definition.get('mss'):
+            cmd.add('--mss', self.test_definition.get('mss'))
+        cmd.add('--len', self.test_definition.get('buffer_size') or '8k')
+        if self.test_definition.get('udp'):
+            cmd.add('--udp')
+        cmd.add('--time', self.test_definition.get('time') or 60)
+        cmd.add('--parallel', self.test_definition.get('threads') or 1)
+        if self.test_definition.get('csv'):
+            cmd.add('--reportstyle', 'C')
+        if self.test_definition.get('interval'):
+            cmd.add('--interval', self.test_definition.get('interval'))
+        return cmd.make()
 
 
 def _calc_stats(array):
@@ -87,7 +101,7 @@ def _calc_stats(array):
 
 class IperfGraphExecutor(IperfExecutor):
     def get_command(self):
-        self.test_definition['css'] = True
+        self.test_definition['csv'] = True
         self.test_definition['interval'] = '1'
         return super(IperfGraphExecutor, self).get_command()
 
