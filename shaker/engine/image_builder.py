@@ -34,7 +34,9 @@ def init():
     # init conf and logging
     conf = cfg.CONF
     conf.register_cli_opts(config.OPENSTACK_OPTS)
+    conf.register_cli_opts(config.IMAGE_BUILDER_OPTS)
     conf.register_opts(config.OPENSTACK_OPTS)
+    conf.register_opts(config.IMAGE_BUILDER_OPTS)
     conf(project='shaker')
 
     logging.setup('shaker')
@@ -68,7 +70,7 @@ def build_image():
             'stack_name': 'shaker_%s' % uuid.uuid4(),
             'parameters': {'external_net': external_net,
                            'flavor': flavor_name},
-            'template': utils.read_file('shaker/engine/installer.yaml'),
+            'template': utils.read_file(cfg.CONF.image_builder_template),
         }
 
         stack = openstack_client.heat.stacks.create(**stack_params)['stack']

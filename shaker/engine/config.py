@@ -64,8 +64,8 @@ SERVER_OPTS = [
                help='Scenario file name'),
 
     cfg.StrOpt('report-template',
-               default='shaker/engine/report.template',
-               help='Report template file name (Jinja format)'),
+               default='shaker/resources/report_template.html',
+               help='Report template in Jinja format'),
     cfg.StrOpt('report',
                help='Report file name. If not specified print to stdout'),
 ]
@@ -76,9 +76,16 @@ AGENT_OPTS = [
                help='Agent unique id'),
 ]
 
+IMAGE_BUILDER_OPTS = [
+    cfg.StrOpt('image-builder-template',
+               default='shaker/resources/image_builder_template.yaml',
+               help='Heat template for the image builder.'),
+]
+
 
 def list_opts():
     yield (None, copy.deepcopy(COMMON_OPTS))
     yield (None, copy.deepcopy(OPENSTACK_OPTS))
     yield (None, copy.deepcopy(SERVER_OPTS))
     yield (None, copy.deepcopy(AGENT_OPTS))
+    yield (None, copy.deepcopy(IMAGE_BUILDER_OPTS))
