@@ -16,9 +16,8 @@
 import os
 import random
 
+from oslo_log import log as logging
 import six
-
-from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

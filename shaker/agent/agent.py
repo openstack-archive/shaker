@@ -18,10 +18,10 @@ import time
 
 from oslo_concurrency import processutils
 from oslo_config import cfg
+from oslo_log import log as logging
 import zmq
 
 from shaker.engine import config
-from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

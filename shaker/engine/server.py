@@ -17,6 +17,7 @@ import time
 import uuid
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import yaml
 import zmq
 
@@ -25,7 +26,6 @@ from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
 from shaker.engine import report
 from shaker.engine import utils
-from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

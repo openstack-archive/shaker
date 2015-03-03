@@ -16,6 +16,7 @@
 import uuid
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from shaker.engine import config
 from shaker.engine import utils
@@ -24,7 +25,6 @@ from shaker.openstack.clients import heat
 from shaker.openstack.clients import neutron
 from shaker.openstack.clients import nova
 from shaker.openstack.clients import openstack
-from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)
