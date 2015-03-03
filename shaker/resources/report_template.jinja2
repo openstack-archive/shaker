@@ -349,9 +349,9 @@
                         {% set cnt = result_per_iteration.agents|length %}
                         <li class="col-md-offset-1"><a href="#test-{{ test.definition.uuid }}-{{ cnt }}" data-toggle="tab">
                             {% if cnt == 1 %}
-                                Single Thread
+                                full iteration
                             {% else %}
-                                {{ cnt }} Threads
+                                {{ cnt }} threads
                             {% endif %}
                         </a></li>
                     {% endfor %}
@@ -368,11 +368,13 @@
                     <h4>Agents:</h4>
                     <ul>
                         {% for agent in report.agents %}
-                            {% if agent.mode == 'master' %}
-                            <li>Master <i>{{ agent.id }}</i>, IP: <i>{{ agent.ip }}</i>
+                            {% if agent.mode != 'slave' %}
+                            <li>Master <i>{{ agent.id }}</i>, IP: <i>{{ agent.ip }}</i>,
+                                node: <i>{{ agent.node }}</i>, instance: <i>{{ agent.instance_name }}</i>
                                 {% if agent.slave %}
                                     <ul>
-                                        <li>Slave <i>{{ agent.slave.id }}</i>, IP: <i>{{ agent.slave.ip }}</i>
+                                        <li>Slave <i>{{ agent.slave.id }}</i>, IP: <i>{{ agent.slave.ip }}</i>,
+                                            node: <i>{{ agent.slave.node }}</i>, instance: <i>{{ agent.slave.instance_name }}</i>
                                     </ul>
                                 {% endif %}
                             </li>
@@ -391,6 +393,10 @@
                     {% for result_per_iteration in test.results_per_iteration %}
                         {% set cnt = result_per_iteration.agents|length %}
                         <div id="test-{{ test.definition.uuid }}-{{ cnt }}" class="tab-pane">
+
+                            <h4>Iteration Summary</h4>
+
+                            {####  PER-AGENT DATA  ####}
                             {% for result_per_agent in result_per_iteration.results_per_agent %}
                                 <h4>Agent {{ result_per_agent.agent.id }}
                                     ({{ result_per_agent.agent.ip }})</h4>
@@ -399,9 +405,9 @@
                                     <h5>Traffic stats</h5>
 
                                     <dl class="dl-horizontal">
-                                      <dt>Max bandwidth</dt><dd>{{ result_per_agent.stats.max|round(3) }} Mbits/s</dd>
-                                      <dt>Min bandwidth</dt><dd>{{ result_per_agent.stats.min|round(3) }} Mbits/s</dd>
-                                      <dt>Average bandwidth</dt><dd>{{ result_per_agent.stats.avg|round(3) }} Mbits/s</dd>
+                                      <dt>Max bandwidth</dt><dd>{{ result_per_agent.stats.max / 1024 / 1024|round(2) }} Mbits/s</dd>
+                                      <dt>Min bandwidth</dt><dd>{{ result_per_agent.stats.min / 1024 / 1024|round(2) }} Mbits/s</dd>
+                                      <dt>Mean bandwidth</dt><dd>{{ result_per_agent.stats.mean / 1024 / 1024|round(2) }} Mbits/s</dd>
                                     </dl>
 
                                     <div id="chart-{{ result_per_agent.uuid }}"></div>
@@ -411,14 +417,13 @@
                                             bindto: '#chart-{{ result_per_agent.uuid }}',
                                             data: {
                                                 x: 'time',
-                                                columns: [
-                                                    {% set first_item = True %}
-                                                    {% for stream, array in result_per_agent.samples.items() %}
-                                                        {% if not first_item %},{% endif %} {% set first_item = False %}
-                                                        ['{{ stream }}', {{ array|join(', ') }}]
+                                                rows: [
+                                                    ['time', 'bandwidth']
+                                                    {% for row in result_per_agent.row_data %}
+                                                        ,['{{ row[0] }}', {{ row[1] / 1024 / 1024 }}]
                                                     {% endfor %}
                                                 ],
-                                                types: { bandwidth_0: 'area' }
+                                                types: { bandwidth: 'area' }
                                             },
                                             axis: {
                                                 x: { label: 'time' },

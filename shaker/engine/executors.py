@@ -17,6 +17,7 @@ import collections
 import csv
 
 from oslo_log import log as logging
+from shaker.engine import math
 
 
 LOG = logging.getLogger(__name__)
@@ -95,45 +96,37 @@ class IperfExecutor(BaseExecutor):
         return cmd.make()
 
 
-def _calc_stats(array):
-    return dict(max=max(array), min=min(array), avg=sum(array) / len(array))
+Sample = collections.namedtuple('Sample', ['start', 'end', 'value'])
 
 
 class IperfGraphExecutor(IperfExecutor):
     def get_command(self):
         self.test_definition['csv'] = True
-        self.test_definition['interval'] = '1'
+        self.test_definition['interval'] = 1
         return super(IperfGraphExecutor, self).get_command()
 
     def process_reply(self, message):
         result = super(IperfGraphExecutor, self).process_reply(message)
 
-        samples = collections.defaultdict(list)
-        streams = {}
-        stream_count = 0
+        samples = []
+        threads_count = self.test_definition.get('threads') or 1
 
         for row in csv.reader(result['stdout'].split('\n')):
-            if row:
+            if row and len(row) > 8:
                 thread = row[5]
-                if thread not in streams:
-                    streams[thread] = stream_count
-                    stream_count += 1
+                if threads_count > 1 and thread != -1:
+                    # ignore individual per-thread data
+                    continue
 
-                samples['time'].append(float(row[6].split('-')[1]))
-                samples['bandwidth_%s' % streams[thread]].append(
-                    float(row[8]) / 1024 / 1024)
+                start, end = row[6].split('-')
+                samples.append(Sample(start=float(start),
+                                      end=float(end),
+                                      value=int(row[8])))
 
-        # the last line is summary, remove its items
-        for arr in samples.values():
-            arr.pop()
+        samples.pop()  # the last line is summary, remove it
 
         result['samples'] = samples
-
-        # todo calculate stats correctly for multiple threads
-        for stream in streams.values():
-            result['stats'] = _calc_stats(
-                samples['bandwidth_%s' % stream])
-
+        result.update(math.calc_traffic_stats(samples))
         return result
 
 

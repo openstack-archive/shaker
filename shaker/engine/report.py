@@ -16,8 +16,12 @@
 import sys
 
 import jinja2
+from oslo_log import log as logging
 
 from shaker.engine import utils
+
+
+LOG = logging.getLogger(__name__)
 
 
 def generate_report(report_template, report_filename, data):
@@ -33,3 +37,4 @@ def generate_report(report_template, report_filename, data):
 
     fd.write(rendered_template)
     fd.close()
+    LOG.info('Report generated')

@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import copy
 
 import json
 import logging as std_logging
@@ -134,9 +135,9 @@ def read_scenario():
 def _extend_agents(agents):
     for agent in agents.values():
         if agent.get('slave_id'):
-            agent['slave'] = utils.copy_dict_kv(agents[agent['slave_id']])
+            agent['slave'] = copy.deepcopy(agents[agent['slave_id']])
         if agent.get('master_id'):
-            agent['master'] = utils.copy_dict_kv(agents[agent['master_id']])
+            agent['master'] = copy.deepcopy(agents[agent['master_id']])
 
 
 def _pick_agents(agents, size):
@@ -265,6 +266,7 @@ def main():
 
     elif cfg.CONF.input:
         # read json results
+        LOG.debug('Reading JSON data from %s', cfg.CONF.input)
         report_data = json.loads(utils.read_file(cfg.CONF.input))
 
     report.generate_report(cfg.CONF.report_template, cfg.CONF.report,
