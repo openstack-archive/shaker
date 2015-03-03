@@ -1,8 +1,8 @@
 heat_template_version: 2013-05-23
 
-description: >
-  HOT template to create a new neutron network plus a router to the external
-  network, and for deploying servers into the new network.
+description:
+  HOT template creates a new neutron network, a router to the external
+  network and plugs servers into this new network.
 
 parameters:
   image:
@@ -14,12 +14,6 @@ parameters:
   external_net:
     type: string
     description: ID or name of external network
-  private_net_name:
-    type: string
-    description: Name of private network to be created
-  private_net_cidr:
-    type: string
-    description: Private network address (CIDR notation)
   server_endpoint:
     type: string
     description: Server endpoint address
@@ -28,13 +22,13 @@ resources:
   private_net:
     type: OS::Neutron::Net
     properties:
-      name: { get_param: private_net_name }
+      name: {{ unique }}_net
 
   private_subnet:
     type: OS::Neutron::Subnet
     properties:
       network_id: { get_resource: private_net }
-      cidr: { get_param: private_net_cidr }
+      cidr: 10.0.0.0/16
       dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
 
   router:
@@ -52,7 +46,6 @@ resources:
   server_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: shaker_vm_access
       rules: [
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: tcp,
@@ -81,9 +74,10 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+            screen -dmS shaker-agent-screen shaker-agent --server-endpoint=$SERVER_ENDPOINT --agent-id=$AGENT_ID
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
+            "$AGENT_ID": {{ group.master.name }}
 
   {{ group.master.name }}_port:
     type: OS::Neutron::Port
@@ -107,9 +101,10 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+            screen -dmS shaker-agent-screen shaker-agent --server-endpoint=$SERVER_ENDPOINT --agent-id=$AGENT_ID
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
+            "$AGENT_ID": {{ group.slave.name }}
 
   {{ group.slave.name }}_port:
     type: OS::Neutron::Port
@@ -124,11 +119,11 @@ resources:
 outputs:
 {% for group in groups %}
   {{ group.master.name }}_ip:
-    value: { get_attr: [ {{ group.master.name }}, networks, { get_param: private_net_name }, 0 ] }
+    value: { get_attr: [ {{ group.master.name }}, networks, { get_attr: [private_net, name] }, 0 ] }
   {{ group.master.name }}_instance_name:
     value: { get_attr: [ {{ group.master.name }}, instance_name ] }
   {{ group.slave.name }}_ip:
-    value: { get_attr: [ {{ group.slave.name }}, networks, { get_param: private_net_name }, 0 ] }
+    value: { get_attr: [ {{ group.slave.name }}, networks, { get_attr: [private_net, name] }, 0 ] }
   {{ group.slave.name }}_instance_name:
     value: { get_attr: [ {{ group.slave.name }}, instance_name ] }
 {% endfor %}

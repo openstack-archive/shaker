@@ -71,8 +71,9 @@ SERVER_OPTS = [
 ]
 
 AGENT_OPTS = [
-    cfg.StrOpt('instance-id',
-               help='The id of instance where agent is running'),
+    cfg.StrOpt('agent-id',
+               required=True,
+               help='Agent unique id'),
 ]
 
 

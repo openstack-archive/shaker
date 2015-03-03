@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import os
+import random
 
 import six
 
@@ -58,3 +59,7 @@ def read_uri(uri):
     except Exception as e:
         LOG.warn('Error "%(error)s" while reading uri %(uri)s',
                  {'error': e, 'uri': uri})
+
+
+def random_string(length=6):
+    return ''.join(random.sample('adefikmoprstuz', length))

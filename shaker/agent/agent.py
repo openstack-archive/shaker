@@ -21,24 +21,16 @@ from oslo_config import cfg
 import zmq
 
 from shaker.engine import config
-from shaker.engine import utils
 from shaker.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)
 
 
-INSTANCE_ID_URI = 'http://169.254.169.254/2009-04-04/meta-data/instance-id'
-
-
-def get_instance_id():
-    return utils.read_uri(INSTANCE_ID_URI)
-
-
-def poll_task(socket, instance_id):
+def poll_task(socket, agent_id):
     payload = {
         'operation': 'poll',
-        'agent_id': instance_id,
+        'agent_id': agent_id,
     }
     LOG.debug('Polling task: %s', payload)
     socket.send_json(payload)
@@ -47,10 +39,10 @@ def poll_task(socket, instance_id):
     return res
 
 
-def send_reply(socket, instance_id, result):
+def send_reply(socket, agent_id, result):
     message = {
         'operation': 'reply',
-        'agent_id': instance_id,
+        'agent_id': agent_id,
     }
     message.update(result)
 
@@ -81,8 +73,8 @@ def main():
 
     endpoint = cfg.CONF.server_endpoint
 
-    instance_id = cfg.CONF.instance_id or get_instance_id()
-    LOG.info('My instance id is: %s', instance_id)
+    agent_id = cfg.CONF.agent_id
+    LOG.info('My instance id is: %s', agent_id)
 
     context = zmq.Context()
     LOG.info('Connecting to server: %s', endpoint)
@@ -92,7 +84,7 @@ def main():
 
     try:
         while True:
-            task = poll_task(socket, instance_id)
+            task = poll_task(socket, agent_id)
 
             if task['operation'] == 'execute':
                 now = int(time.time())
@@ -105,7 +97,7 @@ def main():
                 # do something useful
                 command_stdout, command_stderr = processutils.execute(
                     *shlex.split(command))
-                send_reply(socket, instance_id, {
+                send_reply(socket, agent_id, {
                     'stdout': command_stdout,
                     'stderr': command_stderr,
                 })

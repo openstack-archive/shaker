@@ -16,12 +16,6 @@ parameters:
   external_net:
     type: string
     description: ID or name of external network for which floating IP addresses will be allocated
-  private_net_name:
-    type: string
-    description: Name of private network to be created
-  private_net_cidr:
-    type: string
-    description: Private network address (CIDR notation)
   server_endpoint:
     type: string
     description: Server endpoint address
@@ -30,7 +24,7 @@ resources:
   north_private_net:
     type: OS::Neutron::Net
     properties:
-      name: north_private_net_name
+      name: {{ unique }}_net_north
 
   north_private_subnet:
     type: OS::Neutron::Subnet
@@ -54,7 +48,7 @@ resources:
   south_private_net:
     type: OS::Neutron::Net
     properties:
-      name: south_private_net_name
+      name: {{ unique }}_net_south
 
   south_private_subnet:
     type: OS::Neutron::Subnet
@@ -78,7 +72,6 @@ resources:
   server_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
-      name: shaker_vm_access
       rules: [
         {remote_ip_prefix: 0.0.0.0/0,
         protocol: tcp,
@@ -107,9 +100,10 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+            screen -dmS shaker-agent-screen shaker-agent --server-endpoint=$SERVER_ENDPOINT --agent-id=$AGENT_ID
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
+            "$AGENT_ID": {{ group.slave.name }}
 
   {{ group.master.name }}_port:
     type: OS::Neutron::Port
@@ -133,9 +127,10 @@ resources:
         str_replace:
           template: |
             #!/bin/sh
-            screen -dmS shaker-agent shaker-agent --server-endpoint=$SERVER_ENDPOINT --debug
+            screen -dmS shaker-agent-screen shaker-agent --server-endpoint=$SERVER_ENDPOINT --agent-id=$AGENT_ID
           params:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
+            "$AGENT_ID": {{ group.slave.name }}
 
   {{ group.slave.name }}_port:
     type: OS::Neutron::Port
@@ -156,7 +151,7 @@ resources:
 outputs:
 {% for group in groups %}
   {{ group.master.name }}_ip:
-    value: { get_attr: [ {{ group.master.name }}, networks, north_private_net, 0 ] }
+    value: { get_attr: [ {{ group.master.name }}, networks, { get_attr: [north_private_net, name] }, 0 ] }
   {{ group.master.name }}_instance_name:
     value: { get_attr: [ {{ group.master.name }}, instance_name ] }
   {{ group.slave.name }}_ip:

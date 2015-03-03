@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import uuid
-
 import jinja2
 
 from shaker.engine import utils
@@ -44,7 +42,7 @@ class Deployment(object):
         self.flavor_name = flavor_name
         self.image_name = image_name
 
-        self.stack_name = 'shaker_%s' % uuid.uuid4()
+        self.stack_name = 'shaker_%s' % utils.random_string()
         self.stack_deployed = False
 
     def _make_groups(self, vm_accommodation):
@@ -59,8 +57,9 @@ class Deployment(object):
         groups = []
 
         for i in range(iterations):
-            group = dict(master=dict(name='master_%s' % i),
-                         slave=dict(name='slave_%s' % i))
+            group = dict(
+                master=dict(name=('%s_master_%s' % (self.stack_name, i))),
+                slave=dict(name=('%s_slave_%s' % (self.stack_name, i))))
 
             if 'pair' in vm_accommodation:
                 if 'single_room' in vm_accommodation:
@@ -87,9 +86,6 @@ class Deployment(object):
                 result[param] = o
         return result
 
-    def convert_instance_name_to_agent_id(self, instance_name):
-        return 'i-%s' % instance_name.split('-')[1]
-
     def _make_agents(self, groups, outputs):
         agents = []
 
@@ -100,14 +96,13 @@ class Deployment(object):
                 LOG.info('Group is not deployed: %s. Ignoring', group)
                 continue
 
-            master.update(dict(mode='master',
-                               id=self.convert_instance_name_to_agent_id(
-                                   master['instance_name'])))
+            master.update(group['master'])
+            master.update(dict(mode='master', id=group['master']['name']))
 
             slave = self._get_outputs(outputs, group['slave']['name'],
                                       ['ip', 'instance_name'])
 
-            # todo workaround of Nova bug 1422686
+            # workaround of Nova bug 1422686
             if slave.get('instance_name') and not slave.get('ip'):
                 LOG.info('Ignoring group because of missing IP: %s', group)
                 continue
@@ -116,9 +111,8 @@ class Deployment(object):
 
             if slave.get('instance_name'):
                 # slave is deployed
-                slave.update(dict(mode='slave',
-                                  id=self.convert_instance_name_to_agent_id(
-                                      slave['instance_name'])))
+                slave.update(group['slave'])
+                slave.update(dict(mode='slave', id=group['slave']['name']))
 
                 master['slave_id'] = slave['id']
                 slave['master_id'] = master['id']
@@ -132,6 +126,7 @@ class Deployment(object):
         # render template by jinja
         vars_values = {
             'groups': groups,
+            'unique': self.stack_name,
         }
         heat_template = utils.read_file(specification['template'])
         compiled_template = jinja2.Template(heat_template)
@@ -140,8 +135,6 @@ class Deployment(object):
 
         # create stack by Heat
         merged_parameters = {
-            'private_net_name': 'net_%s' % uuid.uuid4(),
-            'private_net_cidr': '10.0.0.0/16',
             'server_endpoint': self.server_endpoint,
             'external_net': self.external_net,
             'image': self.image_name,
