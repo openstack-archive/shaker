@@ -52,16 +52,28 @@ class TestIperfGraphExecutor(testtools.TestCase):
 """
         }
         expected = {
-            'samples': {
-                'time': [1.0, 2.0, 3.0],
-                'bandwidth_0': [381.0, 393.0, 387.0],
-            },
+            'samples': [
+                executors.Sample(0.0, 1.0, 399507456),
+                executors.Sample(1.0, 2.0, 412090368),
+                executors.Sample(2.0, 3.0, 405798912),
+            ],
+            'row_data': [
+                [1.0, 399507456],
+                [2.0, 412090368],
+                [3.0, 405798912],
+            ],
             'stats': {
-                'max': 393.0,
-                'min': 381.0,
-                'avg': (381.0 + 393.0 + 387.0) / 3
+                'duration': 3.0,
+                'max': 412090368,
+                'min': 399507456,
+                'mean': (399507456 + 412090368 + 405798912) / 3,
+                'total': (399507456 + 412090368 + 405798912),
             },
         }
         reply = executor.process_reply(message)
-        self.assertEqual(expected['samples'], reply['samples'])
-        self.assertEqual(expected['stats'], reply['stats'])
+        self.assertEqual(expected['samples'], reply['samples'],
+                         message='Samples data')
+        self.assertEqual(expected['row_data'], reply['row_data'],
+                         'Row data')
+        self.assertEqual(expected['stats'], reply['stats'],
+                         'Traffic stats')
