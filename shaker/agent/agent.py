@@ -60,6 +60,8 @@ def main():
     conf.register_cli_opts(config.AGENT_OPTS)
     conf.register_opts(config.COMMON_OPTS)
     conf.register_opts(config.AGENT_OPTS)
+    logging.register_options(conf)
+    logging.set_defaults()
 
     try:
         conf(project='shaker')
@@ -68,7 +70,7 @@ def main():
         conf.print_usage()
         exit(1)
 
-    logging.setup('shaker')
+    logging.setup(conf, 'shaker')
     LOG.info('Logging enabled')
 
     endpoint = cfg.CONF.server_endpoint

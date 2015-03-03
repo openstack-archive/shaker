@@ -64,7 +64,7 @@ SERVER_OPTS = [
                help='Scenario file name'),
 
     cfg.StrOpt('report-template',
-               default='shaker/resources/report_template.html',
+               default='shaker/resources/report_template.jinja2',
                help='Report template in Jinja format'),
     cfg.StrOpt('report',
                help='Report file name. If not specified print to stdout'),

@@ -14,8 +14,7 @@
 # limitations under the License.
 
 from neutronclient.neutron import client as neutron_client_pkg
-
-from shaker.openstack.common import log as logging
+from oslo_log import log as logging
 
 
 LOG = logging.getLogger(__name__)

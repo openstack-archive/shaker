@@ -203,6 +203,8 @@ def main():
     conf.register_opts(config.COMMON_OPTS)
     conf.register_opts(config.OPENSTACK_OPTS)
     conf.register_opts(config.SERVER_OPTS)
+    logging.register_options(conf)
+    logging.set_defaults()
 
     try:
         conf(project='shaker')
@@ -211,7 +213,7 @@ def main():
         conf.print_usage()
         exit(1)
 
-    logging.setup('shaker')
+    logging.setup(conf, 'shaker')
     LOG.info('Logging enabled')
 
     scenario = read_scenario()

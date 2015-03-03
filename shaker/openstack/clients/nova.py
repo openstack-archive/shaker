@@ -16,8 +16,7 @@
 import time
 
 from novaclient import client as nova_client_pkg
-
-from shaker.openstack.common import log as logging
+from oslo_log import log as logging
 
 
 LOG = logging.getLogger(__name__)

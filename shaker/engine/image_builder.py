@@ -37,9 +37,11 @@ def init():
     conf.register_cli_opts(config.IMAGE_BUILDER_OPTS)
     conf.register_opts(config.OPENSTACK_OPTS)
     conf.register_opts(config.IMAGE_BUILDER_OPTS)
+    logging.register_options(conf)
+    logging.set_defaults()
     conf(project='shaker')
 
-    logging.setup('shaker')
+    logging.setup(conf, 'shaker')
     LOG.info('Logging enabled')
 
     openstack_client = openstack.OpenStackClient(
