@@ -16,6 +16,7 @@
 import os
 import random
 
+from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
@@ -32,7 +33,15 @@ def env(*_vars, **kwargs):
         value = os.environ.get(v)
         if value:
             return value
-    return kwargs.get('default', '')
+    return kwargs.get('default', None)
+
+
+def validate_required_opts(conf, opts):
+    # all config parameters default to ENV values, that's why standard
+    # check of required options doesn't work and needs to be done manually
+    for opt in opts:
+        if opt.required and not conf[opt.dest]:
+            raise cfg.RequiredOptError(opt.name)
 
 
 def read_file(file_name):

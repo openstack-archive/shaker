@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging as std_logging
 import time
 import uuid
 
@@ -197,17 +198,15 @@ def execute(execution, agents):
 def main():
     # init conf and logging
     conf = cfg.CONF
-    conf.register_cli_opts(config.COMMON_OPTS)
-    conf.register_cli_opts(config.OPENSTACK_OPTS)
-    conf.register_cli_opts(config.SERVER_OPTS)
-    conf.register_opts(config.COMMON_OPTS)
-    conf.register_opts(config.OPENSTACK_OPTS)
-    conf.register_opts(config.SERVER_OPTS)
+    opts = config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS
+    conf.register_cli_opts(opts)
+    conf.register_opts(opts)
     logging.register_options(conf)
     logging.set_defaults()
 
     try:
         conf(project='shaker')
+        utils.validate_required_opts(conf, opts)
     except cfg.RequiredOptError as e:
         print('Error: %s' % e)
         conf.print_usage()
@@ -215,6 +214,7 @@ def main():
 
     logging.setup(conf, 'shaker')
     LOG.info('Logging enabled')
+    conf.log_opt_values(LOG, std_logging.DEBUG)
 
     scenario = read_scenario()
     deployment = deploy.Deployment(cfg.CONF.os_username,

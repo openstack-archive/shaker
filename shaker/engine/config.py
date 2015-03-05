@@ -21,64 +21,84 @@ from shaker.engine import utils
 
 COMMON_OPTS = [
     cfg.StrOpt('server-endpoint',
+               default=utils.env('SHAKER_SERVER_ENDPOINT'),
                required=True,
-               help='Address for server connections (host:port)'),
+               help='Address for server connections (host:port), '
+                    'defaults to env[SHAKER_SERVER_ENDPOINT].'),
 ]
 
 OPENSTACK_OPTS = [
     cfg.StrOpt('os-auth-url', metavar='<auth-url>',
                default=utils.env('OS_AUTH_URL'),
+               sample_default='',
+               required=True,
                help='Authentication URL, defaults to env[OS_AUTH_URL].'),
     cfg.StrOpt('os-tenant-name', metavar='<auth-tenant-name>',
                default=utils.env('OS_TENANT_NAME'),
+               sample_default='',
+               required=True,
                help='Authentication tenant name, defaults to '
                     'env[OS_TENANT_NAME].'),
     cfg.StrOpt('os-username', metavar='<auth-username>',
                default=utils.env('OS_USERNAME'),
+               sample_default='',
+               required=True,
                help='Authentication username, defaults to env[OS_USERNAME].'),
     cfg.StrOpt('os-password', metavar='<auth-password>',
                default=utils.env('OS_PASSWORD'),
+               sample_default='',
+               required=True,
                help='Authentication password, defaults to env[OS_PASSWORD].'),
     cfg.StrOpt('os-region-name', metavar='<auth-region-name>',
                default=utils.env('OS_REGION_NAME') or 'RegionOne',
+               required=True,
                help='Authentication region name, defaults to '
                     'env[OS_REGION_NAME].'),
 
     cfg.StrOpt('external-net',
-               help='Name or ID of external network. If not set the network '
-                    'is chosen randomly.'),
+               default=utils.env('SHAKER_EXTERNAL_NET'),
+               help='Name or ID of external network, defaults to '
+                    'env[SHAKER_EXTERNAL_NET]. If no value provided then '
+                    'Shaker picks any of available external networks.'),
 
     cfg.StrOpt('image-name',
-               default='shaker-image',
+               default=utils.env('SHAKER_IMAGE') or 'shaker-image',
                help='Name of image to use. The default is created by '
-                    'shaker-image-builder'),
+                    'shaker-image-builder.'),
     cfg.StrOpt('flavor-name',
-               default='shaker-flavor',
+               default=utils.env('SHAKER_FLAVOR') or 'shaker-flavor',
                help='Name of image flavor. The default is created by '
-                    'shaker-image-builder'),
+                    'shaker-image-builder.'),
 ]
 
 SERVER_OPTS = [
     cfg.StrOpt('scenario',
+               default=utils.env('SHAKER_SCENARIO'),
                required=True,
-               help='Scenario file name'),
+               help='Scenario file name, defaults to env[SHAKER_SCENARIO].'),
 
     cfg.StrOpt('report-template',
-               default='shaker/resources/report_template.jinja2',
+               default=(utils.env('SHAKER_REPORT_TEMPLATE') or
+                        'shaker/resources/report_template.jinja2'),
                help='Report template in Jinja format'),
     cfg.StrOpt('report',
-               help='Report file name. If not specified print to stdout'),
+               default=utils.env('SHAKER_REPORT'),
+               help='Report file name, defaults to env[SHAKER_REPORT]. '
+                    'If no value provided the report is printed to stdout.'),
 ]
+
 
 AGENT_OPTS = [
     cfg.StrOpt('agent-id',
+               default=utils.env('SHAKER_AGENT_ID'),
                required=True,
-               help='Agent unique id'),
+               help='Agent unique id, defaults to env[SHAKER_AGENT_ID].'),
 ]
 
 IMAGE_BUILDER_OPTS = [
     cfg.StrOpt('image-builder-template',
-               default='shaker/resources/image_builder_template.yaml',
+               default=(utils.env('SHAKER_IMAGE_BUILDER_TEMPLATE') or
+                        'shaker/resources/image_builder_template.yaml'),
                help='Heat template for the image builder.'),
 ]
 
