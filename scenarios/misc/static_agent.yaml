@@ -1,0 +1,15 @@
+description:
+  This scenario runs tests on pre-deployed static agents
+
+deployment:
+  agents:
+  -
+    id: the-agent
+    mode: alone
+
+execution:
+  tests:
+  -
+    title: List all files
+    class: shell
+    method: ls -al

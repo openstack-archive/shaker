@@ -58,6 +58,20 @@ def read_file(file_name, base_dir=''):
             fd.close()
 
 
+def write_file(data, file_name, base_dir=''):
+    full_path = os.path.normpath(os.path.join(base_dir, file_name))
+    fd = None
+    try:
+        fd = open(full_path, 'w')
+        return fd.write(data)
+    except IOError as e:
+        LOG.error('Error writing file: %s', e)
+        raise
+    finally:
+        if fd:
+            fd.close()
+
+
 def split_address(address):
     try:
         host, port = address.split(':')

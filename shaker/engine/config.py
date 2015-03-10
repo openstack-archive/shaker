@@ -74,7 +74,6 @@ OPENSTACK_OPTS = [
 SERVER_OPTS = [
     cfg.StrOpt('scenario',
                default=utils.env('SHAKER_SCENARIO'),
-               required=True,
                help='Scenario file name, defaults to env[SHAKER_SCENARIO].'),
 
     cfg.StrOpt('report-template',
@@ -85,6 +84,15 @@ SERVER_OPTS = [
                default=utils.env('SHAKER_REPORT'),
                help='Report file name, defaults to env[SHAKER_REPORT]. '
                     'If no value provided the report is printed to stdout.'),
+
+    cfg.StrOpt('output',
+               default=utils.env('SHAKER_OUTPUT'),
+               help='File for output in JSON format, '
+                    'defaults to env[SHAKER_OUTPUT].'),
+    cfg.StrOpt('input',
+               default=utils.env('SHAKER_INPUT'),
+               help='File to read test results from, '
+                    'defaults to env[SHAKER_INPUT].'),
 ]
 
 
