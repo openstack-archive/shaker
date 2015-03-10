@@ -3,6 +3,7 @@
 # process, which may cause wedges in the gate later.
 
 # Hacking already pins down pep8, pyflakes and flake8
+coverage>=3.6
 hacking>=0.8.0,<0.9
 mock>=1.0
 python-subunit>=0.0.18

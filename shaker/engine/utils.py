@@ -71,3 +71,7 @@ def read_uri(uri):
 
 def random_string(length=6):
     return ''.join(random.sample('adefikmoprstuz', length))
+
+
+def copy_dict_kv(source):
+    return dict((k, v) for k, v in source.items())

@@ -129,29 +129,28 @@ def read_scenario():
     return scenario
 
 
-def _resolve_agent_ids(agents):
-    id_to_agent = dict((ag['id'], ag) for ag in agents)
-    for agent in agents:
+def _extend_agents(agents):
+    for agent in agents.values():
         if agent.get('slave_id'):
-            agent['slave'] = id_to_agent[agent['slave_id']]
+            agent['slave'] = utils.copy_dict_kv(agents[agent['slave_id']])
         if agent.get('master_id'):
-            agent['master'] = id_to_agent[agent['master_id']]
+            agent['master'] = utils.copy_dict_kv(agents[agent['master_id']])
 
 
 def _pick_agents(agents, size):
-    # tests are executed on master agents only
-    agents = [a for a in agents if a['mode'] == 'master']
+    # slave agents do not execute any tests
+    agents = [a for a in agents.values() if a.get('mode') != 'slave']
 
     if not size or size == 'full':
         yield agents
     elif size == 'linear_progression':
         for i in range(len(agents)):
-            yield agents[:i]
+            yield agents[:i + 1]
     elif size == 'quadratic_progression':
         n = len(agents)
         seq = [n]
         while n > 1:
-            n /= 2
+            n //= 2
             seq.append(n)
         seq.reverse()
         for i in seq:
@@ -159,12 +158,12 @@ def _pick_agents(agents, size):
 
 
 def execute(execution, agents):
-    _resolve_agent_ids(agents)
+    _extend_agents(agents)
 
     message_queue = MessageQueue(cfg.CONF.server_endpoint)
 
     quorum = Quorum(message_queue)
-    quorum.wait_join(set(a['id'] for a in agents))
+    quorum.wait_join(set(agents.keys()))
 
     result = []
 
@@ -216,34 +215,37 @@ def main():
     LOG.info('Logging enabled')
     conf.log_opt_values(LOG, std_logging.DEBUG)
 
-    scenario = read_scenario()
-    deployment = deploy.Deployment(cfg.CONF.os_username,
-                                   cfg.CONF.os_password,
-                                   cfg.CONF.os_tenant_name,
-                                   cfg.CONF.os_auth_url,
-                                   cfg.CONF.os_region_name,
-                                   cfg.CONF.server_endpoint,
-                                   cfg.CONF.external_net,
-                                   cfg.CONF.flavor_name,
-                                   cfg.CONF.image_name)
-    agents = deployment.deploy(scenario['deployment'])
+    deployment = None
+    try:
+        scenario = read_scenario()
+        deployment = deploy.Deployment(cfg.CONF.os_username,
+                                       cfg.CONF.os_password,
+                                       cfg.CONF.os_tenant_name,
+                                       cfg.CONF.os_auth_url,
+                                       cfg.CONF.os_region_name,
+                                       cfg.CONF.server_endpoint,
+                                       cfg.CONF.external_net,
+                                       cfg.CONF.flavor_name,
+                                       cfg.CONF.image_name)
+        agents = deployment.deploy(scenario['deployment'])
 
-    if not agents:
-        LOG.info('No agents deployed. Terminating.')
-        return
+        if not agents:
+            LOG.info('No agents deployed. Terminating.')
+            return
 
-    LOG.debug('Agents: %s', agents)
+        LOG.debug('Agents: %s', agents)
 
-    result = execute(scenario['execution'], agents)
-    LOG.debug('Result: %s', result)
+        result = execute(scenario['execution'], agents)
+        LOG.debug('Result: %s', result)
 
-    report.generate_report(cfg.CONF.report_template,
-                           cfg.CONF.report,
-                           dict(scenario=yaml.dump(scenario),
-                                agents=agents,
-                                result=result))
-
-    deployment.cleanup()
+        report.generate_report(cfg.CONF.report_template,
+                               cfg.CONF.report,
+                               dict(scenario=yaml.dump(scenario),
+                                    agents=agents.values(),
+                                    result=result))
+    finally:
+        if deployment:
+            deployment.cleanup()
 
 
 if __name__ == "__main__":

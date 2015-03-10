@@ -26,6 +26,85 @@ from shaker.openstack.clients import openstack
 LOG = logging.getLogger(__name__)
 
 
+def generate_agents(compute_nodes, vm_accommodation, unique):
+    cn_count = len(compute_nodes)
+    iterations = cn_count
+    if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
+        iterations //= 2
+    node_formulae = lambda x: compute_nodes[x % cn_count]
+
+    agents = {}
+
+    for i in range(iterations):
+        if 'pair' in vm_accommodation:
+            master_id = '%s_master_%s' % (unique, i)
+            slave_id = '%s_slave_%s' % (unique, i)
+            master = dict(id=master_id, mode='master', slave_id=slave_id)
+            slave = dict(id=slave_id, mode='slave', master_id=master_id)
+
+            if 'single_room' in vm_accommodation:
+                master['node'] = node_formulae(i * 2)
+                slave['node'] = node_formulae(i * 2 + 1)
+            elif 'double_room' in vm_accommodation:
+                master['node'] = node_formulae(i)
+                slave['node'] = node_formulae(i)
+            elif 'mixed_room' in vm_accommodation:
+                master['node'] = node_formulae(i)
+                slave['node'] = node_formulae(i + 1)
+
+            agents[master['id']] = master
+            agents[slave['id']] = slave
+        else:
+            if 'single_room' in vm_accommodation:
+                agent_id = '%s_agent_%s' % (unique, i)
+                agents[agent_id] = dict(id=agent_id, node=node_formulae(i),
+                                        mode='alone')
+
+    return agents
+
+
+def _get_stack_values(stack_outputs, vm_name, params):
+    result = {}
+    for param in params:
+        o = stack_outputs.get(vm_name + '_' + param)
+        if o:
+            result[param] = o
+    return result
+
+
+def filter_agents(agents, stack_outputs):
+    deployed_agents = {}
+
+    # first pass, ignore non-deployed
+    for agent in agents.values():
+        stack_values = _get_stack_values(stack_outputs, agent['id'],
+                                         ['ip', 'instance_name'])
+        if not stack_values.get('instance_name'):
+            LOG.info('Ignore non-deployed agent: %s', agent)
+            continue
+
+        agent.update(stack_values)
+
+        # workaround of Nova bug 1422686
+        if agent.get('mode') == 'slave' and not agent.get('ip'):
+            LOG.info('IP address is missing in agent: %s', agent)
+            continue
+
+        deployed_agents[agent['id']] = agent
+
+    # second pass, check pairs
+    result = {}
+    for agent in deployed_agents.values():
+        if (agent.get('mode') == 'alone' or
+                (agent.get('mode') == 'master' and
+                 agent.get('slave_id') in deployed_agents) or
+                (agent.get('mode') == 'slave' and
+                 agent.get('master_id') in deployed_agents)):
+            result[agent['id']] = agent
+
+    return result
+
+
 class Deployment(object):
     def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
                  os_region_name, server_endpoint, external_net, flavor_name,
@@ -45,87 +124,15 @@ class Deployment(object):
         self.stack_name = 'shaker_%s' % utils.random_string()
         self.stack_deployed = False
 
-    def _make_groups(self, vm_accommodation):
-        compute_nodes = nova.get_available_compute_nodes(
-            self.openstack_client.nova)
-        cn_count = len(compute_nodes)
-        iterations = cn_count
-        if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
-            iterations /= 2
-        node_formulae = lambda x: compute_nodes[x % cn_count]
-
-        groups = []
-
-        for i in range(iterations):
-            group = dict(
-                master=dict(name=('%s_master_%s' % (self.stack_name, i))),
-                slave=dict(name=('%s_slave_%s' % (self.stack_name, i))))
-
-            if 'pair' in vm_accommodation:
-                if 'single_room' in vm_accommodation:
-                    group['master']['node'] = node_formulae(i * 2)
-                    group['slave']['node'] = node_formulae(i * 2 + 1)
-                elif 'double_room' in vm_accommodation:
-                    group['master']['node'] = node_formulae(i)
-                    group['slave']['node'] = node_formulae(i)
-                elif 'mixed_room' in vm_accommodation:
-                    group['master']['node'] = node_formulae(i)
-                    group['slave']['node'] = node_formulae(i + 1)
-            else:
-                if 'single_room' in vm_accommodation:
-                    group['master']['node'] = node_formulae(i)
-            groups.append(group)
-
-        return groups
-
-    def _get_outputs(self, stack_outputs, vm_name, params):
-        result = {}
-        for param in params:
-            o = stack_outputs.get(vm_name + '_' + param)
-            if o:
-                result[param] = o
-        return result
-
-    def _make_agents(self, groups, outputs):
-        agents = []
-
-        for group in groups:
-            master = self._get_outputs(outputs, group['master']['name'],
-                                       ['ip', 'instance_name'])
-            if not master.get('instance_name'):
-                LOG.info('Group is not deployed: %s. Ignoring', group)
-                continue
-
-            master.update(group['master'])
-            master.update(dict(mode='master', id=group['master']['name']))
-
-            slave = self._get_outputs(outputs, group['slave']['name'],
-                                      ['ip', 'instance_name'])
-
-            # workaround of Nova bug 1422686
-            if slave.get('instance_name') and not slave.get('ip'):
-                LOG.info('Ignoring group because of missing IP: %s', group)
-                continue
-
-            agents.append(master)
-
-            if slave.get('instance_name'):
-                # slave is deployed
-                slave.update(group['slave'])
-                slave.update(dict(mode='slave', id=group['slave']['name']))
-
-                master['slave_id'] = slave['id']
-                slave['master_id'] = master['id']
-                agents.append(slave)
-
-        return agents
-
     def _deploy_from_hot(self, specification):
-        groups = self._make_groups(specification['vm_accommodation'])
+        agents = generate_agents(
+            nova.get_available_compute_nodes(self.openstack_client.nova),
+            specification['vm_accommodation'],
+            self.stack_name)
 
         # render template by jinja
         vars_values = {
-            'groups': groups,
+            'agents': agents,
             'unique': self.stack_name,
         }
         heat_template = utils.read_file(specification['template'])
@@ -160,19 +167,18 @@ class Deployment(object):
         outputs = heat.get_stack_outputs(self.openstack_client.heat,
                                          stack['id'])
 
-        # convert groups into agents
-        return self._make_agents(groups, outputs)
+        return filter_agents(agents, outputs)
 
     def deploy(self, deployment):
-        agents = []
+        agents = {}
 
         if deployment.get('template'):
             # deploy topology specified by HOT
-            agents += self._deploy_from_hot(deployment)
+            agents.update(self._deploy_from_hot(deployment))
 
         if deployment.get('agents'):
             # agents are specified statically
-            agents += deployment.get('agents')
+            agents.update(dict((a['id'], a) for a in deployment.get('agents')))
 
         return agents
 
