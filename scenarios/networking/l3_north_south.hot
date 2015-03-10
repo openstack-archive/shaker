@@ -132,12 +132,12 @@ resources:
 {% endfor %}
 
 outputs:
-{% for agent in agents.value() %}
+{% for agent in agents.values() %}
   {{ agent.id }}_instance_name:
     value: { get_attr: [ {{ agent.id }}, instance_name ] }
 {% if agent.mode == 'master' %}
   {{ agent.id }}_ip:
-    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [east_private_net, name] }, 0 ] }
+    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [north_private_net, name] }, 0 ] }
 {% else %}
   {{ agent.id }}_ip:
     value: { get_attr: [ {{ agent.id }}_floating_ip, floating_ip_address ] }

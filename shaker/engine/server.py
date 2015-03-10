@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging as std_logging
+import os
 import time
 import uuid
 
@@ -227,7 +228,8 @@ def main():
                                        cfg.CONF.external_net,
                                        cfg.CONF.flavor_name,
                                        cfg.CONF.image_name)
-        agents = deployment.deploy(scenario['deployment'])
+        agents = deployment.deploy(scenario['deployment'],
+                                   base_dir=os.path.dirname(cfg.CONF.scenario))
 
         if not agents:
             LOG.info('No agents deployed. Terminating.')

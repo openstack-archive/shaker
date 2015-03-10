@@ -124,7 +124,7 @@ class Deployment(object):
         self.stack_name = 'shaker_%s' % utils.random_string()
         self.stack_deployed = False
 
-    def _deploy_from_hot(self, specification):
+    def _deploy_from_hot(self, specification, base_dir=None):
         agents = generate_agents(
             nova.get_available_compute_nodes(self.openstack_client.nova),
             specification['vm_accommodation'],
@@ -135,7 +135,8 @@ class Deployment(object):
             'agents': agents,
             'unique': self.stack_name,
         }
-        heat_template = utils.read_file(specification['template'])
+        heat_template = utils.read_file(specification['template'],
+                                        base_dir=base_dir)
         compiled_template = jinja2.Template(heat_template)
         rendered_template = compiled_template.render(vars_values)
         LOG.debug('Rendered template: %s', rendered_template)
@@ -169,12 +170,12 @@ class Deployment(object):
 
         return filter_agents(agents, outputs)
 
-    def deploy(self, deployment):
+    def deploy(self, deployment, base_dir=None):
         agents = {}
 
         if deployment.get('template'):
             # deploy topology specified by HOT
-            agents.update(self._deploy_from_hot(deployment))
+            agents.update(self._deploy_from_hot(deployment, base_dir=base_dir))
 
         if deployment.get('agents'):
             # agents are specified statically

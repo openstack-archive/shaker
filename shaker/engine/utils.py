@@ -44,9 +44,18 @@ def validate_required_opts(conf, opts):
             raise cfg.RequiredOptError(opt.name)
 
 
-def read_file(file_name):
-    with open(file_name) as fd:
+def read_file(file_name, base_dir=''):
+    full_path = os.path.normpath(os.path.join(base_dir, file_name))
+    fd = None
+    try:
+        fd = open(full_path)
         return fd.read()
+    except IOError as e:
+        LOG.error('Error reading file: %s', e)
+        raise
+    finally:
+        if fd:
+            fd.close()
 
 
 def split_address(address):

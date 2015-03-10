@@ -4,7 +4,7 @@ description:
   by floating ip
 
 deployment:
-  template: scenarios/networking/l3_north_south.hot
+  template: l3_north_south.hot
   vm_accommodation: [pair, double_room]
 
 execution:

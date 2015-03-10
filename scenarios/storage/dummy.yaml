@@ -2,7 +2,7 @@ description:
   This scenario launches VMs in the same private network
 
 deployment:
-  template: scenarios/storage/dummy.hot
+  template: dummy.hot
   vm_accommodation: [single_room]
 
 execution:

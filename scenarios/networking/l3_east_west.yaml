@@ -3,7 +3,7 @@ description:
   router (L3 east-west)
 
 deployment:
-  template: scenarios/networking/l3_east_west.hot
+  template: l3_east_west.hot
   vm_accommodation: [pair, single_room]
 
 execution:
