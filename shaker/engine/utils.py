@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging as std_logging
 import os
 import random
 
@@ -42,6 +43,26 @@ def validate_required_opts(conf, opts):
     for opt in opts:
         if opt.required and not conf[opt.dest]:
             raise cfg.RequiredOptError(opt.name)
+
+
+def init_config_and_logging(opts):
+    conf = cfg.CONF
+    conf.register_cli_opts(opts)
+    conf.register_opts(opts)
+    logging.register_options(conf)
+    logging.set_defaults()
+
+    try:
+        conf(project='shaker')
+        validate_required_opts(conf, opts)
+    except cfg.RequiredOptError as e:
+        print('Error: %s' % e)
+        conf.print_usage()
+        exit(1)
+
+    logging.setup(conf, 'shaker')
+    LOG.info('Logging enabled')
+    conf.log_opt_values(LOG, std_logging.DEBUG)
 
 
 def read_file(file_name, base_dir=''):
