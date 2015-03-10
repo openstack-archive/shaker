@@ -12,10 +12,9 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import copy
 
+import copy
 import json
-import logging as std_logging
 import os
 import time
 import uuid
@@ -198,76 +197,48 @@ def execute(execution, agents):
 
 
 def main():
-    # init conf and logging
-    conf = cfg.CONF
-    opts = config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS
-    conf.register_cli_opts(opts)
-    conf.register_opts(opts)
-    logging.register_options(conf)
-    logging.set_defaults()
+    utils.init_config_and_logging(
+        config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
+        config.REPORT_OPTS
+    )
+
+    scenario = read_scenario()
+
+    deployment = None
+    agents = {}
+    result = []
 
     try:
-        conf(project='shaker')
-        utils.validate_required_opts(conf, opts)
-        if not cfg.CONF.scenario and not cfg.CONF.input:
-            raise cfg.RequiredOptError('One of "scenario" or "input" options '
-                                       'must be set')
-    except cfg.RequiredOptError as e:
-        print('Error: %s' % e)
-        conf.print_usage()
-        exit(1)
+        deployment = deploy.Deployment(cfg.CONF.os_username,
+                                       cfg.CONF.os_password,
+                                       cfg.CONF.os_tenant_name,
+                                       cfg.CONF.os_auth_url,
+                                       cfg.CONF.os_region_name,
+                                       cfg.CONF.server_endpoint,
+                                       cfg.CONF.external_net,
+                                       cfg.CONF.flavor_name,
+                                       cfg.CONF.image_name)
 
-    logging.setup(conf, 'shaker')
-    LOG.info('Logging enabled')
-    conf.log_opt_values(LOG, std_logging.DEBUG)
+        agents = deployment.deploy(scenario['deployment'],
+                                   base_dir=os.path.dirname(cfg.CONF.scenario))
+        LOG.debug('Deployed agents: %s', agents)
 
-    report_data = None
+        if not agents:
+            LOG.warning('No agents deployed.')
+        else:
+            result = execute(scenario['execution'], agents)
+            LOG.debug('Result: %s', result)
+    except Exception as e:
+        LOG.error('Error while executing scenario: %s', e)
+    finally:
+        if deployment:
+            deployment.cleanup()
 
-    if cfg.CONF.scenario:
-        # run scenario
-        scenario = read_scenario()
-
-        deployment = None
-        agents = {}
-        result = []
-
-        try:
-            deployment = deploy.Deployment(cfg.CONF.os_username,
-                                           cfg.CONF.os_password,
-                                           cfg.CONF.os_tenant_name,
-                                           cfg.CONF.os_auth_url,
-                                           cfg.CONF.os_region_name,
-                                           cfg.CONF.server_endpoint,
-                                           cfg.CONF.external_net,
-                                           cfg.CONF.flavor_name,
-                                           cfg.CONF.image_name)
-
-            agents = deployment.deploy(
-                scenario['deployment'],
-                base_dir=os.path.dirname(cfg.CONF.scenario))
-            LOG.debug('Deployed agents: %s', agents)
-
-            if not agents:
-                LOG.warning('No agents deployed.')
-            else:
-                result = execute(scenario['execution'], agents)
-                LOG.debug('Result: %s', result)
-        except Exception as e:
-            LOG.error('Error while executing scenario: %s', cfg.CONF.scenario)
-        finally:
-            if deployment:
-                deployment.cleanup()
-
-        report_data = dict(scenario=yaml.dump(scenario),
-                           agents=agents.values(),
-                           result=result)
-        if cfg.CONF.output:
-            utils.write_file(json.dumps(report_data), cfg.CONF.output)
-
-    elif cfg.CONF.input:
-        # read json results
-        LOG.debug('Reading JSON data from %s', cfg.CONF.input)
-        report_data = json.loads(utils.read_file(cfg.CONF.input))
+    report_data = dict(scenario=yaml.dump(scenario),
+                       agents=agents.values(),
+                       result=result)
+    if cfg.CONF.output:
+        utils.write_file(json.dumps(report_data), cfg.CONF.output)
 
     report.generate_report(cfg.CONF.report_template, cfg.CONF.report,
                            report_data)

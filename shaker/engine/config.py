@@ -74,8 +74,16 @@ OPENSTACK_OPTS = [
 SERVER_OPTS = [
     cfg.StrOpt('scenario',
                default=utils.env('SHAKER_SCENARIO'),
+               required=True,
                help='Scenario file name, defaults to env[SHAKER_SCENARIO].'),
 
+    cfg.StrOpt('output',
+               default=utils.env('SHAKER_OUTPUT'),
+               help='File for output in JSON format, '
+                    'defaults to env[SHAKER_OUTPUT].'),
+]
+
+REPORT_OPTS = [
     cfg.StrOpt('report-template',
                default=(utils.env('SHAKER_REPORT_TEMPLATE') or
                         'shaker/resources/report_template.jinja2'),
@@ -84,13 +92,12 @@ SERVER_OPTS = [
                default=utils.env('SHAKER_REPORT'),
                help='Report file name, defaults to env[SHAKER_REPORT]. '
                     'If no value provided the report is printed to stdout.'),
+]
 
-    cfg.StrOpt('output',
-               default=utils.env('SHAKER_OUTPUT'),
-               help='File for output in JSON format, '
-                    'defaults to env[SHAKER_OUTPUT].'),
+INPUT_OPTS = [
     cfg.StrOpt('input',
                default=utils.env('SHAKER_INPUT'),
+               required=True,
                help='File to read test results from, '
                     'defaults to env[SHAKER_INPUT].'),
 ]
@@ -115,5 +122,7 @@ def list_opts():
     yield (None, copy.deepcopy(COMMON_OPTS))
     yield (None, copy.deepcopy(OPENSTACK_OPTS))
     yield (None, copy.deepcopy(SERVER_OPTS))
+    yield (None, copy.deepcopy(REPORT_OPTS))
+    yield (None, copy.deepcopy(INPUT_OPTS))
     yield (None, copy.deepcopy(AGENT_OPTS))
     yield (None, copy.deepcopy(IMAGE_BUILDER_OPTS))

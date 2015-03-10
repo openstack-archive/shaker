@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging as std_logging
 import uuid
 
 from oslo_config import cfg
@@ -32,25 +31,8 @@ LOG = logging.getLogger(__name__)
 
 
 def init():
-    # init conf and logging
-    conf = cfg.CONF
-    opts = config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS
-    conf.register_cli_opts(opts)
-    conf.register_opts(opts)
-    logging.register_options(conf)
-    logging.set_defaults()
-
-    try:
-        conf(project='shaker')
-        utils.validate_required_opts(conf, opts)
-    except cfg.RequiredOptError as e:
-        print('Error: %s' % e)
-        conf.print_usage()
-        exit(1)
-
-    logging.setup(conf, 'shaker')
-    LOG.info('Logging enabled')
-    conf.log_opt_values(LOG, std_logging.DEBUG)
+    utils.init_config_and_logging(
+        config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS)
 
     openstack_client = openstack.OpenStackClient(
         username=cfg.CONF.os_username, password=cfg.CONF.os_password,
