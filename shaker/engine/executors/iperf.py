@@ -13,11 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
 import csv
 
 from shaker.engine.executors import base
-from shaker.engine import math
 
 
 class IperfExecutor(base.BaseExecutor):
@@ -40,9 +38,6 @@ class IperfExecutor(base.BaseExecutor):
         return cmd.make()
 
 
-Sample = collections.namedtuple('Sample', ['start', 'end', 'value'])
-
-
 class IperfGraphExecutor(IperfExecutor):
     def get_command(self):
         self.test_definition['csv'] = True
@@ -63,12 +58,10 @@ class IperfGraphExecutor(IperfExecutor):
                     continue
 
                 start, end = row[6].split('-')
-                samples.append(Sample(start=float(start),
-                                      end=float(end),
-                                      value=int(row[8])))
+                samples.append((float(end), int(row[8])))
 
         samples.pop()  # the last line is summary, remove it
 
         result['samples'] = samples
-        result.update(math.calc_traffic_stats(samples))
+        result['meta'] = [('time', 'sec'), ('bandwidth', 'bps')]
         return result

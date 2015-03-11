@@ -394,7 +394,37 @@
                         {% set cnt = result_per_iteration.agents|length %}
                         <div id="test-{{ test.definition.uuid }}-{{ cnt }}" class="tab-pane">
 
-                            <h4>Iteration Summary</h4>
+                            <h3>Iteration Summary</h3>
+
+                            {% if result_per_iteration.stats %}
+                                <h5>Traffic stats</h5>
+                                <dl class="dl-horizontal">
+                                    <dt>Max bandwidth</dt><dd>{{ result_per_iteration.stats.max|round(2) }} Mbits/s</dd>
+                                    <dt>Min bandwidth</dt><dd>{{ result_per_iteration.stats.min|round(2) }} Mbits/s</dd>
+                                    <dt>Mean bandwidth</dt><dd>{{ result_per_iteration.stats.mean|round(2) }} Mbits/s</dd>
+                                </dl>
+                            {% endif %}
+
+                            {% if result_per_iteration.agent_chart %}
+                                <h5>Agent Chart</h5>
+                                    <div id="chart-{{ result_per_iteration.agent_chart.uuid }}"></div>
+                                    <script type="application/javascript">
+                                        $(document).ready(function () {
+                                        c3.generate({
+                                            bindto: '#chart-{{ result_per_iteration.agent_chart.uuid }}',
+                                            data: {
+                                                x: 'x',
+                                                columns: {{ result_per_iteration.agent_chart.data|jsonify }},
+                                                type: 'area-step',
+                                                order: null
+                                            },
+                                            axis: {
+                                                x: { type: 'category' }
+                                            }
+                                        });
+                                        });
+                                    </script>
+                            {% endif %}
 
                             {####  PER-AGENT DATA  ####}
                             {% for result_per_agent in result_per_iteration.results_per_agent %}
@@ -405,9 +435,9 @@
                                     <h5>Traffic stats</h5>
 
                                     <dl class="dl-horizontal">
-                                      <dt>Max bandwidth</dt><dd>{{ result_per_agent.stats.max / 1024 / 1024|round(2) }} Mbits/s</dd>
-                                      <dt>Min bandwidth</dt><dd>{{ result_per_agent.stats.min / 1024 / 1024|round(2) }} Mbits/s</dd>
-                                      <dt>Mean bandwidth</dt><dd>{{ result_per_agent.stats.mean / 1024 / 1024|round(2) }} Mbits/s</dd>
+                                      <dt>Max bandwidth</dt><dd>{{ result_per_agent.stats.max|round(2) }} Mbits/s</dd>
+                                      <dt>Min bandwidth</dt><dd>{{ result_per_agent.stats.min|round(2) }} Mbits/s</dd>
+                                      <dt>Mean bandwidth</dt><dd>{{ result_per_agent.stats.mean|round(2) }} Mbits/s</dd>
                                     </dl>
 
                                     <div id="chart-{{ result_per_agent.uuid }}"></div>
@@ -417,12 +447,7 @@
                                             bindto: '#chart-{{ result_per_agent.uuid }}',
                                             data: {
                                                 x: 'time',
-                                                rows: [
-                                                    ['time', 'bandwidth']
-                                                    {% for row in result_per_agent.row_data %}
-                                                        ,['{{ row[0] }}', {{ row[1] / 1024 / 1024 }}]
-                                                    {% endfor %}
-                                                ],
+                                                columns: {{ result_per_agent.chart|jsonify }},
                                                 types: { bandwidth: 'area' }
                                             },
                                             axis: {

@@ -20,6 +20,7 @@ import jinja2
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from shaker.engine import aggregators
 from shaker.engine import config
 from shaker.engine import utils
 
@@ -27,12 +28,29 @@ from shaker.engine import utils
 LOG = logging.getLogger(__name__)
 
 
+def calculate_stats(data):
+    for test_result in data['result']:
+        aggregator = aggregators.get_aggregator(test_result['definition'])
+
+        for iteration_result in test_result['results_per_iteration']:
+            for agent_result in iteration_result['results_per_agent']:
+                aggregator.agent_summary(agent_result)
+
+            aggregator.iteration_summary(iteration_result)
+
+
 def generate_report(report_template, report_filename, data):
     LOG.debug('Generating report, template: %s, output: %s',
               report_template, report_filename or 'stdout')
 
+    calculate_stats(data)
+
+    # add more filters to jinja
+    jinja_env = jinja2.Environment()
+    jinja_env.filters['jsonify'] = json.dumps
+
     template = utils.read_file(report_template)
-    compiled_template = jinja2.Template(template)
+    compiled_template = jinja_env.from_string(template)
     rendered_template = compiled_template.render(dict(report=data))
 
     if report_filename:
