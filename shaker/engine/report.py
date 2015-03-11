@@ -13,12 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
 import json
 import sys
 
 import jinja2
 from oslo_config import cfg
 from oslo_log import log as logging
+import yaml
 
 from shaker.engine import aggregators
 from shaker.engine import config
@@ -47,7 +49,9 @@ def generate_report(report_template, report_filename, data):
 
     # add more filters to jinja
     jinja_env = jinja2.Environment()
-    jinja_env.filters['jsonify'] = json.dumps
+    jinja_env.filters['json'] = json.dumps
+    jinja_env.filters['yaml'] = functools.partial(yaml.safe_dump, indent=2,
+                                                  default_flow_style=False)
 
     template = utils.read_file(report_template)
     compiled_template = jinja_env.from_string(template)

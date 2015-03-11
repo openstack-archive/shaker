@@ -234,7 +234,7 @@ def main():
         if deployment:
             deployment.cleanup()
 
-    report_data = dict(scenario=yaml.dump(scenario),
+    report_data = dict(scenario=scenario,
                        agents=agents.values(),
                        result=result)
     if cfg.CONF.output:

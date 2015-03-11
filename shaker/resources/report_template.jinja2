@@ -21,6 +21,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.9/c3.min.js"></script>
 
+    <script type="text/javascript" src="https://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
+    <link rel=stylesheet type=text/css href="https://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css">
+
     <style type="text/css">
         body {
             padding-top: 50px;
@@ -304,6 +307,18 @@
 
     </style>
 
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $("#scenario_agents").dataTable({
+                "autoWidth": true,
+                "paging":   false,
+                "ordering": false,
+                "info":     false
+            });
+        });
+
+    </script>
+
 </head>
 
 <body>
@@ -362,32 +377,42 @@
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
             <div class="tab-content">
                 <div id="scenario" class="tab-pane active">
-                    <h4>Scenario:</h4>
-                    <pre>{{ report.scenario }}</pre>
+                    <h3>Scenario:</h3>
+                    <pre>{{ report.scenario|yaml }}</pre>
 
-                    <h4>Agents:</h4>
-                    <ul>
+                    <h3>Agents:</h3>
+                    <table id="scenario_agents">
+                        <thead><tr><th>Agent</th><th>Mode</th><th>IP</th><th>Node</th><th>Instance Name</th></tr></thead>
+                        <tbody>
                         {% for agent in report.agents %}
                             {% if agent.mode != 'slave' %}
-                            <li>Master <i>{{ agent.id }}</i>, IP: <i>{{ agent.ip }}</i>,
-                                node: <i>{{ agent.node }}</i>, instance: <i>{{ agent.instance_name }}</i>
+                                <tr>
+                                    <td>{{ agent.id }}</td>
+                                    <td>{{ agent.mode }}</td>
+                                    <td>{{ agent.ip }}</td>
+                                    <td>{{ agent.node }}</td>
+                                    <td>{{ agent.instance_name }}</td>
+                                </tr>
                                 {% if agent.slave %}
-                                    <ul>
-                                        <li>Slave <i>{{ agent.slave.id }}</i>, IP: <i>{{ agent.slave.ip }}</i>,
-                                            node: <i>{{ agent.slave.node }}</i>, instance: <i>{{ agent.slave.instance_name }}</i>
-                                    </ul>
+                                    <tr style="background-color: #efefef">
+                                        <td style="padding-left: 2em;">{{ agent.slave.id }}</td>
+                                        <td>{{ agent.slave.mode }}</td>
+                                        <td>{{ agent.slave.ip }}</td>
+                                        <td>{{ agent.slave.node }}</td>
+                                        <td>{{ agent.slave.instance_name }}</td>
+                                    </tr>
                                 {% endif %}
-                            </li>
                             {% endif %}
                         {% endfor %}
-                    </ul>
+                        </tbody>
+                    </table>
                 </div>
 
                 {% set tests = report.result %}
                 {% for test in tests %}
                     <div id="test-{{ test.definition.uuid }}" class="tab-pane">
-                        <h4>Test Case</h4>
-                        <pre>{{ test.definition|pprint }}</pre>
+                        <h3>Test Case Specification</h3>
+                        <pre>{{ test.definition|yaml }}</pre>
                     </div>
 
                     {% for result_per_iteration in test.results_per_iteration %}
@@ -414,7 +439,7 @@
                                             bindto: '#chart-{{ result_per_iteration.agent_chart.uuid }}',
                                             data: {
                                                 x: 'x',
-                                                columns: {{ result_per_iteration.agent_chart.data|jsonify }},
+                                                columns: {{ result_per_iteration.agent_chart.data|json }},
                                                 type: 'area-step',
                                                 order: null
                                             },
@@ -447,7 +472,7 @@
                                             bindto: '#chart-{{ result_per_agent.uuid }}',
                                             data: {
                                                 x: 'time',
-                                                columns: {{ result_per_agent.chart|jsonify }},
+                                                columns: {{ result_per_agent.chart|json }},
                                                 types: { bandwidth: 'area' }
                                             },
                                             axis: {
