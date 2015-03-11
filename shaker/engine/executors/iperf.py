@@ -16,69 +16,13 @@
 import collections
 import csv
 
-from oslo_log import log as logging
+from shaker.engine.executors import base
 from shaker.engine import math
 
 
-LOG = logging.getLogger(__name__)
-
-
-class CommandLine(object):
-    def __init__(self, command):
-        self.commands = [command]
-
-    def add(self, param_name, param_value=None):
-        self.commands.append('%s' % param_name)
-        if param_value:
-            self.commands.append(str(param_value))
-
-    def make(self):
-        return ' '.join(self.commands)
-
-
-class BaseExecutor(object):
-    def __init__(self, test_definition, agent):
-        super(BaseExecutor, self).__init__()
-        self.test_definition = test_definition
-        self.agent = agent
-
+class IperfExecutor(base.BaseExecutor):
     def get_command(self):
-        return None
-
-    def process_reply(self, message):
-        LOG.debug('Test %s on agent %s finished with %s',
-                  self.test_definition, self.agent, message)
-        return dict(stdout=message.get('stdout'),
-                    stderr=message.get('stderr'),
-                    command=self.get_command(),
-                    agent=self.agent)
-
-
-class ShellExecutor(BaseExecutor):
-    def get_command(self):
-        return self.test_definition['method']
-
-
-class NetperfExecutor(BaseExecutor):
-    def get_command(self):
-        cmd = CommandLine('netperf')
-        cmd.add('-H', self.agent['slave']['ip'])
-        cmd.add('-l', self.test_definition.get('time') or 60)
-        cmd.add('-t', self.test_definition.get('method') or 'TCP_STREAM')
-        return cmd.make()
-
-
-class NetperfWrapperExecutor(BaseExecutor):
-    def get_command(self):
-        target_ip = self.agent['slave']['ip']
-        return ('netperf-wrapper -H %(ip)s -f stats %(method)s' %
-                dict(ip=target_ip,
-                     method=self.test_definition['method']))
-
-
-class IperfExecutor(BaseExecutor):
-    def get_command(self):
-        cmd = CommandLine('sudo nice -n -20 iperf')
+        cmd = base.CommandLine('sudo nice -n -20 iperf')
         cmd.add('--client', self.agent['slave']['ip'])
         cmd.add('--format', 'm')
         cmd.add('--nodelay')
@@ -128,20 +72,3 @@ class IperfGraphExecutor(IperfExecutor):
         result['samples'] = samples
         result.update(math.calc_traffic_stats(samples))
         return result
-
-
-EXECUTORS = {
-    'shell': ShellExecutor,
-    'netperf': NetperfExecutor,
-    'iperf': IperfExecutor,
-    'iperf_graph': IperfGraphExecutor,
-    'netperf_wrapper': NetperfWrapperExecutor,
-    '_default': ShellExecutor,
-}
-
-
-def get_executor(test_definition, agent):
-    # returns executor of the specified test on the specified agent
-    executor_class = test_definition['class']
-    klazz = EXECUTORS.get(executor_class, EXECUTORS['_default'])
-    return klazz(test_definition, agent)

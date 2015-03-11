@@ -13,26 +13,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import testtools
-
+from shaker.engine.executors import base
+from shaker.engine.executors import iperf
 from shaker.engine.executors import netperf
 
 
-IP = '10.0.0.10'
-AGENT = {'slave': {'ip': IP}}
+EXECUTORS = {
+    'shell': base.ShellExecutor,
+    'netperf': netperf.NetperfExecutor,
+    'iperf': iperf.IperfExecutor,
+    'iperf_graph': iperf.IperfGraphExecutor,
+    'netperf_wrapper': netperf.NetperfWrapperExecutor,
+    '_default': base.ShellExecutor,
+}
 
 
-class TestNetperfExecutor(testtools.TestCase):
-
-    def test_get_command(self):
-        executor = netperf.NetperfExecutor({}, AGENT)
-
-        expected = 'netperf -H %s -l 60 -t TCP_STREAM' % IP
-        self.assertEqual(expected, executor.get_command())
-
-    def test_get_command_options(self):
-        executor = netperf.NetperfExecutor(
-            {'method': 'UDP_STREAM', 'time': 30}, AGENT)
-
-        expected = 'netperf -H %s -l 30 -t UDP_STREAM' % IP
-        self.assertEqual(expected, executor.get_command())
+def get_executor(test_definition, agent):
+    # returns executor of the specified test on the specified agent
+    executor_class = test_definition['class']
+    klazz = EXECUTORS.get(executor_class, EXECUTORS['_default'])
+    return klazz(test_definition, agent)

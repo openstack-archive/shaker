@@ -15,7 +15,7 @@
 
 import testtools
 
-from shaker.engine import executors
+from shaker.engine.executors import iperf
 
 
 IP = '10.0.0.10'
@@ -25,7 +25,7 @@ AGENT = {'slave': {'ip': IP}}
 class TestIperfGraphExecutor(testtools.TestCase):
 
     def test_get_command(self):
-        executor = executors.IperfGraphExecutor({}, AGENT)
+        executor = iperf.IperfGraphExecutor({}, AGENT)
 
         expected = ('sudo nice -n -20 iperf --client %s --format m --nodelay '
                     '--len 8k --time 60 --parallel 1 '
@@ -33,7 +33,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
         self.assertEqual(expected, executor.get_command())
 
     def test_get_command_udp(self):
-        executor = executors.IperfGraphExecutor(
+        executor = iperf.IperfGraphExecutor(
             {'udp': True, 'time': 30}, AGENT)
 
         expected = ('sudo nice -n -20 iperf --client %s --format m --nodelay '
@@ -42,7 +42,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
         self.assertEqual(expected, executor.get_command())
 
     def test_process_reply(self):
-        executor = executors.IperfGraphExecutor({}, AGENT)
+        executor = iperf.IperfGraphExecutor({}, AGENT)
         message = {
             'stdout': """
 20150224134955,172.1.7.77,47351,172.1.76.77,5001,3,0.0-1.0,50068684,399507456
@@ -53,9 +53,9 @@ class TestIperfGraphExecutor(testtools.TestCase):
         }
         expected = {
             'samples': [
-                executors.Sample(0.0, 1.0, 399507456),
-                executors.Sample(1.0, 2.0, 412090368),
-                executors.Sample(2.0, 3.0, 405798912),
+                iperf.Sample(0.0, 1.0, 399507456),
+                iperf.Sample(1.0, 2.0, 412090368),
+                iperf.Sample(2.0, 3.0, 405798912),
             ],
             'row_data': [
                 [1.0, 399507456],
