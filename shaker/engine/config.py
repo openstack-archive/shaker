@@ -25,6 +25,9 @@ COMMON_OPTS = [
                required=True,
                help='Address for server connections (host:port), '
                     'defaults to env[SHAKER_SERVER_ENDPOINT].'),
+    cfg.IntOpt('polling-interval',
+               default=10,
+               help='How frequently the agent polls server, in seconds')
 ]
 
 OPENSTACK_OPTS = [
@@ -119,10 +122,6 @@ IMAGE_BUILDER_OPTS = [
 
 
 def list_opts():
-    yield (None, copy.deepcopy(COMMON_OPTS))
-    yield (None, copy.deepcopy(OPENSTACK_OPTS))
-    yield (None, copy.deepcopy(SERVER_OPTS))
-    yield (None, copy.deepcopy(REPORT_OPTS))
-    yield (None, copy.deepcopy(INPUT_OPTS))
-    yield (None, copy.deepcopy(AGENT_OPTS))
-    yield (None, copy.deepcopy(IMAGE_BUILDER_OPTS))
+    all_opts = (COMMON_OPTS + OPENSTACK_OPTS + SERVER_OPTS + REPORT_OPTS +
+                INPUT_OPTS + AGENT_OPTS + IMAGE_BUILDER_OPTS)
+    yield (None, copy.deepcopy(all_opts))

@@ -19,9 +19,11 @@ import time
 from oslo_concurrency import processutils
 from oslo_config import cfg
 from oslo_log import log as logging
+import sys
 import zmq
 
 from shaker.engine import config
+from shaker.engine import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -54,29 +56,12 @@ def send_reply(socket, agent_id, result):
 
 
 def main():
-    # init conf and logging
-    conf = cfg.CONF
-    conf.register_cli_opts(config.COMMON_OPTS)
-    conf.register_cli_opts(config.AGENT_OPTS)
-    conf.register_opts(config.COMMON_OPTS)
-    conf.register_opts(config.AGENT_OPTS)
-    logging.register_options(conf)
-    logging.set_defaults()
-
-    try:
-        conf(project='shaker')
-    except cfg.RequiredOptError as e:
-        print('Error: %s' % e)
-        conf.print_usage()
-        exit(1)
-
-    logging.setup(conf, 'shaker')
-    LOG.info('Logging enabled')
+    utils.init_config_and_logging(config.COMMON_OPTS + config.AGENT_OPTS)
 
     endpoint = cfg.CONF.server_endpoint
-
+    polling_interval = cfg.CONF.polling_interval
     agent_id = cfg.CONF.agent_id
-    LOG.info('My instance id is: %s', agent_id)
+    LOG.info('My id is: %s', agent_id)
 
     context = zmq.Context()
     LOG.info('Connecting to server: %s', endpoint)
@@ -98,20 +83,23 @@ def main():
 
                 # do something useful
                 command_stdout, command_stderr = processutils.execute(
-                    *shlex.split(command))
+                    *shlex.split(command), check_exit_code=False)
                 send_reply(socket, agent_id, {
                     'stdout': command_stdout,
                     'stderr': command_stderr,
                 })
+            elif task['operation'] == 'configure':
+                if 'polling_interval' in task:
+                    polling_interval = task.get('polling_interval')
 
-            time.sleep(10)
+            time.sleep(polling_interval)
 
     except BaseException as e:
-        if not isinstance(e, KeyboardInterrupt):
+        if isinstance(e, KeyboardInterrupt):
+            LOG.info('The process is interrupted')
+            sys.exit(3)
+        else:
             LOG.exception(e)
-    finally:
-        LOG.info('Shutting down')
-
 
 if __name__ == "__main__":
     main()
