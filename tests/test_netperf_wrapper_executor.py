@@ -15,50 +15,55 @@
 
 import testtools
 
-from shaker.engine.executors import iperf
+from shaker.engine.executors import netperf
 
 
 IP = '10.0.0.10'
 AGENT = {'slave': {'ip': IP}}
 
 
-class TestIperfGraphExecutor(testtools.TestCase):
+class TestNetperfWrapperExecutor(testtools.TestCase):
 
     def test_get_command(self):
-        executor = iperf.IperfGraphExecutor({}, AGENT)
+        executor = netperf.NetperfWrapperExecutor({}, AGENT)
 
-        expected = ('sudo nice -n -20 iperf --client %s --format m --nodelay '
-                    '--len 8k --time 60 --parallel 1 '
-                    '--reportstyle C --interval 1') % IP
+        expected = 'netperf-wrapper -H %s -l 60 -s 1 -f csv tcp_download' % IP
         self.assertEqual(expected, executor.get_command())
 
-    def test_get_command_udp(self):
-        executor = iperf.IperfGraphExecutor(
-            {'udp': True, 'time': 30}, AGENT)
+    def test_get_command_with_params(self):
+        executor = netperf.NetperfWrapperExecutor(
+            dict(method='ping', time=10, interval=0.5), AGENT)
 
-        expected = ('sudo nice -n -20 iperf --client %s --format m --nodelay '
-                    '--len 8k --udp --time 30 --parallel 1 '
-                    '--reportstyle C --interval 1') % IP
+        expected = 'netperf-wrapper -H %s -l 10 -s 0.5 -f csv ping' % IP
         self.assertEqual(expected, executor.get_command())
 
     def test_process_reply(self):
-        executor = iperf.IperfGraphExecutor({}, AGENT)
+        executor = netperf.NetperfWrapperExecutor({}, AGENT)
         message = {
-            'stdout': """
-20150224134955,172.1.7.77,47351,172.1.76.77,5001,3,0.0-1.0,50068684,399507456
-20150224134956,172.1.7.77,47351,172.1.76.77,5001,3,1.0-2.0,51605504,412090368
-20150224134957,172.1.7.77,47351,172.1.76.77,5001,3,2.0-3.0,50843648,405798912
-20150224134957,172.1.7.77,47351,172.1.76.77,5001,3,0.0-3.0,150843648,400000002
+            'stdout': """tcp_download,Ping ICMP,TCP download
+0.0,0.09,
+2.0,0.0800211283506,
+4.0,0.0602545096056,
+6.0,0.0502416561724,28555.9
+8.0,0.05,25341.9871721
+10.0,0.0500947171761,30486.4518264
+12.0,0.0603484557656,
+14.0,0.0603987445198,
 """
         }
         expected = {
             'samples': [
-                [1.0, 399507456],
-                [2.0, 412090368],
-                [3.0, 405798912],
+                [0.0, 0.09, None],
+                [2.0, 0.0800211283506, None],
+                [4.0, 0.0602545096056, None],
+                [6.0, 0.0502416561724, 28555.9],
+                [8.0, 0.05, 25341.9871721],
+                [10.0, 0.0500947171761, 30486.4518264],
+                [12.0, 0.0603484557656, None],
+                [14.0, 0.0603987445198, None],
             ],
             'meta': [
-                ['time', 's'], ['bandwidth', 'bps']
+                ['time', 's'], ['Ping ICMP', 'ms'], ['TCP download', 'Mbps'],
             ]
         }
         reply = executor.process_reply(message)

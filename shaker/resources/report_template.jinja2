@@ -457,14 +457,19 @@
                                     ({{ result_per_agent.agent.ip }})</h4>
 
                                 {% if result_per_agent.samples %}
-                                    <h5>Traffic stats</h5>
+                                    {% if result_per_agent.stats %}
+                                        {% for stat_title, stat_values in result_per_agent.stats.items() %}
+                                        <h5>Stats for {{ stat_title }}</h5>
 
-                                    <dl class="dl-horizontal">
-                                      <dt>Max bandwidth</dt><dd>{{ result_per_agent.stats.max|round(2) }} Mbits/s</dd>
-                                      <dt>Min bandwidth</dt><dd>{{ result_per_agent.stats.min|round(2) }} Mbits/s</dd>
-                                      <dt>Mean bandwidth</dt><dd>{{ result_per_agent.stats.mean|round(2) }} Mbits/s</dd>
-                                    </dl>
+                                        <dl class="dl-horizontal">
+                                          <dt>Max</dt><dd>{{ stat_values.max|round(2) }} {{ stat_values.unit }}</dd>
+                                          <dt>Min</dt><dd>{{ stat_values.min|round(2) }} {{ stat_values.unit }}</dd>
+                                          <dt>Mean</dt><dd>{{ stat_values.mean|round(2) }} {{ stat_values.unit }}</dd>
+                                        </dl>
+                                        {% endfor %}
+                                    {% endif %}
 
+                                    {% if result_per_agent.chart %}
                                     <div id="chart-{{ result_per_agent.uuid }}"></div>
                                     <script type="application/javascript">
                                         $(document).ready(function () {
@@ -482,6 +487,7 @@
                                         });
                                         });
                                     </script>
+                                    {% endif %}
                                 {% endif %}
 
                                 {% if result_per_agent.command %}

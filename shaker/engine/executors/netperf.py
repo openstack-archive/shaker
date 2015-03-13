@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import csv
+
 from shaker.engine.executors import base
 
 
@@ -27,7 +29,28 @@ class NetperfExecutor(base.BaseExecutor):
 
 class NetperfWrapperExecutor(base.BaseExecutor):
     def get_command(self):
-        target_ip = self.agent['slave']['ip']
-        return ('netperf-wrapper -H %(ip)s -f stats %(method)s' %
-                dict(ip=target_ip,
-                     method=self.test_definition['method']))
+        cmd = base.CommandLine('netperf-wrapper')
+        cmd.add('-H', self.agent['slave']['ip'])
+        cmd.add('-l', self.test_definition.get('time') or 60)
+        cmd.add('-s', self.test_definition.get('interval') or 1)
+        cmd.add('-f', 'csv')
+        cmd.add(self.test_definition.get('method') or 'tcp_download')
+        return cmd.make()
+
+    def process_reply(self, message):
+        result = super(NetperfWrapperExecutor, self).process_reply(message)
+
+        data_stream = csv.reader(result['stdout'].split('\n'))
+
+        header = data_stream.next()
+        meta = [['time', 's']]
+        for el in header[1:]:
+            if el.find('Ping') >= 0:
+                meta.append([el, 'ms'])
+            else:
+                meta.append([el, 'Mbps'])
+        result['meta'] = meta
+
+        result['samples'] = [[(float(x) if x else None) for x in row]
+                             for row in data_stream if row]
+        return result

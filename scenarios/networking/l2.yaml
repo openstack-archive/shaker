@@ -13,10 +13,18 @@ execution:
     class: iperf_graph
     time: 60
   -
-    title: Iperf UDP 5 threads
+    title: TCP download
+    class: netperf_wrapper
+    method: tcp_download
+  -
+    title: TCP bi-directional
+    class: netperf_wrapper
+    method: tcp_bidirectional
+  -
+    title: Iperf UDP 8 threads
     class: iperf
     udp: 1
-    threads: 5
+    threads: 8
   -
     title: Netperf TCP_STREAM
     class: netperf
