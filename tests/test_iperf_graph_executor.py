@@ -53,12 +53,12 @@ class TestIperfGraphExecutor(testtools.TestCase):
         }
         expected = {
             'samples': [
-                (1.0, 399507456),
-                (2.0, 412090368),
-                (3.0, 405798912),
+                [1.0, 399507456],
+                [2.0, 412090368],
+                [3.0, 405798912],
             ],
             'meta': [
-                ('time', 'sec'), ('bandwidth', 'bps')
+                ['time', 'sec'], ['bandwidth', 'bps']
             ]
         }
         reply = executor.process_reply(message)

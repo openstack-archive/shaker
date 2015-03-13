@@ -58,10 +58,10 @@ class IperfGraphExecutor(IperfExecutor):
                     continue
 
                 start, end = row[6].split('-')
-                samples.append((float(end), int(row[8])))
+                samples.append([float(end), int(row[8])])
 
         samples.pop()  # the last line is summary, remove it
 
         result['samples'] = samples
-        result['meta'] = [('time', 'sec'), ('bandwidth', 'bps')]
+        result['meta'] = [['time', 'sec'], ['bandwidth', 'bps']]
         return result
