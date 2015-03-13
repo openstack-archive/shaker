@@ -18,6 +18,9 @@ class BaseAggregator(object):
     def __init__(self, test_definition):
         self.test_definition = test_definition
 
+    def test_summary(self, test_data):
+        pass
+
     def iteration_summary(self, iteration_data):
         pass
 

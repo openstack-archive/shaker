@@ -19,6 +19,7 @@ from shaker.engine.aggregators import traffic
 
 AGGREGATORS = {
     'iperf_graph': traffic.TrafficAggregator,
+    'netperf_wrapper': traffic.TrafficAggregator,
     '_default': base.BaseAggregator,
 }
 

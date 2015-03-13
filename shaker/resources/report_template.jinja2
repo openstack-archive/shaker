@@ -360,13 +360,14 @@
                         {% endif %}
                     </a></li>
 
+                    {% set iterations = test.results_per_iteration|length %}
                     {% for result_per_iteration in test.results_per_iteration %}
                         {% set cnt = result_per_iteration.agents|length %}
                         <li class="col-md-offset-1"><a href="#test-{{ test.definition.uuid }}-{{ cnt }}" data-toggle="tab">
-                            {% if cnt == 1 %}
-                                full iteration
+                            {% if iterations == 1 %}
+                                Details
                             {% else %}
-                                {{ cnt }} threads
+                                {{ cnt }} Threads
                             {% endif %}
                         </a></li>
                     {% endfor %}
@@ -413,6 +414,31 @@
                     <div id="test-{{ test.definition.uuid }}" class="tab-pane">
                         <h3>Test Case Specification</h3>
                         <pre>{{ test.definition|yaml }}</pre>
+
+                        {# show summary only of number of iterations > 1 #}
+                        {% set iteration_cnt = test.results_per_iteration|length %}
+                        {% if iteration_cnt > 1 %}
+
+                        {% if test.chart %}
+                            <div id="chart-{{ test.definition.uuid }}"></div>
+                            <script type="application/javascript">
+                                $(document).ready(function () {
+                                c3.generate({
+                                    bindto: '#chart-{{ test.definition.uuid }}',
+                                    data: {
+                                        x: 'x',
+                                        columns: {{ test.chart|json }},
+                                        type: 'step'
+                                    },
+                                    axis: {
+                                        x: { label: '# threads' },
+                                        y: { label: 'Bandwidth, Mbits/s', min: 0 }
+                                    }
+                                });
+                                });
+                            </script>
+                        {% endif %}
+                        {% endif %}
                     </div>
 
                     {% for result_per_iteration in test.results_per_iteration %}
@@ -421,26 +447,57 @@
 
                             <h3>Iteration Summary</h3>
 
+                            {# show summary only of number of agents > 1 #}
+                            {% set agent_cnt = result_per_iteration.results_per_agent|length %}
+                            {% if agent_cnt > 1 %}
+
                             {% if result_per_iteration.stats %}
-                                <h5>Traffic stats</h5>
-                                <dl class="dl-horizontal">
-                                    <dt>Max bandwidth</dt><dd>{{ result_per_iteration.stats.max|round(2) }} Mbits/s</dd>
-                                    <dt>Min bandwidth</dt><dd>{{ result_per_iteration.stats.min|round(2) }} Mbits/s</dd>
-                                    <dt>Mean bandwidth</dt><dd>{{ result_per_iteration.stats.mean|round(2) }} Mbits/s</dd>
-                                </dl>
+                                <div class="row">
+                                {% for stat_title, stat_values in result_per_iteration.stats.items() %}
+                                    <div class="col-md-4">
+                                        <h5>Stats for {{ stat_title }}</h5>
+
+                                        <dl class="dl-horizontal">
+                                            <dt>Max</dt><dd>{{ stat_values.max|round(2) }} {{ stat_values.unit }}</dd>
+                                            <dt>Min</dt><dd>{{ stat_values.min|round(2) }} {{ stat_values.unit }}</dd>
+                                            <dt>Mean</dt><dd>{{ stat_values.mean|round(2) }} {{ stat_values.unit }}</dd>
+                                        </dl>
+                                    </div>
+                                {% endfor %}
+                                </div>
                             {% endif %}
 
-                            {% if result_per_iteration.agent_chart %}
-                                <h5>Agent Chart</h5>
-                                    <div id="chart-{{ result_per_iteration.agent_chart.uuid }}"></div>
+                            {% if result_per_iteration.chart %}
+                                <div id="chart-{{ result_per_iteration.uuid }}"></div>
+                                <script type="application/javascript">
+                                    $(document).ready(function () {
+                                    c3.generate({
+                                        bindto: '#chart-{{ result_per_iteration.uuid }}',
+                                        data: {
+                                            x: 'time',
+                                            columns: {{ result_per_iteration.chart|json }},
+                                            types: { bandwidth: 'area' }
+                                        },
+                                        axis: {
+                                            x: { label: 'time' },
+                                            y: { label: 'Bandwidth, Mbits/s', min: 0 }
+                                        }
+                                    });
+                                    });
+                                </script>
+                            {% endif %}
+
+                            {% if result_per_iteration.node_chart %}
+                                <h5>Per-node stats</h5>
+                                    <div id="chart-{{ result_per_iteration.uuid }}-node"></div>
                                     <script type="application/javascript">
                                         $(document).ready(function () {
                                         c3.generate({
-                                            bindto: '#chart-{{ result_per_iteration.agent_chart.uuid }}',
+                                            bindto: '#chart-{{ result_per_iteration.uuid }}-node',
                                             data: {
                                                 x: 'x',
-                                                columns: {{ result_per_iteration.agent_chart.data|json }},
-                                                type: 'area-step',
+                                                columns: {{ result_per_iteration.node_chart|json }},
+                                                type: 'step',
                                                 order: null
                                             },
                                             axis: {
@@ -450,21 +507,31 @@
                                         });
                                     </script>
                             {% endif %}
+                            {% endif %}
 
                             {####  PER-AGENT DATA  ####}
                             {% for result_per_agent in result_per_iteration.results_per_agent %}
                                 <h4>Agent {{ result_per_agent.agent.id }}
-                                    ({{ result_per_agent.agent.ip }})</h4>
+                                    ({{ result_per_agent.agent.ip }}, {{ result_per_agent.agent.node }})</h4>
 
                                 {% if result_per_agent.samples %}
-                                    <h5>Traffic stats</h5>
+                                    {% if result_per_agent.stats %}
+                                        <div class="row">
+                                        {% for stat_title, stat_values in result_per_agent.stats.items() %}
+                                            <div class="col-md-4">
+                                                <h5>Stats for {{ stat_title }}</h5>
 
-                                    <dl class="dl-horizontal">
-                                      <dt>Max bandwidth</dt><dd>{{ result_per_agent.stats.max|round(2) }} Mbits/s</dd>
-                                      <dt>Min bandwidth</dt><dd>{{ result_per_agent.stats.min|round(2) }} Mbits/s</dd>
-                                      <dt>Mean bandwidth</dt><dd>{{ result_per_agent.stats.mean|round(2) }} Mbits/s</dd>
-                                    </dl>
+                                                <dl class="dl-horizontal">
+                                                  <dt>Max</dt><dd>{{ stat_values.max|round(2) }} {{ stat_values.unit }}</dd>
+                                                  <dt>Min</dt><dd>{{ stat_values.min|round(2) }} {{ stat_values.unit }}</dd>
+                                                  <dt>Mean</dt><dd>{{ stat_values.mean|round(2) }} {{ stat_values.unit }}</dd>
+                                                </dl>
+                                            </div>
+                                        {% endfor %}
+                                        </div>
+                                    {% endif %}
 
+                                    {% if result_per_agent.chart %}
                                     <div id="chart-{{ result_per_agent.uuid }}"></div>
                                     <script type="application/javascript">
                                         $(document).ready(function () {
@@ -482,6 +549,7 @@
                                         });
                                         });
                                     </script>
+                                    {% endif %}
                                 {% endif %}
 
                                 {% if result_per_agent.command %}

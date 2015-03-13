@@ -63,5 +63,5 @@ class IperfGraphExecutor(IperfExecutor):
         samples.pop()  # the last line is summary, remove it
 
         result['samples'] = samples
-        result['meta'] = [['time', 'sec'], ['bandwidth', 'bps']]
+        result['meta'] = [['time', 's'], ['bandwidth', 'bps']]
         return result

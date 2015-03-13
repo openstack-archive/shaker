@@ -40,6 +40,8 @@ def calculate_stats(data):
 
             aggregator.iteration_summary(iteration_result)
 
+        aggregator.test_summary(test_result)
+
 
 def generate_report(report_template, report_filename, data):
     LOG.debug('Generating report, template: %s, output: %s',
