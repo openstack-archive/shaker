@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import ast
+import operator as op
+
 import logging as std_logging
 import os
 import random
@@ -119,3 +122,63 @@ def random_string(length=6):
 
 def copy_dict_kv(source):
     return dict((k, v) for k, v in source.items())
+
+
+def flatten_dict(d, prefix='', sep='.'):
+    res = []
+    for k, v in d.items():
+        path = prefix + k
+        if isinstance(v, dict):
+            res.extend(flatten_dict(v, path + sep))
+        else:
+            res.append((path, v))
+    return res
+
+
+# supported operators
+operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
+             ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
+             ast.USub: op.neg, ast.Lt: op.lt, ast.Gt: op.gt, ast.LtE: op.le,
+             ast.GtE: op.ge, ast.Eq: op.eq}
+
+
+def eval_expr(expr, ctx=None):
+    """Usage examples:
+
+    >>> eval_expr('2^6')
+    4
+    >>> eval_expr('2**6')
+    64
+    >>> eval_expr('1 + 2*3**(4^5) / (6 + -7)')
+    -5.0
+    >>> eval_expr('11 > a > 5', {'a': 7})
+    True
+    >>> eval_expr('2 + a.b', {'a': {'b': 2.2}})
+    4.2
+    """
+    ctx = ctx or {}
+    return _eval(ast.parse(expr, mode='eval').body, ctx)
+
+
+def _eval(node, ctx):
+    if isinstance(node, ast.Num):
+        return node.n
+    elif isinstance(node, ast.Name):
+        return ctx.get(node.id)
+    elif isinstance(node, ast.BinOp):
+        return operators[type(node.op)](_eval(node.left, ctx),
+                                        _eval(node.right, ctx))
+    elif isinstance(node, ast.UnaryOp):
+        return operators[type(node.op)](_eval(node.operand, ctx))
+    elif isinstance(node, ast.Compare):
+        x = _eval(node.left, ctx)
+        r = True
+        for i in range(len(node.ops)):
+            y = _eval(node.comparators[i], ctx)
+            r &= operators[type(node.ops[i])](x, y)
+            x = y
+        return r
+    elif isinstance(node, ast.Attribute):
+        return _eval(node.value, ctx).get(node.attr)
+    else:
+        raise TypeError(node)
