@@ -119,3 +119,14 @@ def random_string(length=6):
 
 def copy_dict_kv(source):
     return dict((k, v) for k, v in source.items())
+
+
+def flatten_dict(d, prefix='', sep='.'):
+    res = []
+    for k, v in d.items():
+        path = prefix + k
+        if isinstance(v, dict):
+            res.extend(flatten_dict(v, path + sep))
+        else:
+            res.append((path, v))
+    return res

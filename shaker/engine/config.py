@@ -95,6 +95,10 @@ REPORT_OPTS = [
                default=utils.env('SHAKER_REPORT'),
                help='Report file name, defaults to env[SHAKER_REPORT]. '
                     'If no value provided the report is printed to stdout.'),
+    cfg.StrOpt('subunit',
+               default=utils.env('SHAKER_SUBUNIT'),
+               help='Subunit stream file name, defaults to '
+                    'env[SHAKER_SUBUNIT].'),
 ]
 
 INPUT_OPTS = [
