@@ -29,9 +29,14 @@ LOG = logging.getLogger(__name__)
 def generate_agents(compute_nodes, vm_accommodation, unique):
     cn_count = len(compute_nodes)
     iterations = cn_count
+
+    for s in vm_accommodation:
+        if isinstance(s, dict) and s.get('density'):
+            iterations *= s.get('density')
+
     if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
         iterations //= 2
-    node_formulae = lambda x: compute_nodes[x % cn_count]
+    node_formula = lambda x: compute_nodes[x % cn_count]
 
     agents = {}
 
@@ -43,21 +48,21 @@ def generate_agents(compute_nodes, vm_accommodation, unique):
             slave = dict(id=slave_id, mode='slave', master_id=master_id)
 
             if 'single_room' in vm_accommodation:
-                master['node'] = node_formulae(i * 2)
-                slave['node'] = node_formulae(i * 2 + 1)
+                master['node'] = node_formula(i * 2)
+                slave['node'] = node_formula(i * 2 + 1)
             elif 'double_room' in vm_accommodation:
-                master['node'] = node_formulae(i)
-                slave['node'] = node_formulae(i)
+                master['node'] = node_formula(i)
+                slave['node'] = node_formula(i)
             elif 'mixed_room' in vm_accommodation:
-                master['node'] = node_formulae(i)
-                slave['node'] = node_formulae(i + 1)
+                master['node'] = node_formula(i)
+                slave['node'] = node_formula(i + 1)
 
             agents[master['id']] = master
             agents[slave['id']] = slave
         else:
             if 'single_room' in vm_accommodation:
                 agent_id = '%s_agent_%s' % (unique, i)
-                agents[agent_id] = dict(id=agent_id, node=node_formulae(i),
+                agents[agent_id] = dict(id=agent_id, node=node_formula(i),
                                         mode='alone')
 
     return agents
