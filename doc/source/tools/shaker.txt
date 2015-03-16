@@ -10,8 +10,8 @@ usage: shaker [-h] [--config-dir DIR] [--config-file PATH] [--debug]
               [--os-username <auth-username>] [--output OUTPUT]
               [--polling-interval POLLING_INTERVAL] [--report REPORT]
               [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
-              [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
-              [--use-syslog-rfc-format] [--verbose] [--version]
+              [--subunit SUBUNIT] [--syslog-log-facility SYSLOG_LOG_FACILITY]
+              [--use-syslog] [--use-syslog-rfc-format] [--verbose] [--version]
               [--server-endpoint SERVER_ENDPOINT]
 
 optional arguments:
@@ -82,6 +82,8 @@ optional arguments:
   --report-template REPORT_TEMPLATE
                         Report template in Jinja format
   --scenario SCENARIO   Scenario file name, defaults to env[SHAKER_SCENARIO].
+  --subunit SUBUNIT     Subunit stream file name, defaults to
+                        env[SHAKER_SUBUNIT].
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines.
   --use-syslog          Use syslog for logging. Existing syslog format is

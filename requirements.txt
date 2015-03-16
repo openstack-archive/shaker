@@ -17,6 +17,7 @@ python-keystoneclient>=1.1.0
 python-neutronclient>=2.3.11,<3
 python-novaclient>=2.18.0,!=2.21.0
 python-heatclient>=0.3.0
+python-subunit>=0.0.18
 PyYAML>=3.1.0
 pyzmq>=14.3.1 # LGPL+BSD
 six>=1.9.0

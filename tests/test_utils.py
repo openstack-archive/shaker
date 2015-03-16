@@ -28,3 +28,12 @@ class TestUtils(testtools.TestCase):
 
     def test_split_address_invalid(self):
         self.assertRaises(ValueError, utils.split_address, 'erroneous')
+
+    def test_flatten_dict(self):
+        self.assertEqual({}, dict(utils.flatten_dict({})))
+        self.assertEqual(
+            {'pa_b': 1},
+            dict(utils.flatten_dict({'a': {'b': 1}}, prefix='p', sep='_')))
+        self.assertEqual(
+            {'a': 1, 'b.c': 2, 'b.d': 3},
+            dict(utils.flatten_dict({'a': 1, 'b': {'c': 2, 'd': 3}})))

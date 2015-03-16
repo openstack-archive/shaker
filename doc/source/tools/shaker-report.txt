@@ -3,7 +3,7 @@ usage: shaker-report [-h] [--config-dir DIR] [--config-file PATH] [--debug]
                      [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
                      [--log-file PATH] [--log-format FORMAT] [--nodebug]
                      [--nouse-syslog] [--nouse-syslog-rfc-format]
-                     [--noverbose] [--report REPORT]
+                     [--noverbose] [--report REPORT] [--subunit SUBUNIT]
                      [--syslog-log-facility SYSLOG_LOG_FACILITY]
                      [--use-syslog] [--use-syslog-rfc-format] [--verbose]
                      [--version] [--report-template REPORT_TEMPLATE]
@@ -49,6 +49,8 @@ optional arguments:
   --noverbose           The inverse of --verbose
   --report REPORT       Report file name, defaults to env[SHAKER_REPORT]. If
                         no value provided the report is printed to stdout.
+  --subunit SUBUNIT     Subunit stream file name, defaults to
+                        env[SHAKER_SUBUNIT].
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines.
   --use-syslog          Use syslog for logging. Existing syslog format is
