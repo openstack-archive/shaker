@@ -27,12 +27,15 @@ LOG = logging.getLogger(__name__)
 
 
 def generate_agents(compute_nodes, vm_accommodation, unique):
-    cn_count = len(compute_nodes)
-    iterations = cn_count
-
+    density = 1
     for s in vm_accommodation:
-        if isinstance(s, dict) and s.get('density'):
-            iterations *= s.get('density')
+        if isinstance(s, dict):
+            density = s.get('density', 1)
+            if s.get('compute_nodes'):
+                compute_nodes = compute_nodes[:s.get('compute_nodes')]
+
+    cn_count = len(compute_nodes)
+    iterations = cn_count * density
 
     if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
         iterations //= 2

@@ -141,6 +141,41 @@ class TestDeploy(testtools.TestCase):
                                         unique)
         self.assertEqual(expected, actual)
 
+    def test_generate_agents_alone_single_room_compute_nodes(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_agent_0': {
+                'id': 'UU1D_agent_0',
+                'mode': 'alone',
+                'node': 'uno'},
+            'UU1D_agent_1': {
+                'id': 'UU1D_agent_1',
+                'mode': 'alone',
+                'node': 'duo'},
+        }
+        actual = deploy.generate_agents(['uno', 'duo', 'tre'],
+                                        ['single_room', {'compute_nodes': 2}],
+                                        unique)
+        self.assertEqual(expected, actual)
+
+    def test_generate_agents_alone_single_room_density_compute_nodes(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_agent_0': {
+                'id': 'UU1D_agent_0',
+                'mode': 'alone',
+                'node': 'uno'},
+            'UU1D_agent_1': {
+                'id': 'UU1D_agent_1',
+                'mode': 'alone',
+                'node': 'uno'},
+        }
+        actual = deploy.generate_agents(['uno', 'duo', 'tre'],
+                                        ['single_room', {'compute_nodes': 1},
+                                         {'density': 2}],
+                                        unique)
+        self.assertEqual(expected, actual)
+
     def test_filter_agents_all_deployed(self):
         agents = {
             'UU1D_agent_0': {
