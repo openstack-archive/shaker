@@ -27,12 +27,14 @@ class TestNetperfExecutor(testtools.TestCase):
     def test_get_command(self):
         executor = netperf.NetperfExecutor({}, AGENT)
 
-        expected = 'netperf -H %s -l 60 -t TCP_STREAM' % IP
+        expected = {'data': ('netperf -H %s -l 60 -t TCP_STREAM') % IP,
+                    'type': 'program'}
         self.assertEqual(expected, executor.get_command())
 
     def test_get_command_options(self):
         executor = netperf.NetperfExecutor(
             {'method': 'UDP_STREAM', 'time': 30}, AGENT)
 
-        expected = 'netperf -H %s -l 30 -t UDP_STREAM' % IP
+        expected = {'data': ('netperf -H %s -l 30 -t UDP_STREAM') % IP,
+                    'type': 'program'}
         self.assertEqual(expected, executor.get_command())

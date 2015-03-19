@@ -13,3 +13,10 @@ execution:
     title: List all files
     class: shell
     method: ls -al
+  -
+    title: Run sample script
+    class: shell
+    script: |
+      #!/bin/bash
+      echo "hello"
+      echo "world"

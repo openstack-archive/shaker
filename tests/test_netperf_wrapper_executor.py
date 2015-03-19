@@ -27,14 +27,18 @@ class TestNetperfWrapperExecutor(testtools.TestCase):
     def test_get_command(self):
         executor = netperf.NetperfWrapperExecutor({}, AGENT)
 
-        expected = 'netperf-wrapper -H %s -l 60 -s 1 -f csv tcp_download' % IP
+        expected = {'data': ('netperf-wrapper -H %s -l 60 -s 1 '
+                             '-f csv tcp_download') % IP,
+                    'type': 'program'}
         self.assertEqual(expected, executor.get_command())
 
     def test_get_command_with_params(self):
         executor = netperf.NetperfWrapperExecutor(
             dict(method='ping', time=10, interval=0.5), AGENT)
 
-        expected = 'netperf-wrapper -H %s -l 10 -s 0.5 -f csv ping' % IP
+        expected = {'data': ('netperf-wrapper -H %s -l 10 -s 0.5 '
+                             '-f csv ping') % IP,
+                    'type': 'program'}
         self.assertEqual(expected, executor.get_command())
 
     def test_process_reply(self):
