@@ -13,7 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import shlex
+import tempfile
 import time
 
 from oslo_concurrency import processutils
@@ -55,6 +57,27 @@ def send_reply(socket, agent_id, result):
     return res
 
 
+def run_command(command):
+    command_stdout, command_stderr = None, None
+
+    if command['type'] == 'program':
+        command_stdout, command_stderr = processutils.execute(
+            *shlex.split(command['data']), check_exit_code=False)
+
+    elif command['type'] == 'script':
+        fd = tempfile.mkstemp()
+        os.write(fd[0], command['data'])
+        os.close(fd[0])
+        LOG.debug('stored script into %s', fd[1])
+        command_stdout, command_stderr = processutils.execute(
+            *shlex.split('bash %s' % fd[1]), check_exit_code=False)
+
+    else:
+        command_stderr = 'Unknown command type : %s' % command['type']
+
+    return dict(stdout=command_stdout, stderr=command_stderr)
+
+
 def main():
     utils.init_config_and_logging(config.COMMON_OPTS + config.AGENT_OPTS)
 
@@ -81,13 +104,9 @@ def main():
 
                 time.sleep(start_at - now)
 
-                # do something useful
-                command_stdout, command_stderr = processutils.execute(
-                    *shlex.split(command), check_exit_code=False)
-                send_reply(socket, agent_id, {
-                    'stdout': command_stdout,
-                    'stderr': command_stderr,
-                })
+                result = run_command(command)
+                send_reply(socket, agent_id, result)
+
             elif task['operation'] == 'configure':
                 if 'polling_interval' in task:
                     polling_interval = task.get('polling_interval')

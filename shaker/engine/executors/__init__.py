@@ -13,18 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from shaker.engine.executors import base
 from shaker.engine.executors import iperf
 from shaker.engine.executors import netperf
+from shaker.engine.executors import shell
 
 
 EXECUTORS = {
-    'shell': base.ShellExecutor,
+    'shell': shell.ShellExecutor,
     'netperf': netperf.NetperfExecutor,
     'iperf': iperf.IperfExecutor,
     'iperf_graph': iperf.IperfGraphExecutor,
     'netperf_wrapper': netperf.NetperfWrapperExecutor,
-    '_default': base.ShellExecutor,
+    '_default': shell.ShellExecutor,
 }
 
 

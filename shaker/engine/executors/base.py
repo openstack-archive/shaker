@@ -21,15 +21,23 @@ LOG = logging.getLogger(__name__)
 
 class CommandLine(object):
     def __init__(self, command):
-        self.commands = [command]
+        self.tokens = [command]
 
     def add(self, param_name, param_value=None):
-        self.commands.append('%s' % param_name)
+        self.tokens.append('%s' % param_name)
         if param_value:
-            self.commands.append(str(param_value))
+            self.tokens.append(str(param_value))
 
     def make(self):
-        return ' '.join(self.commands)
+        return dict(type='program', data=' '.join(self.tokens))
+
+
+class Script(object):
+    def __init__(self, script):
+        self.script = script
+
+    def make(self):
+        return dict(type='script', data=self.script)
 
 
 class BaseExecutor(object):
@@ -48,8 +56,3 @@ class BaseExecutor(object):
                     stderr=message.get('stderr'),
                     command=self.get_command(),
                     agent=self.agent)
-
-
-class ShellExecutor(BaseExecutor):
-    def get_command(self):
-        return self.test_definition['method']
