@@ -23,8 +23,8 @@ LOG = logging.getLogger(__name__)
 
 class ShellExecutor(base.BaseExecutor):
     def get_command(self):
-        if 'method' in self.test_definition:
-            cmd = base.CommandLine(self.test_definition['method'])
+        if 'program' in self.test_definition:
+            cmd = base.CommandLine(self.test_definition['program'])
         elif 'script' in self.test_definition:
             cmd = base.Script(self.test_definition['script'])
         return cmd.make()

@@ -12,7 +12,7 @@ execution:
   -
     title: List all files
     class: shell
-    method: ls -al
+    program: ls -al
   -
     title: Run sample script
     class: shell
