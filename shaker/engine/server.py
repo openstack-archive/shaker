@@ -22,11 +22,11 @@ import uuid
 from oslo_config import cfg
 from oslo_log import log as logging
 import yaml
-import zmq
 
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
+from shaker.engine import messaging
 from shaker.engine import report
 from shaker.engine import utils
 
@@ -35,17 +35,20 @@ LOG = logging.getLogger(__name__)
 
 
 class Quorum(object):
-    def __init__(self, message_queue):
+    def __init__(self, message_queue, polling_interval):
         self.message_queue = message_queue
+        self.polling_interval = polling_interval
 
     def wait_join(self, agent_ids):
+        agent_ids = set(agent_ids)
         LOG.debug('Waiting for quorum of agents: %s', agent_ids)
         alive_agents = set()
         for message, reply_handler in self.message_queue:
             agent_id = message.get('agent_id')
             alive_agents.add(agent_id)
 
-            reply_handler(dict(operation='none'))
+            reply_handler(dict(operation='configure',
+                               polling_interval=self.polling_interval))
 
             LOG.debug('Alive agents: %s', alive_agents)
 
@@ -58,7 +61,7 @@ class Quorum(object):
         replied_agents = set()
         result = {}
 
-        start_at = int(time.time()) + 30  # schedule tasks in a 30 sec from now
+        start_at = int(time.time()) + self.polling_interval * 2
 
         for message, reply_handler in self.message_queue:
             agent_id = message.get('agent_id')
@@ -91,36 +94,6 @@ class Quorum(object):
                 break
 
         return result
-
-
-class MessageQueue(object):
-    def __init__(self, endpoint):
-        _, port = utils.split_address(endpoint)
-
-        context = zmq.Context()
-        self.socket = context.socket(zmq.REP)
-        self.socket.bind("tcp://*:%s" % port)
-        LOG.info('Listening on *:%s', port)
-
-    def __iter__(self):
-        try:
-            while True:
-                #  Wait for next request from client
-                message = self.socket.recv_json()
-                LOG.debug('Received request: %s', message)
-
-                def reply_handler(reply_message):
-                    self.socket.send_json(reply_message)
-
-                try:
-                    yield message, reply_handler
-                except GeneratorExit:
-                    break
-
-        except BaseException as e:
-            if not isinstance(e, KeyboardInterrupt):
-                LOG.exception(e)
-            raise
 
 
 def read_scenario():
@@ -159,13 +132,8 @@ def _pick_agents(agents, size):
             yield agents[:i]
 
 
-def execute(execution, agents):
+def execute(quorum, execution, agents):
     _extend_agents(agents)
-
-    message_queue = MessageQueue(cfg.CONF.server_endpoint)
-
-    quorum = Quorum(message_queue)
-    quorum.wait_join(set(agents.keys()))
 
     result = []
 
@@ -209,15 +177,15 @@ def main():
     result = []
 
     try:
-        deployment = deploy.Deployment(cfg.CONF.os_username,
-                                       cfg.CONF.os_password,
-                                       cfg.CONF.os_tenant_name,
-                                       cfg.CONF.os_auth_url,
-                                       cfg.CONF.os_region_name,
-                                       cfg.CONF.server_endpoint,
-                                       cfg.CONF.external_net,
-                                       cfg.CONF.flavor_name,
-                                       cfg.CONF.image_name)
+        deployment = deploy.Deployment(cfg.CONF.server_endpoint)
+
+        if (cfg.CONF.os_username and cfg.CONF.os_password and
+                cfg.CONF.os_tenant_name and cfg.CONF.os_auth_url):
+            deployment.connect_to_openstack(
+                cfg.CONF.os_username, cfg.CONF.os_password,
+                cfg.CONF.os_tenant_name, cfg.CONF.os_auth_url,
+                cfg.CONF.os_region_name, cfg.CONF.external_net,
+                cfg.CONF.flavor_name, cfg.CONF.image_name)
 
         agents = deployment.deploy(scenario['deployment'],
                                    base_dir=os.path.dirname(cfg.CONF.scenario))
@@ -226,7 +194,12 @@ def main():
         if not agents:
             LOG.warning('No agents deployed.')
         else:
-            result = execute(scenario['execution'], agents)
+            message_queue = messaging.MessageQueue(cfg.CONF.server_endpoint)
+
+            quorum = Quorum(message_queue, cfg.CONF.polling_interval)
+            quorum.wait_join(set(agents.keys()))
+
+            result = execute(quorum, scenario['execution'], agents)
             LOG.debug('Result: %s', result)
     except Exception as e:
         LOG.error('Error while executing scenario: %s', e)
