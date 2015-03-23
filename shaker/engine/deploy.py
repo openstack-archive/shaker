@@ -114,23 +114,27 @@ def filter_agents(agents, stack_outputs):
 
 
 class Deployment(object):
-    def __init__(self, os_username, os_password, os_tenant_name, os_auth_url,
-                 os_region_name, server_endpoint, external_net, flavor_name,
-                 image_name):
+    def __init__(self, server_endpoint):
+        self.server_endpoint = server_endpoint
+        self.openstack_client = None
+        self.stack_deployed = False
+
+    def connect_to_openstack(self, os_username, os_password, os_tenant_name,
+                             os_auth_url, os_region_name, external_net,
+                             flavor_name, image_name):
+        LOG.debug('Connecting to OpenStack')
+
         self.openstack_client = openstack.OpenStackClient(
             username=os_username, password=os_password,
             tenant_name=os_tenant_name, auth_url=os_auth_url,
             region_name=os_region_name)
 
-        self.server_endpoint = server_endpoint
+        self.flavor_name = flavor_name
+        self.image_name = image_name
         self.external_net = (external_net or
                              neutron.choose_external_net(
                                  self.openstack_client.neutron))
-        self.flavor_name = flavor_name
-        self.image_name = image_name
-
         self.stack_name = 'shaker_%s' % utils.random_string()
-        self.stack_deployed = False
 
     def _deploy_from_hot(self, specification, base_dir=None):
         agents = generate_agents(
@@ -182,8 +186,13 @@ class Deployment(object):
         agents = {}
 
         if deployment.get('template'):
-            # deploy topology specified by HOT
-            agents.update(self._deploy_from_hot(deployment, base_dir=base_dir))
+            if not self.openstack_client:
+                LOG.error('OpenStack client is not initialized. Template '
+                          'deployment is ignored.')
+            else:
+                # deploy topology specified by HOT
+                agents.update(self._deploy_from_hot(
+                    deployment, base_dir=base_dir))
 
         if deployment.get('agents'):
             # agents are specified statically

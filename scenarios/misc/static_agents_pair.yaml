@@ -18,7 +18,7 @@ execution:
   tests:
   -
     class: netperf
-    method: TCP_STREAM
+    program: TCP_STREAM
   -
     class: shell
-    method: ls -al
+    program: ls -al
