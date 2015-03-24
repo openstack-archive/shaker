@@ -24,21 +24,11 @@ How to run
 ----------
  1. ``shaker --server-endpoint <host>:<port> --scenario <scenario-file> --report <report-file>``
 
-During the run the tool deploys topology linked into scenario, spawns instances, distributes
+During the run the tool deploys topology, spawns instances, distributes
 tasks among instances and generates report in HTML format.
 
-All server parameters
----------------------
-
- * ``server_endpoint = <None>`` - Address for server connections (host:port) (string value)
- * ``os_auth_url`` - Authentication URL, defaults to env[OS_AUTH_URL]. (string value)
- * ``os_tenant_name`` - Authentication tenant name, defaults to env[OS_TENANT_NAME]. (string value)
- * ``os_username`` - Authentication username, defaults to env[OS_USERNAME]. (string value)
- * ``os_password`` - Authentication password, defaults to env[OS_PASSWORD]. (string value)
- * ``os_region_name = RegionOne`` - Authentication region name, defaults to env[OS_REGION_NAME]. (string value)
- * ``external_net`` - Name or ID of external network. If not set the network is chosen randomly. (string value)
- * ``image_name = shaker-image`` - Name of image to use. The default is created by shaker-image-builder (string value)
- * ``flavor_name = shaker-flavor`` - Name of image flavor. The default is created by shaker-image-builder (string value)
- * ``scenario = <None>`` - Scenario file name (string value)
- * ``report = <None>`` - Report file name. If not specified print to stdout (string value)
- * ``report_template = shaker/engine/report.template`` - Report template file name (Jinja format) (string value)
+Links
+-----
+ * Launchpad - https://launchpad.net/shaker/
+ * Docs - http://shaker-docs.readthedocs.org/
+ * PyPi - https://pypi.python.org/pypi/pyshaker/
