@@ -213,8 +213,8 @@ def main():
     if cfg.CONF.output:
         utils.write_file(json.dumps(report_data), cfg.CONF.output)
 
-    report.generate_report(cfg.CONF.report_template, cfg.CONF.report,
-                           report_data)
+    report.generate_report(report_data, cfg.CONF.report_template,
+                           cfg.CONF.report, cfg.CONF.subunit)
 
 
 if __name__ == "__main__":

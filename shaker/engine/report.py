@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import functools
 import json
 import sys
@@ -20,6 +21,7 @@ import sys
 import jinja2
 from oslo_config import cfg
 from oslo_log import log as logging
+from subunit import v2 as subunit_v2
 import yaml
 
 from shaker.engine import aggregators
@@ -43,11 +45,80 @@ def calculate_stats(data):
         aggregator.test_summary(test_result)
 
 
-def generate_report(report_template, report_filename, data):
+SLARecord = collections.namedtuple('SLARecord',
+                                   ['sla', 'status', 'location', 'stats'])
+
+
+def _verify_stats_against_sla(sla, stats, location):
+    res = []
+    for term in sla:
+        status = utils.eval_expr(term, stats)
+        sla_record = SLARecord(sla=term, status=status,
+                               location=location, stats=stats)
+        res.append(sla_record)
+        LOG.debug('SLA: %s', sla_record)
+    return res
+
+
+def verify_sla(data):
+    res = []
+    for test_result in data['result']:
+        test_name = (test_result['definition'].get('title') or
+                     test_result['definition'].get('class'))
+        sla = test_result['definition'].get('sla')
+        if not sla:
+            continue
+
+        for iteration_result in test_result['results_per_iteration']:
+            size = str(len(iteration_result['results_per_agent']))
+
+            sla_info = _verify_stats_against_sla(
+                sla, iteration_result['stats'],
+                '%s.%s' % (test_name, size))
+            res += sla_info
+            iteration_result['sla_info'] = sla_info
+
+            for agent_result in iteration_result['results_per_agent']:
+                agent_id = agent_result['agent']['id']
+
+                sla_info = _verify_stats_against_sla(
+                    sla, agent_result['stats'],
+                    '%s.%s.%s' % (test_name, size, agent_id))
+                res += sla_info
+                agent_result['sla_info'] = sla_info
+
+    return res
+
+
+def save_to_subunit(sla_res, subunit_filename):
+    fd = open(subunit_filename, 'w')
+    output = subunit_v2.StreamResultToBytes(fd)
+
+    for item in sla_res:
+        output.startTestRun()
+        test_id = item.location + ':' + item.sla
+
+        if not item.status:
+            output.status(test_id=test_id, file_name='results',
+                          mime_type='text/plain; charset="utf8"', eof=True,
+                          file_bytes=yaml.safe_dump(
+                              item.stats, default_flow_style=False))
+
+        output.status(test_id=test_id,
+                      test_status='success' if item.status else 'fail')
+        output.stopTestRun()
+    fd.close()
+
+
+def generate_report(data, report_template, report_filename, subunit_filename):
     LOG.debug('Generating report, template: %s, output: %s',
               report_template, report_filename or 'stdout')
 
     calculate_stats(data)
+    sla_res = verify_sla(data)
+
+    if subunit_filename:
+        save_to_subunit(sla_res, subunit_filename)
 
     # add more filters to jinja
     jinja_env = jinja2.Environment()
@@ -75,7 +146,8 @@ def main():
     LOG.debug('Reading JSON data from: %s', cfg.CONF.input)
     report_data = json.loads(utils.read_file(cfg.CONF.input))
 
-    generate_report(cfg.CONF.report_template, cfg.CONF.report, report_data)
+    generate_report(report_data, cfg.CONF.report_template, cfg.CONF.report,
+                    cfg.CONF.subunit)
 
 
 if __name__ == "__main__":
