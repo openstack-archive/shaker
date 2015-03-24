@@ -176,6 +176,14 @@ class TestDeploy(testtools.TestCase):
                                         unique)
         self.assertEqual(expected, actual)
 
+    def test_generate_agents_pair_single_room_density_compute_nodes(self):
+        unique = 'UU1D'
+        actual = deploy.generate_agents(['uno', 'duo', 'tre'],
+                                        ['pair', 'single_room',
+                                         {'density': 4}, {'compute_nodes': 2}],
+                                        unique)
+        self.assertEqual(8, len(actual))
+
     def test_filter_agents_all_deployed(self):
         agents = {
             'UU1D_agent_0': {
