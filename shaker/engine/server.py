@@ -44,15 +44,20 @@ class Quorum(object):
         LOG.debug('Waiting for quorum of agents: %s', agent_ids)
         alive_agents = set()
         for message, reply_handler in self.message_queue:
-            agent_id = message.get('agent_id')
-            alive_agents.add(agent_id)
+            msg_agent_id = message.get('agent_id')
+
+            if msg_agent_id not in agent_ids:
+                reply_handler(dict(operation='none'))
+                continue
+
+            alive_agents.add(msg_agent_id)
 
             reply_handler(dict(operation='configure',
                                polling_interval=self.polling_interval))
 
             LOG.debug('Alive agents: %s', alive_agents)
 
-            if alive_agents >= agent_ids:
+            if alive_agents == agent_ids:
                 LOG.info('All expected agents are alive')
                 break
 
@@ -68,21 +73,24 @@ class Quorum(object):
             operation = message.get('operation')
 
             reply = {'operation': 'none'}
-            if agent_id in test_case:
-                # message from a known agent
 
-                test = test_case[agent_id]
+            if agent_id not in test_case:
+                reply_handler(reply)
+                continue
 
-                if operation == 'poll':
-                    reply = {
-                        'operation': 'execute',
-                        'start_at': start_at,
-                        'command': test.get_command(),
-                    }
-                    working_agents.add(agent_id)
-                elif operation == 'reply':
-                    replied_agents.add(agent_id)
-                    result[agent_id] = test.process_reply(message)
+            # message from a known agent
+            test = test_case[agent_id]
+
+            if operation == 'poll':
+                reply = {
+                    'operation': 'execute',
+                    'start_at': start_at,
+                    'command': test.get_command(),
+                }
+                working_agents.add(agent_id)
+            elif operation == 'reply':
+                replied_agents.add(agent_id)
+                result[agent_id] = test.process_reply(message)
 
             reply_handler(reply)
 
