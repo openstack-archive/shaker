@@ -30,7 +30,8 @@ def generate_agents(compute_nodes, vm_accommodation, unique):
     density = 1
     for s in vm_accommodation:
         if isinstance(s, dict):
-            density = s.get('density', 1)
+            if s.get('density'):
+                density = s.get('density')
             if s.get('compute_nodes'):
                 compute_nodes = compute_nodes[:s.get('compute_nodes')]
 
