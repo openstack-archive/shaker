@@ -35,10 +35,11 @@ class TestIperfGraphExecutor(testtools.TestCase):
 
     def test_get_command_udp(self):
         executor = iperf.IperfGraphExecutor(
-            {'udp': True, 'time': 30}, AGENT)
+            {'udp': True, 'bandwidth': '100M', 'time': 30}, AGENT)
 
         expected = {'data': ('sudo nice -n -20 iperf --client %s --format m '
-                             '--nodelay --len 8k --udp --time 30 --parallel 1 '
+                             '--nodelay --len 8k --udp --bandwidth 100M '
+                             '--time 30 --parallel 1 '
                              '--reportstyle C --interval 1') % IP,
                     'type': 'program'}
         self.assertEqual(expected, executor.get_command())
