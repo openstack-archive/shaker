@@ -114,8 +114,8 @@ AGENT_OPTS = [
 
 IMAGE_BUILDER_OPTS = [
     cfg.StrOpt('image-builder-template',
-               default=(utils.env('SHAKER_IMAGE_BUILDER_TEMPLATE') or
-                        'shaker/resources/image_builder_template.yaml'),
+               default=(utils.env('SHAKER_IMAGE_BUILDER_TEMPLATE')),
+               required=True,
                help='Heat template for the image builder.'),
 ]
 
