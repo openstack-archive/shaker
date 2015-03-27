@@ -209,8 +209,11 @@ def main():
 
             result = execute(quorum, scenario['execution'], agents)
             LOG.debug('Result: %s', result)
-    except Exception as e:
-        LOG.error('Error while executing scenario: %s', e)
+    except BaseException as e:
+        if isinstance(e, KeyboardInterrupt):
+            LOG.info('Caught SIGINT. Terminating')
+        else:
+            LOG.error('Error while executing scenario: %s', e)
     finally:
         if deployment:
             deployment.cleanup()
