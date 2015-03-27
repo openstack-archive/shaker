@@ -70,6 +70,16 @@ def init_config_and_logging(opts):
 
 def read_file(file_name, base_dir=''):
     full_path = os.path.normpath(os.path.join(base_dir, file_name))
+    if not os.path.exists(full_path):
+        # treat file_name as relative to shaker's package root
+        full_path = os.path.normpath(os.path.join(
+            os.path.dirname(__import__('shaker').__file__), '../', file_name))
+        if not os.path.exists(full_path):
+            msg = ('File %s not found by absolute nor by relative path' %
+                   file_name)
+            LOG.error(msg)
+            raise IOError(msg)
+
     fd = None
     try:
         fd = open(full_path)
