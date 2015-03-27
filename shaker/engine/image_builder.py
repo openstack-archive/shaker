@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 
 import uuid
 
@@ -34,10 +35,18 @@ def init():
     utils.init_config_and_logging(
         config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS)
 
-    openstack_client = openstack.OpenStackClient(
-        username=cfg.CONF.os_username, password=cfg.CONF.os_password,
-        tenant_name=cfg.CONF.os_tenant_name, auth_url=cfg.CONF.os_auth_url,
-        region_name=cfg.CONF.os_region_name)
+    openstack_client = None
+    try:
+        openstack_client = openstack.OpenStackClient(
+            username=cfg.CONF.os_username, password=cfg.CONF.os_password,
+            tenant_name=cfg.CONF.os_tenant_name, auth_url=cfg.CONF.os_auth_url,
+            region_name=cfg.CONF.os_region_name)
+    except Exception as e:
+        LOG.error('Error establishing connection to OpenStack: %s. '
+                  'Please verify OpenStack credentials (--os-username, '
+                  '--os-password, --os-tenant-name, --os-auth-url)', e)
+        exit(1)
+
     return openstack_client
 
 
@@ -53,16 +62,28 @@ def build_image():
                                              ram=1024, vcpus=1, disk=3)
         LOG.info('Created flavor %s', flavor_name)
 
-    if glance.get_image(openstack_client.glance, image_name):
+    if glance.get_image(openstack_client.glance, 'image_name'):
         LOG.info('Using existing image: %s', image_name)
     else:
+        template = None
+        template_filename = os.path.join(os.path.dirname(__file__),
+                                         '../../',
+                                         cfg.CONF.image_builder_template)
+        try:
+            template = utils.read_file(template_filename)
+        except IOError:
+            LOG.error('Error reading template file: %s. '
+                      'Please verify correctness of --image-builder-template '
+                      'parameter', template_filename)
+            exit(1)
+
         external_net = (cfg.CONF.external_net or
                         neutron.choose_external_net(openstack_client.neutron))
         stack_params = {
             'stack_name': 'shaker_%s' % uuid.uuid4(),
             'parameters': {'external_net': external_net,
                            'flavor': flavor_name},
-            'template': utils.read_file(cfg.CONF.image_builder_template),
+            'template': template,
         }
 
         stack = openstack_client.heat.stacks.create(**stack_params)['stack']
