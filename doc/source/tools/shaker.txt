@@ -1,4 +1,5 @@
-usage: shaker [-h] [--config-dir DIR] [--config-file PATH] [--debug]
+usage: shaker [-h] [--agent-loss-timeout AGENT_LOSS_TIMEOUT]
+              [--config-dir DIR] [--config-file PATH] [--debug]
               [--external-net EXTERNAL_NET] [--flavor-name FLAVOR_NAME]
               [--image-name IMAGE_NAME] [--log-config-append PATH]
               [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
@@ -16,6 +17,8 @@ usage: shaker [-h] [--config-dir DIR] [--config-file PATH] [--debug]
 
 optional arguments:
   -h, --help            show this help message and exit
+  --agent-loss-timeout AGENT_LOSS_TIMEOUT
+                        Timeout to treat agent as lost
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
                         predictable parse order if individual options are
