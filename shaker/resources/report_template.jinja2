@@ -514,6 +514,8 @@
                                 <h4>Agent {{ result_per_agent.agent.id }}
                                     ({{ result_per_agent.agent.ip }}, {{ result_per_agent.agent.node }})</h4>
 
+                                <h5>Status: {{ result_per_agent.status }}</h5>
+
                                 {% if result_per_agent.samples %}
                                     {% if result_per_agent.stats %}
                                         <div class="row">

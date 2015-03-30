@@ -46,6 +46,13 @@ class BaseExecutor(object):
         self.test_definition = test_definition
         self.agent = agent
 
+    def get_test_duration(self):
+        """Get the expected duration of the test
+        Duration is used by Quorum to calculate expected time of reply.
+        :return: time in seconds
+        """
+        return self.test_definition.get('time') or 60
+
     def get_command(self):
         return None
 
@@ -55,4 +62,8 @@ class BaseExecutor(object):
         return dict(stdout=message.get('stdout'),
                     stderr=message.get('stderr'),
                     command=self.get_command(),
+                    agent=self.agent)
+
+    def process_failure(self):
+        return dict(command=self.get_command(),
                     agent=self.agent)

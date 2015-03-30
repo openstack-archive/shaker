@@ -28,12 +28,11 @@ class Shaker(object):
     shaker = Shaker('127.0.0.1:5999', ['the-agent'])
     res = shaker.run_program('the-agent', 'ls -al')
     """
-    def __init__(self, server_endpoint, agent_ids, polling_interval=1):
-        self.server_endpoint = server_endpoint
-        self.polling_interval = polling_interval
-
-        message_queue = messaging.MessageQueue(self.server_endpoint)
-        self.quorum = server.Quorum(message_queue, self.polling_interval)
+    def __init__(self, server_endpoint, agent_ids, polling_interval=1,
+                 agent_loss_timeout=60):
+        message_queue = messaging.MessageQueue(server_endpoint)
+        self.quorum = server.Quorum(message_queue, polling_interval,
+                                    agent_loss_timeout)
         self.quorum.wait_join(agent_ids)
 
     def _run(self, agent_id, item):
