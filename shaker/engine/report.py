@@ -16,7 +16,6 @@
 import collections
 import functools
 import json
-import sys
 
 import jinja2
 from oslo_config import cfg
@@ -91,28 +90,37 @@ def verify_sla(data):
 
 
 def save_to_subunit(sla_res, subunit_filename):
-    fd = open(subunit_filename, 'w')
-    output = subunit_v2.StreamResultToBytes(fd)
+    LOG.debug('Writing subunit stream to: %s', subunit_filename)
+    fd = None
+    try:
+        fd = open(subunit_filename, 'w')
+        output = subunit_v2.StreamResultToBytes(fd)
 
-    for item in sla_res:
-        output.startTestRun()
-        test_id = item.location + ':' + item.sla
+        for item in sla_res:
+            output.startTestRun()
+            test_id = item.location + ':' + item.sla
 
-        if not item.status:
-            output.status(test_id=test_id, file_name='results',
-                          mime_type='text/plain; charset="utf8"', eof=True,
-                          file_bytes=yaml.safe_dump(
-                              item.stats, default_flow_style=False))
+            if not item.status:
+                output.status(test_id=test_id, file_name='results',
+                              mime_type='text/plain; charset="utf8"', eof=True,
+                              file_bytes=yaml.safe_dump(
+                                  item.stats, default_flow_style=False))
 
-        output.status(test_id=test_id,
-                      test_status='success' if item.status else 'fail')
-        output.stopTestRun()
-    fd.close()
+            output.status(test_id=test_id,
+                          test_status='success' if item.status else 'fail')
+            output.stopTestRun()
+
+        LOG.info('Subunit stream saved to: %s', subunit_filename)
+    except IOError as e:
+        LOG.error('Error writing subunit stream: %s', e)
+    finally:
+        if fd:
+            fd.close()
 
 
 def generate_report(data, report_template, report_filename, subunit_filename):
     LOG.debug('Generating report, template: %s, output: %s',
-              report_template, report_filename or 'stdout')
+              report_template, report_filename or '<dummy>')
 
     calculate_stats(data)
     sla_res = verify_sla(data)
@@ -131,13 +139,12 @@ def generate_report(data, report_template, report_filename, subunit_filename):
     rendered_template = compiled_template.render(dict(report=data))
 
     if report_filename:
-        fd = open(report_filename, 'w')
-    else:
-        fd = sys.stdout
-
-    fd.write(rendered_template)
-    fd.close()
-    LOG.info('Report generated')
+        LOG.debug('Writing report to: %s', report_filename)
+        try:
+            utils.write_file(rendered_template, report_filename)
+            LOG.info('Report saved to: %s', report_filename)
+        except IOError as e:
+            LOG.error('Failed to write report file: %s', e)
 
 
 def main():
