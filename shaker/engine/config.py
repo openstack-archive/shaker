@@ -79,6 +79,9 @@ SERVER_OPTS = [
                default=utils.env('SHAKER_OUTPUT'),
                help='File for output in JSON format, '
                     'defaults to env[SHAKER_OUTPUT].'),
+    cfg.IntOpt('agent-loss-timeout',
+               default=60,
+               help='Timeout to treat agent as lost')
 ]
 
 REPORT_OPTS = [
