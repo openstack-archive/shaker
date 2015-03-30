@@ -100,9 +100,9 @@ class TrafficAggregator(base.BaseAggregator):
 
     def agent_summary(self, agent_data):
         # convert bps to Mbps
-        for idx, item_meta in enumerate(agent_data['meta']):
+        for idx, item_meta in enumerate(agent_data.get('meta', [])):
             if item_meta[1] == 'bps':
-                for row in agent_data['samples']:
+                for row in agent_data.get('samples'):
                     if row[idx]:
                         row[idx] = float(row[idx]) / 1024 / 1024
                 item_meta[1] = 'Mbps'
@@ -111,8 +111,8 @@ class TrafficAggregator(base.BaseAggregator):
         agent_data['stats'] = dict()
         agent_data['chart'] = []
 
-        for idx, item_meta in enumerate(agent_data['meta']):
-            column = [row[idx] for row in agent_data['samples']]
+        for idx, item_meta in enumerate(agent_data.get('meta', [])):
+            column = [row[idx] for row in agent_data.get('samples')]
 
             item_title = item_meta[0]
             if item_title != 'time':
@@ -125,4 +125,5 @@ class TrafficAggregator(base.BaseAggregator):
             agent_data['chart'].append([item_title] + column)
 
         # drop stdout
-        del agent_data['stdout']
+        if 'stdout' in agent_data:
+            del agent_data['stdout']

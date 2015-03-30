@@ -19,6 +19,9 @@ from shaker.engine.executors import base
 
 
 class IperfExecutor(base.BaseExecutor):
+    def get_expected_duration(self):
+        return self.test_definition.get('time') or 60
+
     def get_command(self):
         cmd = base.CommandLine('sudo nice -n -20 iperf')
         cmd.add('--client', self.agent['slave']['ip'])
@@ -31,7 +34,7 @@ class IperfExecutor(base.BaseExecutor):
             cmd.add('--udp')
             if self.test_definition.get('bandwidth'):
                 cmd.add('--bandwidth', self.test_definition.get('bandwidth'))
-        cmd.add('--time', self.test_definition.get('time') or 60)
+        cmd.add('--time', self.get_expected_duration())
         cmd.add('--parallel', self.test_definition.get('threads') or 1)
         if self.test_definition.get('csv'):
             cmd.add('--reportstyle', 'C')
