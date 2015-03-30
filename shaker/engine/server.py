@@ -62,6 +62,8 @@ class Quorum(object):
                 break
 
     def run_test_case(self, test_case):
+        current_agents = set(test_case.keys())
+
         working_agents = set()
         replied_agents = set()
         result = {}
@@ -74,7 +76,7 @@ class Quorum(object):
 
             reply = {'operation': 'none'}
 
-            if agent_id not in test_case:
+            if agent_id not in current_agents:
                 reply_handler(reply)
                 continue
 
@@ -97,7 +99,7 @@ class Quorum(object):
             LOG.debug('Working agents: %s', working_agents)
             LOG.debug('Replied agents: %s', replied_agents)
 
-            if replied_agents >= set(test_case.keys()):
+            if replied_agents >= current_agents:
                 LOG.info('Received all replies for test case: %s', test_case)
                 break
 
