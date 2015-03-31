@@ -34,10 +34,13 @@ def create_client(keystone_client, os_region_name):
 
 
 def wait_stack_completion(heat_client, stack_id):
+    reason = None
     status = None
 
     while True:
-        status = heat_client.stacks.get(stack_id).status
+        stack = heat_client.stacks.get(stack_id)
+        status = stack.status
+        reason = stack.stack_status_reason
         LOG.debug('Stack status: %s', status)
         if status not in ['IN_PROGRESS', '']:
             break
@@ -45,7 +48,17 @@ def wait_stack_completion(heat_client, stack_id):
         time.sleep(5)
 
     if status != 'COMPLETE':
-        raise Exception(status)
+        resources = heat_client.resources.list(stack_id)
+        for res in resources:
+            if res.resource_status != 'CREATE_COMPLETE':
+                LOG.error('Stack resource %(res)s of type %(type)s has '
+                          '%(reason)s',
+                          dict(res=res.logical_resource_id,
+                               type=res.resource_type,
+                               reason=res.resource_status_reason))
+        raise Exception('Failed to deploy Heat stack %(id)s. Expected status '
+                        'COMPLETE, but got %(status)s. Reason: %(reason)s',
+                        dict(id=stack_id, status=status, reason=reason))
 
 
 def get_stack_outputs(heat_client, stack_id):
