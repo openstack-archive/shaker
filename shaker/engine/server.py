@@ -15,6 +15,7 @@
 
 import copy
 import json
+import multiprocessing
 import os
 import time
 import uuid
@@ -23,6 +24,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import yaml
 
+from shaker.agent import agent as agent_process
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
@@ -222,6 +224,14 @@ def main():
         else:
             message_queue = messaging.MessageQueue(cfg.CONF.server_endpoint)
 
+            heartbeat = multiprocessing.Process(
+                target=agent_process.work,
+                kwargs=dict(agent_id='heartbeat',
+                            endpoint=cfg.CONF.server_endpoint,
+                            polling_interval=cfg.CONF.polling_interval))
+            heartbeat.daemon = True
+            heartbeat.start()
+
             quorum = Quorum(message_queue, cfg.CONF.polling_interval)
             quorum.wait_join(set(agents.keys()))
 
@@ -232,6 +242,7 @@ def main():
             LOG.info('Caught SIGINT. Terminating')
         else:
             LOG.error('Error while executing scenario: %s', e)
+        raise
     finally:
         if deployment:
             deployment.cleanup()

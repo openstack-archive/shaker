@@ -60,6 +60,7 @@ class BaseExecutor(object):
         LOG.debug('Test %s on agent %s finished with %s',
                   self.test_definition, self.agent, message)
         res = dict((k, message.get(k))
-                   for k in ['stdout', 'stderr', 'status', 'time'])
+                   for k in ['stdout', 'stderr', 'status', 'time']
+                   if message.get(k))
         res.update(dict(command=self.get_command(), agent=self.agent))
         return res
