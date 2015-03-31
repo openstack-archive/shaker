@@ -78,17 +78,11 @@ def run_command(command):
     return dict(stdout=command_stdout, stderr=command_stderr)
 
 
-def main():
-    utils.init_config_and_logging(config.COMMON_OPTS + config.AGENT_OPTS)
-
-    endpoint = cfg.CONF.server_endpoint
-    polling_interval = cfg.CONF.polling_interval
-    agent_id = cfg.CONF.agent_id
-    LOG.info('My id is: %s', agent_id)
-
-    context = zmq.Context()
+def work(agent_id, endpoint, polling_interval):
+    LOG.info('Agent id is: %s', agent_id)
     LOG.info('Connecting to server: %s', endpoint)
 
+    context = zmq.Context()
     socket = context.socket(zmq.REQ)
     socket.connect('tcp://%s' % endpoint)
 
@@ -120,6 +114,16 @@ def main():
             sys.exit(3)
         else:
             LOG.exception(e)
+
+
+def main():
+    utils.init_config_and_logging(config.COMMON_OPTS + config.AGENT_OPTS)
+
+    endpoint = cfg.CONF.server_endpoint
+    polling_interval = cfg.CONF.polling_interval
+    agent_id = cfg.CONF.agent_id
+
+    work(agent_id, endpoint, polling_interval)
 
 if __name__ == "__main__":
     main()

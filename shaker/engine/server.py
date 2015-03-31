@@ -15,12 +15,14 @@
 
 import copy
 import json
+import multiprocessing
 import os
 import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
 
+from shaker.agent import agent as agent_process
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
@@ -130,6 +132,14 @@ def main():
             LOG.warning('No agents deployed.')
         else:
             message_queue = messaging.MessageQueue(cfg.CONF.server_endpoint)
+
+            heartbeat = multiprocessing.Process(
+                target=agent_process.work,
+                kwargs=dict(agent_id='heartbeat',
+                            endpoint=cfg.CONF.server_endpoint,
+                            polling_interval=cfg.CONF.polling_interval))
+            heartbeat.daemon = True
+            heartbeat.start()
 
             quorum = quorum_pkg.Quorum(
                 message_queue, cfg.CONF.polling_interval,
