@@ -46,20 +46,13 @@ class BaseExecutor(object):
         self.test_definition = test_definition
         self.agent = agent
 
-    def get_test_duration(self):
-        """Get the expected duration of the test
-        Duration is used by Quorum to calculate expected time of reply.
-        :return: time in seconds
-        """
-        return self.test_definition.get('time') or 60
-
     def get_command(self):
         return None
 
     def process_reply(self, message):
         LOG.debug('Test %s on agent %s finished with %s',
                   self.test_definition, self.agent, message)
-        res = dict((k, message.get(k))
-                   for k in ['stdout', 'stderr', 'status', 'time'])
-        res.update(dict(command=self.get_command(), agent=self.agent))
-        return res
+        return dict(stdout=message.get('stdout'),
+                    stderr=message.get('stderr'),
+                    command=self.get_command(),
+                    agent=self.agent)
