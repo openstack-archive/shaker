@@ -22,7 +22,7 @@ class NetperfExecutor(base.BaseExecutor):
     def get_command(self):
         cmd = base.CommandLine('netperf')
         cmd.add('-H', self.agent['slave']['ip'])
-        cmd.add('-l', self.get_test_duration())
+        cmd.add('-l', self.test_definition.get('time') or 60)
         cmd.add('-t', self.test_definition.get('method') or 'TCP_STREAM')
         return cmd.make()
 
@@ -31,7 +31,7 @@ class NetperfWrapperExecutor(base.BaseExecutor):
     def get_command(self):
         cmd = base.CommandLine('netperf-wrapper')
         cmd.add('-H', self.agent['slave']['ip'])
-        cmd.add('-l', self.get_test_duration())
+        cmd.add('-l', self.test_definition.get('time') or 60)
         cmd.add('-s', self.test_definition.get('interval') or 1)
         cmd.add('-f', 'csv')
         cmd.add(self.test_definition.get('method') or 'tcp_download')

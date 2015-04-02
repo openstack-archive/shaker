@@ -31,7 +31,7 @@ class IperfExecutor(base.BaseExecutor):
             cmd.add('--udp')
             if self.test_definition.get('bandwidth'):
                 cmd.add('--bandwidth', self.test_definition.get('bandwidth'))
-        cmd.add('--time', self.get_test_duration())
+        cmd.add('--time', self.test_definition.get('time') or 60)
         cmd.add('--parallel', self.test_definition.get('threads') or 1)
         if self.test_definition.get('csv'):
             cmd.add('--reportstyle', 'C')
