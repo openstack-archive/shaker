@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import time
 
 from novaclient import client as nova_client_pkg
@@ -42,34 +43,61 @@ def is_flavor_exists(nova_client, flavor_name):
     return False
 
 
-def _poll_for_status(poll_fn, obj_id, final_ok_states, poll_period=20,
+def check_server_console(nova_client, server_id, len_limit=100):
+    console = nova_client.servers.get(server_id).get_console_output(len_limit)
+
+    for line in console.splitlines():
+        if (re.search(r'\[critical\]', line, flags=re.IGNORECASE) or
+                re.search(r'Cloud-init.*Datasource DataSourceNone\.', line)):
+            message = ('Instance %(id)s has critical cloud-init error: '
+                       '%(msg)s. Check metadata service availability' %
+                       dict(id=server_id, msg=line))
+            LOG.error(message)
+            return message
+        if re.search(r'error', line, flags=re.IGNORECASE):
+            LOG.error('Error message in instance %(id)s console: %(msg)s',
+                      dict(id=server_id, msg=line))
+        elif re.search(r'warn', line, flags=re.IGNORECASE):
+            LOG.warn('Warn message in instance %(id)s console: %(msg)s',
+                     dict(id=server_id, msg=line))
+
+    return None
+
+
+def _poll_for_status(nova_client, server_id, final_ok_states, poll_period=20,
                      status_field="status"):
-    LOG.debug('Poll server %(id)s, waiting for any of statuses %(statuses)s',
-              dict(id=obj_id, statuses=final_ok_states))
+    LOG.debug('Poll instance %(id)s, waiting for any of statuses %(statuses)s',
+              dict(id=server_id, statuses=final_ok_states))
     while True:
-        obj = poll_fn(obj_id)
+        obj = nova_client.servers.get(server_id)
+
+        err_msg = check_server_console(nova_client, server_id, len_limit=25)
+        if err_msg:
+            raise Exception('Critical error in instance %s console: %s' %
+                            (server_id, err_msg))
+
         status = getattr(obj, status_field)
         if status:
             status = status.lower()
 
-        LOG.debug('Server %(id)s has status %(status)s',
-                  dict(id=obj_id, status=status))
+        LOG.debug('Instance %(id)s has status %(status)s',
+                  dict(id=server_id, status=status))
 
         if status in final_ok_states:
             break
-        elif status == "error":
+        elif status == "error" or status == 'paused':
             raise Exception(obj.fault['message'])
 
         time.sleep(poll_period)
 
 
 def wait_server_shutdown(nova_client, server_id):
-    _poll_for_status(nova_client.servers.get, server_id, ['shutoff'])
+    _poll_for_status(nova_client, server_id, ['shutoff'])
 
 
 def wait_server_snapshot(nova_client, server_id):
     task_state_field = "OS-EXT-STS:task_state"
     server = nova_client.servers.get(server_id)
     if hasattr(server, task_state_field):
-        _poll_for_status(nova_client.servers.get, server.id, [None, '-', ''],
+        _poll_for_status(nova_client, server.id, [None, '-', ''],
                          status_field=task_state_field)

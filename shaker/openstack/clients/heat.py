@@ -51,13 +51,13 @@ def wait_stack_completion(heat_client, stack_id):
         resources = heat_client.resources.list(stack_id)
         for res in resources:
             if res.resource_status != 'CREATE_COMPLETE':
-                LOG.error('Stack resource %(res)s of type %(type)s has '
+                LOG.error('Heat stack resource %(res)s of type %(type)s has '
                           '%(reason)s',
                           dict(res=res.logical_resource_id,
                                type=res.resource_type,
                                reason=res.resource_status_reason))
         raise Exception('Failed to deploy Heat stack %(id)s. Expected status '
-                        'COMPLETE, but got %(status)s. Reason: %(reason)s',
+                        'COMPLETE, but got %(status)s. Reason: %(reason)s' %
                         dict(id=stack_id, status=status, reason=reason))
 
 
