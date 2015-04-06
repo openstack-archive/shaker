@@ -112,12 +112,16 @@ def read_scenario():
     return scenario
 
 
-def _extend_agents(agents):
-    for agent in agents.values():
+def _extend_agents(agents_map):
+    extended_agents = {}
+    for agent in agents_map.values():
+        extended = copy.deepcopy(agent)
         if agent.get('slave_id'):
-            agent['slave'] = copy.deepcopy(agents[agent['slave_id']])
+            extended['slave'] = copy.deepcopy(agents_map[agent['slave_id']])
         if agent.get('master_id'):
-            agent['master'] = copy.deepcopy(agents[agent['master_id']])
+            extended['master'] = copy.deepcopy(agents_map[agent['master_id']])
+        extended_agents[agent['id']] = extended
+    return extended_agents
 
 
 def _pick_agents(agents, size):
@@ -141,7 +145,7 @@ def _pick_agents(agents, size):
 
 
 def execute(quorum, execution, agents):
-    _extend_agents(agents)
+    agents = _extend_agents(agents)
 
     result = []
 

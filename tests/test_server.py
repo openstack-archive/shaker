@@ -21,7 +21,7 @@ from shaker.engine import server
 class TestServer(testtools.TestCase):
 
     def test_extend_agents(self):
-        agents = {
+        agents_map = {
             'UU1D_master_0': {
                 'id': 'UU1D_master_0',
                 'mode': 'master',
@@ -33,7 +33,7 @@ class TestServer(testtools.TestCase):
                 'mode': 'slave',
                 'node': 'dos'},
         }
-        server._extend_agents(agents)
+        agents = server._extend_agents(agents_map)
         self.assertDictContainsSubset(agents['UU1D_master_0']['slave'],
                                       agents['UU1D_slave_0'])
         self.assertDictContainsSubset(agents['UU1D_slave_0']['master'],
