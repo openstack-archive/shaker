@@ -33,7 +33,7 @@ class Shaker(object):
         message_queue = messaging.MessageQueue(server_endpoint)
         self.quorum = server.Quorum(message_queue, polling_interval,
                                     agent_loss_timeout)
-        self.quorum.wait_join(agent_ids)
+        self.quorum.join(agent_ids)
 
     def _run(self, agent_id, item):
         agents = dict([(agent_id, dict(id=agent_id, mode='alone'))])

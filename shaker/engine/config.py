@@ -81,7 +81,12 @@ SERVER_OPTS = [
                     'defaults to env[SHAKER_OUTPUT].'),
     cfg.IntOpt('agent-loss-timeout',
                default=60,
-               help='Timeout to treat agent as lost in seconds')
+               help='Timeout to treat agent as lost in seconds'),
+    cfg.IntOpt('agent-join-timeout',
+               default=600,
+               help='How long to wait for agents to join in seconds (time '
+                    'between stack deployment and start of scenario '
+                    'execution).')
 ]
 
 REPORT_OPTS = [

@@ -110,6 +110,7 @@ def main():
             elif task['operation'] == 'configure':
                 if 'polling_interval' in task:
                     polling_interval = task.get('polling_interval')
+                    send_reply(socket, agent_id, {})
 
             time.sleep(polling_interval)
 

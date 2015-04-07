@@ -24,9 +24,11 @@ from shaker.engine import server
 
 STEP = 10  # polling interval
 LOSS_TIMEOUT = 60
+JOIN_TIMEOUT = 600
 
 make_quorum = functools.partial(server.Quorum, polling_interval=STEP,
-                                agent_loss_timeout=LOSS_TIMEOUT)
+                                agent_loss_timeout=LOSS_TIMEOUT,
+                                agent_join_timeout=JOIN_TIMEOUT)
 
 
 class DummyExecutor(base_executor.BaseExecutor):
@@ -74,7 +76,7 @@ class TestQuorum(testtools.TestCase):
         event_stream = [
             dict(msg=dict(operation='poll', agent_id='alpha'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP),
                  time=1),
             dict(msg=dict(operation='reply', agent_id='alpha'),
                  reply=dict(operation='none'),
@@ -85,7 +87,7 @@ class TestQuorum(testtools.TestCase):
         test_case = {
             'alpha': DummyExecutor()
         }
-        result = quorum.run_test_case(test_case)
+        result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
 
     def test_poll_reply_unknown_agent_ignored(self):
@@ -93,7 +95,7 @@ class TestQuorum(testtools.TestCase):
         event_stream = [
             dict(msg=dict(operation='poll', agent_id='alpha'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP),
                  time=1),
             dict(msg=dict(operation='reply', agent_id='beta'),
                  reply=dict(operation='none'),
@@ -107,7 +109,7 @@ class TestQuorum(testtools.TestCase):
         test_case = {
             'alpha': DummyExecutor()
         }
-        result = quorum.run_test_case(test_case)
+        result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
 
     def test_lost_agent(self):
@@ -115,7 +117,7 @@ class TestQuorum(testtools.TestCase):
         event_stream = [
             dict(msg=dict(operation='poll', agent_id='alpha'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP),
                  time=1),
             dict(msg=dict(operation='reply', agent_id='heartbeat'),
                  reply=dict(operation='none'),
@@ -126,7 +128,7 @@ class TestQuorum(testtools.TestCase):
         test_case = {
             'alpha': DummyExecutor()
         }
-        result = quorum.run_test_case(test_case)
+        result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
         self.assertEqual('lost', result['alpha']['status'])
 
@@ -136,7 +138,7 @@ class TestQuorum(testtools.TestCase):
         event_stream = [
             dict(msg=dict(operation='poll', agent_id='alpha'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP),
                  time=1),
             dict(msg=dict(operation='reply', agent_id='heartbeat'),
                  reply=dict(operation='none'),
@@ -150,7 +152,7 @@ class TestQuorum(testtools.TestCase):
         test_case = {
             'alpha': DummyExecutor()
         }
-        result = quorum.run_test_case(test_case)
+        result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
         self.assertEqual('ok', result['alpha']['status'])
 
@@ -159,11 +161,11 @@ class TestQuorum(testtools.TestCase):
         event_stream = [
             dict(msg=dict(operation='poll', agent_id='alpha'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP),
                  time=1),
             dict(msg=dict(operation='poll', agent_id='beta'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP),
                  time=2),
             dict(msg=dict(operation='reply', agent_id='beta'),
                  reply=dict(operation='none'),
@@ -178,17 +180,17 @@ class TestQuorum(testtools.TestCase):
             'alpha': DummyExecutor(),
             'beta': DummyExecutor(),
         }
-        result = quorum.run_test_case(test_case)
+        result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
         self.assertEqual('lost', result['alpha']['status'])
         self.assertEqual('ok', result['beta']['status'])
 
-    def test_wait_agent_running_long_test(self):
+    def test_wait_agentexecutening_long_test(self):
         self.mock_time.return_value = 0
         event_stream = [
             dict(msg=dict(operation='poll', agent_id='alpha'),
                  reply=dict(operation='execute', command='RUN',
-                            start_at=STEP * 2),
+                            start_at=STEP * 2, expected_duration=STEP * 9),
                  time=1),
             dict(msg=dict(operation='reply', agent_id='heartbeat'),
                  reply=dict(operation='none'),
@@ -202,6 +204,45 @@ class TestQuorum(testtools.TestCase):
         test_case = {
             'alpha': DummyExecutor(duration=STEP * 9)
         }
-        result = quorum.run_test_case(test_case)
+        result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
         self.assertEqual('ok', result['alpha']['status'])
+
+    def test_join_succeed(self):
+        self.mock_time.return_value = 0
+        event_stream = [
+            dict(msg=dict(operation='poll', agent_id='alpha'),
+                 reply=dict(operation='configure', polling_interval=STEP,
+                            expected_duration=0),
+                 time=STEP),
+            dict(msg=dict(operation='reply', agent_id='alpha'),
+                 reply=dict(operation='none'),
+                 time=STEP * 2),
+            dict(msg=dict(operation='reply', agent_id='heartbeat'),
+                 reply=dict(operation='none'),
+                 time=STEP * 2),
+        ]
+
+        quorum = make_quorum(self._message_queue_gen(event_stream))
+        result = quorum.join(['alpha'])
+        lost = [agent_id for agent_id, r in result.items()
+                if r['status'] == 'lost']
+        self.assertEqual([], lost)
+
+    def test_join_failed(self):
+        self.mock_time.return_value = 0
+        event_stream = [
+            dict(msg=dict(operation='poll', agent_id='alpha'),
+                 reply=dict(operation='configure', polling_interval=STEP,
+                            expected_duration=0),
+                 time=STEP),
+            dict(msg=dict(operation='reply', agent_id='heartbeat'),
+                 reply=dict(operation='none'),
+                 time=JOIN_TIMEOUT + STEP * 2),
+        ]
+
+        quorum = make_quorum(self._message_queue_gen(event_stream))
+        result = quorum.join(['alpha'])
+        lost = [agent_id for agent_id, r in result.items()
+                if r['status'] == 'lost']
+        self.assertEqual(['alpha'], lost)
