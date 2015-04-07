@@ -23,6 +23,7 @@ import random
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
+import yaml
 
 
 LOG = logging.getLogger(__name__)
@@ -104,6 +105,16 @@ def write_file(data, file_name, base_dir=''):
     finally:
         if fd:
             fd.close()
+
+
+def read_yaml_file(file_name):
+    raw = read_file(file_name)
+    try:
+        parsed = yaml.safe_load(raw)
+        return parsed
+    except Exception as e:
+        LOG.error('Failed to parse file %(file)s in YAML format: %(err)s',
+                  dict(file=file_name, err=e))
 
 
 def split_address(address):

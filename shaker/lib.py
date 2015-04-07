@@ -16,6 +16,7 @@
 from oslo_log import log as logging
 
 from shaker.engine import messaging
+from shaker.engine import quorum
 from shaker.engine import server
 
 
@@ -29,10 +30,10 @@ class Shaker(object):
     res = shaker.run_program('the-agent', 'ls -al')
     """
     def __init__(self, server_endpoint, agent_ids, polling_interval=1,
-                 agent_loss_timeout=60):
+                 agent_loss_timeout=60, agent_join_timeout=600):
         message_queue = messaging.MessageQueue(server_endpoint)
-        self.quorum = server.Quorum(message_queue, polling_interval,
-                                    agent_loss_timeout)
+        self.quorum = quorum.Quorum(message_queue, polling_interval,
+                                    agent_loss_timeout, agent_join_timeout)
         self.quorum.join(agent_ids)
 
     def _run(self, agent_id, item):

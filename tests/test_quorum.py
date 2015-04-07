@@ -19,14 +19,14 @@ import mock
 import testtools
 
 from shaker.engine.executors import base as base_executor
-from shaker.engine import server
+from shaker.engine import quorum
 
 
 STEP = 10  # polling interval
 LOSS_TIMEOUT = 60
 JOIN_TIMEOUT = 600
 
-make_quorum = functools.partial(server.Quorum, polling_interval=STEP,
+make_quorum = functools.partial(quorum.Quorum, polling_interval=STEP,
                                 agent_loss_timeout=LOSS_TIMEOUT,
                                 agent_join_timeout=JOIN_TIMEOUT)
 

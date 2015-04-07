@@ -16,163 +16,21 @@
 import copy
 import json
 import os
-import time
 import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import yaml
 
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
 from shaker.engine import messaging
+from shaker.engine import quorum as quorum_pkg
 from shaker.engine import report
 from shaker.engine import utils
 
 
 LOG = logging.getLogger(__name__)
-
-
-class BaseOperation(object):
-    def get_agent_join_timeout(self):
-        return 0
-
-    def get_active_agent_ids(self):
-        pass
-
-    def get_reply(self, agent_id, start_at):
-        return {}
-
-    def process_reply(self, agent_id, message):
-        return {'status': 'ok'}
-
-    def process_failure(self, agent_id):
-        return {'status': 'lost'}
-
-
-class JoinOperation(BaseOperation):
-    def __init__(self, agent_ids, polling_interval, agent_join_timeout):
-        super(JoinOperation, self).__init__()
-        self.agent_ids = agent_ids
-        self.polling_interval = polling_interval
-        self.agent_join_timeout = agent_join_timeout
-
-    def get_agent_join_timeout(self):
-        return self.agent_join_timeout
-
-    def get_active_agent_ids(self):
-        return set(self.agent_ids)
-
-    def get_reply(self, agent_id, start_at):
-        return dict(operation='configure',
-                    polling_interval=self.polling_interval,
-                    expected_duration=0)
-
-
-class ExecuteOperation(BaseOperation):
-    def __init__(self, executors):
-        super(ExecuteOperation, self).__init__()
-        self.executors = executors
-
-    def get_active_agent_ids(self):
-        return set(self.executors.keys())
-
-    def get_reply(self, agent_id, start_at):
-        reply = dict(operation='execute',
-                     start_at=start_at,
-                     command=self.executors[agent_id].get_command(),
-                     expected_duration=(self.executors[agent_id].
-                                        get_expected_duration()))
-        return reply
-
-    def process_reply(self, agent_id, message):
-        r = super(ExecuteOperation, self).process_reply(agent_id, message)
-        r.update(self.executors[agent_id].process_reply(message))
-        return r
-
-    def process_failure(self, agent_id):
-        r = super(ExecuteOperation, self).process_failure(agent_id)
-        r.update(self.executors[agent_id].process_failure())
-        return r
-
-
-class Quorum(object):
-    def __init__(self, message_queue, polling_interval, agent_loss_timeout,
-                 agent_join_timeout):
-        self.message_queue = message_queue
-        self.polling_interval = polling_interval
-        self.agent_loss_timeout = agent_loss_timeout
-        self.agent_join_timeout = agent_join_timeout
-
-    def _run(self, operation):
-        current = operation.get_active_agent_ids()
-        LOG.debug('Executing operation %s on agents: %s', operation, current)
-
-        working = set()
-        replied = set()
-        result = {}
-
-        start_at = time.time() + self.polling_interval * 2
-        lives = dict((agent_id, start_at + operation.get_agent_join_timeout())
-                     for agent_id in current)
-
-        for message, reply_handler in self.message_queue:
-            agent_id = message.get('agent_id')
-            op = message.get('operation')
-            reply = {'operation': 'none'}
-            now = time.time()
-
-            if agent_id in (current - replied):
-                # message from a known not yet worked agent
-                lives[agent_id] = (now + self.polling_interval * 2 +
-                                   self.agent_loss_timeout)
-
-                if op == 'poll':
-                    reply = operation.get_reply(agent_id, start_at)
-                    lives[agent_id] += reply.get('expected_duration')
-                    working.add(agent_id)
-                    LOG.debug('Working agents: %s', working)
-                elif op == 'reply':
-                    if agent_id in working:
-                        result[agent_id] = operation.process_reply(
-                            agent_id, message)
-                        replied.add(agent_id)
-                        LOG.debug('Replied agents: %s', replied)
-
-            reply_handler(reply)
-
-            lost = set(a for a, t in lives.items() if t < now) - replied
-            if lost:
-                LOG.debug('Lost agents: %s', lost)
-
-            if replied | lost >= current:
-                if lost:
-                    LOG.warning('Lost agents: %s', lost)
-                    # update result with info about lost agents
-                    for agent_id in lost:
-                        result[agent_id] = operation.process_failure(agent_id)
-
-                LOG.info('Finished processing operation: %s', operation)
-                break
-
-        return result
-
-    def join(self, agent_ids):
-        LOG.debug('Waiting for quorum of agents: %s', agent_ids)
-        return self._run(JoinOperation(agent_ids, self.polling_interval,
-                                       self.agent_join_timeout))
-
-    def execute(self, executors):
-        return self._run(ExecuteOperation(executors))
-
-
-def read_scenario():
-    scenario_raw = utils.read_file(cfg.CONF.scenario)
-    scenario = yaml.safe_load(scenario_raw)
-    scenario['file_name'] = cfg.CONF.scenario
-    LOG.debug('Scenario: %s', scenario)
-    return scenario
 
 
 def _extend_agents(agents_map):
@@ -246,7 +104,8 @@ def main():
         config.REPORT_OPTS
     )
 
-    scenario = read_scenario()
+    scenario = utils.read_yaml_file(cfg.CONF.scenario)
+    scenario['file_name'] = cfg.CONF.scenario
 
     deployment = None
     agents = {}
@@ -272,9 +131,9 @@ def main():
         else:
             message_queue = messaging.MessageQueue(cfg.CONF.server_endpoint)
 
-            quorum = Quorum(message_queue, cfg.CONF.polling_interval,
-                            cfg.CONF.agent_loss_timeout,
-                            cfg.CONF.agent_join_timeout)
+            quorum = quorum_pkg.Quorum(
+                message_queue, cfg.CONF.polling_interval,
+                cfg.CONF.agent_loss_timeout, cfg.CONF.agent_join_timeout)
             quorum.join(set(agents.keys()))
 
             result = execute(quorum, scenario['execution'], agents)
