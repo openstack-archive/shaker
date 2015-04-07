@@ -100,18 +100,9 @@ def execute(quorum, execution, agents):
     return result
 
 
-def main():
-    utils.init_config_and_logging(
-        config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
-        config.REPORT_OPTS
-    )
-
-    scenario = utils.read_yaml_file(cfg.CONF.scenario)
-    scenario['file_name'] = cfg.CONF.scenario
-
+def play_scenario(scenario):
     deployment = None
-    agents = {}
-    result = []
+    output = dict(scenario=scenario)
 
     try:
         deployment = deploy.Deployment(cfg.CONF.server_endpoint)
@@ -126,6 +117,7 @@ def main():
 
         agents = deployment.deploy(scenario['deployment'],
                                    base_dir=os.path.dirname(cfg.CONF.scenario))
+        output['agents'] = agents
         LOG.debug('Deployed agents: %s', agents)
 
         if not agents:
@@ -146,8 +138,8 @@ def main():
                 cfg.CONF.agent_loss_timeout, cfg.CONF.agent_join_timeout)
             quorum.join(set(agents.keys()))
 
-            result = execute(quorum, scenario['execution'], agents)
-            LOG.debug('Result: %s', result)
+            execution_result = execute(quorum, scenario['execution'], agents)
+            output['result'] = execution_result
     except BaseException as e:
         if isinstance(e, KeyboardInterrupt):
             LOG.info('Caught SIGINT. Terminating')
@@ -157,13 +149,24 @@ def main():
         if deployment:
             deployment.cleanup()
 
-    report_data = dict(scenario=scenario,
-                       agents=agents.values(),
-                       result=result)
-    if cfg.CONF.output:
-        utils.write_file(json.dumps(report_data), cfg.CONF.output)
+    return output
 
-    report.generate_report(report_data, cfg.CONF.report_template,
+
+def main():
+    utils.init_config_and_logging(
+        config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
+        config.REPORT_OPTS
+    )
+
+    scenario = utils.read_yaml_file(cfg.CONF.scenario)
+    scenario['file_name'] = cfg.CONF.scenario
+
+    output = play_scenario(scenario)
+
+    if cfg.CONF.output:
+        utils.write_file(json.dumps(output), cfg.CONF.output)
+
+    report.generate_report(output, cfg.CONF.report_template,
                            cfg.CONF.report, cfg.CONF.subunit)
 
 
