@@ -4,9 +4,9 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--flavor-name FLAVOR_NAME] [--image-name IMAGE_NAME]
               [--log-config-append PATH] [--log-date-format DATE_FORMAT]
               [--log-dir LOG_DIR] [--log-file PATH] [--log-format FORMAT]
-              [--nodebug] [--nouse-syslog] [--nouse-syslog-rfc-format]
-              [--noverbose] [--os-auth-url <auth-url>]
-              [--os-password <auth-password>]
+              [--no-report-on-error] [--nodebug] [--nono-report-on-error]
+              [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
+              [--os-auth-url <auth-url>] [--os-password <auth-password>]
               [--os-region-name <auth-region-name>]
               [--os-tenant-name <auth-tenant-name>]
               [--os-username <auth-username>] [--output OUTPUT]
@@ -64,7 +64,10 @@ optional arguments:
                         logging.LogRecord attributes. This option is
                         deprecated. Please use logging_context_format_string
                         and logging_default_format_string instead.
+  --no-report-on-error  Do not generate report for failed scenarios
   --nodebug             The inverse of --debug
+  --nono-report-on-error
+                        The inverse of --no-report-on-error
   --nouse-syslog        The inverse of --use-syslog
   --nouse-syslog-rfc-format
                         The inverse of --use-syslog-rfc-format
@@ -85,8 +88,7 @@ optional arguments:
                         env[SHAKER_OUTPUT].
   --polling-interval POLLING_INTERVAL
                         How frequently the agent polls server, in seconds
-  --report REPORT       Report file name, defaults to env[SHAKER_REPORT]. If
-                        no value provided the report is printed to stdout.
+  --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
   --report-template REPORT_TEMPLATE
                         Report template in Jinja format
   --scenario SCENARIO   Scenario file name, defaults to env[SHAKER_SCENARIO].

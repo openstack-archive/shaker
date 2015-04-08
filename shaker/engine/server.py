@@ -144,7 +144,9 @@ def play_scenario(scenario):
         if isinstance(e, KeyboardInterrupt):
             LOG.info('Caught SIGINT. Terminating')
         else:
-            LOG.error('Error while executing scenario: %s', e)
+            error_msg = 'Error while executing scenario: %s' % e
+            LOG.error(error_msg)
+            output['error'] = error_msg
     finally:
         if deployment:
             deployment.cleanup()
@@ -166,8 +168,12 @@ def main():
     if cfg.CONF.output:
         utils.write_file(json.dumps(output), cfg.CONF.output)
 
-    report.generate_report(output, cfg.CONF.report_template,
-                           cfg.CONF.report, cfg.CONF.subunit)
+    if cfg.CONF.no_report_on_error and 'error' in output:
+        LOG.info('Skipped report generation due to errors and '
+                 'no_report_on_error=True')
+    else:
+        report.generate_report(output, cfg.CONF.report_template,
+                               cfg.CONF.report, cfg.CONF.subunit)
 
 
 if __name__ == "__main__":

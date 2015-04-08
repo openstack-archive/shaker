@@ -381,11 +381,16 @@
                     <h3>Scenario:</h3>
                     <pre>{{ report.scenario|yaml }}</pre>
 
+                    {% if report.error %}
+                        <h3 class="text-danger">Error</h3>
+                        <pre class="bg-danger">{{ report.error }}</pre>
+                    {% endif %}
+
                     <h3>Agents:</h3>
                     <table id="scenario_agents">
                         <thead><tr><th>Agent</th><th>Mode</th><th>IP</th><th>Node</th><th>Instance Name</th></tr></thead>
                         <tbody>
-                        {% for agent in report.agents %}
+                        {% for agent in report.agents.values() %}
                             {% if agent.mode != 'slave' %}
                                 <tr>
                                     <td>{{ agent.id }}</td>
