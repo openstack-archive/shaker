@@ -47,8 +47,7 @@ optional arguments:
   --nouse-syslog-rfc-format
                         The inverse of --use-syslog-rfc-format
   --noverbose           The inverse of --verbose
-  --report REPORT       Report file name, defaults to env[SHAKER_REPORT]. If
-                        no value provided the report is printed to stdout.
+  --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
   --subunit SUBUNIT     Subunit stream file name, defaults to
                         env[SHAKER_SUBUNIT].
   --syslog-log-facility SYSLOG_LOG_FACILITY

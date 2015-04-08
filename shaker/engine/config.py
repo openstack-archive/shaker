@@ -26,7 +26,7 @@ COMMON_OPTS = [
                help='Address for server connections (host:port), '
                     'defaults to env[SHAKER_SERVER_ENDPOINT].'),
     cfg.IntOpt('polling-interval',
-               default=10,
+               default=utils.env('SHAKER_POLLING_INTERVAL') or 10,
                help='How frequently the agent polls server, in seconds')
 ]
 
@@ -80,13 +80,16 @@ SERVER_OPTS = [
                help='File for output in JSON format, '
                     'defaults to env[SHAKER_OUTPUT].'),
     cfg.IntOpt('agent-loss-timeout',
-               default=60,
+               default=utils.env('SHAKER_AGENT_LOSS_TIMEOUT') or 60,
                help='Timeout to treat agent as lost in seconds'),
     cfg.IntOpt('agent-join-timeout',
-               default=600,
+               default=utils.env('SHAKER_AGENT_JOIN_TIMEOUT') or 600,
                help='How long to wait for agents to join in seconds (time '
                     'between stack deployment and start of scenario '
-                    'execution).')
+                    'execution).'),
+    cfg.BoolOpt('no-report-on-error',
+                default=(utils.env('SHAKER_NO_REPORT_ON_ERROR') or False),
+                help='Do not generate report for failed scenarios'),
 ]
 
 REPORT_OPTS = [
@@ -96,8 +99,7 @@ REPORT_OPTS = [
                help='Report template in Jinja format'),
     cfg.StrOpt('report',
                default=utils.env('SHAKER_REPORT'),
-               help='Report file name, defaults to env[SHAKER_REPORT]. '
-                    'If no value provided the report is printed to stdout.'),
+               help='Report file name, defaults to env[SHAKER_REPORT]. '),
     cfg.StrOpt('subunit',
                default=utils.env('SHAKER_SUBUNIT'),
                help='Subunit stream file name, defaults to '

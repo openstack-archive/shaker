@@ -32,7 +32,7 @@ LOG = logging.getLogger(__name__)
 
 
 def calculate_stats(data):
-    for test_result in data['result']:
+    for test_result in data.get('result', []):
         aggregator = aggregators.get_aggregator(test_result['definition'])
 
         for iteration_result in test_result['results_per_iteration']:
@@ -61,7 +61,7 @@ def _verify_stats_against_sla(sla, stats, location):
 
 def verify_sla(data):
     res = []
-    for test_result in data['result']:
+    for test_result in data.get('result', []):
         test_name = (test_result['definition'].get('title') or
                      test_result['definition'].get('class'))
         sla = test_result['definition'].get('sla')
