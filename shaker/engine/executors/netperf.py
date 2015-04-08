@@ -19,9 +19,6 @@ from shaker.engine.executors import base
 
 
 class NetperfExecutor(base.BaseExecutor):
-    def get_expected_duration(self):
-        return self.test_definition.get('time') or 60
-
     def get_command(self):
         cmd = base.CommandLine('netperf')
         cmd.add('-H', self.agent['slave']['ip'])
@@ -31,9 +28,6 @@ class NetperfExecutor(base.BaseExecutor):
 
 
 class NetperfWrapperExecutor(base.BaseExecutor):
-    def get_expected_duration(self):
-        return self.test_definition.get('time') or 60
-
     def get_command(self):
         cmd = base.CommandLine('netperf-wrapper')
         cmd.add('-H', self.agent['slave']['ip'])

@@ -19,9 +19,6 @@ from shaker.engine.executors import base
 
 
 class IperfExecutor(base.BaseExecutor):
-    def get_expected_duration(self):
-        return self.test_definition.get('time') or 60
-
     def get_command(self):
         cmd = base.CommandLine('sudo nice -n -20 iperf')
         cmd.add('--client', self.agent['slave']['ip'])

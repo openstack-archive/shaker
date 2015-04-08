@@ -51,7 +51,7 @@ class BaseExecutor(object):
         The value is used by Quorum to calculate expected time of reply.
         :return: time in seconds
         """
-        return 0
+        return self.test_definition.get('time') or 60
 
     def get_command(self):
         return None

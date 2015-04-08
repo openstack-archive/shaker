@@ -69,6 +69,11 @@ def generate_agents(compute_nodes, vm_accommodation, unique):
                 agents[agent_id] = dict(id=agent_id, node=node_formula(i),
                                         mode='alone')
 
+    if not agents:
+        LOG.warning('Not enough compute nodes %(cn)s for requested '
+                    'instance accommodation %(acc)s',
+                    dict(cn=compute_nodes, acc=vm_accommodation))
+
     return agents
 
 
