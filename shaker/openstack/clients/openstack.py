@@ -73,7 +73,7 @@ class OpenStackClient(object):
             username=username, password=password,
             tenant_name=tenant_name, auth_url=auth_url)
         # ping OpenStack
-        self.keystone_creator().services.list()
+        self.keystone_creator()
 
     def __getattribute__(self, name):
         if name != '_osc_cache' and name in self._osc_cache:
