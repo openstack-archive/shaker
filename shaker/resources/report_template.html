@@ -22,6 +22,8 @@
           src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.js"></script>
   <script type="application/javascript"
           src="https://cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
+  <script type="application/javascript"
+          src="https://cdnjs.cloudflare.com/ajax/libs/sammy.js/0.7.6/sammy.min.js"></script>
 
   <!-- STYLES -->
 
@@ -38,30 +40,157 @@
   <link rel='stylesheet' type='text/css'
         href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic&subset=latin,cyrillic'>
 
-  <script type="text/javascript">
-    function initSingleSelector(name) {
-      var selectorId = "#" + name + "_selector";
-      console.log($(selectorId));
+  <script type="application/javascript">
+    var report = {
+  "records": [
+    {
+      "status": "ok",
+      "node": null,
+      "concurrency": 1,
+      "scenario": "scenarios/misc/static_agent.yaml",
+      "stdout": "total 24\ndrwxrwxr-x 3 ishakhat ishakhat 4096 Apr  8 15:45 .\ndrwxrwxr-x 7 ishakhat ishakhat 4096 Apr  8 15:30 ..\n-rw-rw-r-- 1 ishakhat ishakhat 3635 Apr  8 15:30 agent.py\n-rw-rw-r-- 1 ishakhat ishakhat 3581 Apr  8 15:45 agent.pyc\n-rw-rw-r-- 1 ishakhat ishakhat    0 Mar 19 16:59 __init__.py\n-rw-rw-r-- 1 ishakhat ishakhat  138 Mar 23 14:04 __init__.pyc\ndrwxrwxr-x 2 ishakhat ishakhat 4096 Apr  8 16:10 __pycache__\n",
+      "command": {
+        "data": "ls -al",
+        "type": "program"
+      },
+      "agent_id": "the-agent",
+      "stderr": "",
+      "executor": "shell",
+      "test": "List all files"
+    },
+    {
+      "status": "ok",
+      "node": null,
+      "concurrency": 1,
+      "scenario": "scenarios/misc/static_agent.yaml",
+      "stdout": "hello\nworld\n",
+      "command": {
+        "data": "#!/bin/bash\necho \"hello\"\necho \"world\"\n",
+        "type": "script"
+      },
+      "agent_id": "the-agent",
+      "stderr": "",
+      "executor": "shell",
+      "test": "Run sample script"
+    }
+  ],
+  "agents": {
+    "the-agent": {
+      "id": "the-agent",
+      "mode": "alone"
+    }
+  },
+  "scenario": {
+    "file_name": "scenarios/misc/static_agent.yaml",
+    "execution": {
+      "tests": [
+        {
+          "program": "ls -al",
+          "class": "shell",
+          "title": "List all files"
+        },
+        {
+          "title": "Run sample script",
+          "class": "shell",
+          "script": "#!/bin/bash\necho \"hello\"\necho \"world\"\n"
+        }
+      ]
+    },
+    "description": "This scenario runs tests on pre-deployed static agents",
+    "deployment": {
+      "agents": [
+        {
+          "id": "the-agent",
+          "mode": "alone"
+        }
+      ]
+    }
+  }
+}
+  </script>
 
-      //$(selectorId).val(0).select2();
-      $(selectorId).val(0).select2({
-        data: [
-          {id: 0, text: "Uno"},
-          {id: 1, text: "Duo"}
-        ]
-      }).select2("enable", true);
+  <script type="text/javascript">
+    "use strict";
+
+    var fields = ["scenario", "test", "concurrency", "node", "agent_id"];
+
+    function initSingleSelector(name, values) {
+      var selectorId = "#" + name + "_selector";
+
+      var options = [];
+      for (var key in values) {
+        options.push({id: key, text: key});
+      }
+      options.sort(function(x, y) {return (x > y)? -1: (x == y)? 0: 1});
+
+      $(selectorId).
+          select2({
+            data: options,
+            allowClear: true
+          }).
+          select2("enable", true).
+          on("change", function (e) {
+            update();
+{#            window.location.search = "btn=" + e.val;#}
+          });
     }
 
-    function initSelectors() {
-      initSingleSelector("scenario");
-      initSingleSelector("test");
-      initSingleSelector("concurrency");
-      initSingleSelector("node");
-      initSingleSelector("agent");
+    function updateSelectors() {
+      var records = report.records;
+
+      $.each(fields, function(i, field) {
+        var values = {};
+
+        $.each(records, function(j, record) {
+          values[record[field]] = true;
+        });
+
+        initSingleSelector(field, values);
+      });
+    }
+
+    function update() {
+      updateSelectors();
+
+      var state = {};
+      $.each(fields, function(i, field) {
+
+      });
     }
 
     $(document).ready(function () {
-      initSelectors();
+      update();
+
+      var app = $.sammy('#main', function () {
+
+        this.get('#/', function (context) {
+          context.log('Yo yo yo');
+        });
+
+        this.get('#/btn=:id', function (context) {
+          context.log('hello' + this.params['id']);
+        });
+
+      });
+
+      $(function () {
+        app.run('#/');
+      });
+
+      // make table out of template!
+      var source = $("#some-template").html();
+      var template = Handlebars.compile(source);
+      var agents_list = [];
+      for (var agent_id in report.agents) {
+        agents_list.push(report.agents[agent_id]);
+      }
+      $("#container").append(template({agents: agents_list, table_id: "agents_table"}));
+      $("#agents_table").dataTable({
+        "autoWidth": true,
+        "paging": false,
+        "ordering": false,
+        "info": false
+      });
     });
 
     $(function () {
@@ -99,7 +228,7 @@
 
 <body>
 
-<div class="container">
+<div class="container" id="container">
   <div class="row text-center">
     <h1>Shaker | The Report</h1>
   </div>
@@ -126,8 +255,8 @@
              data-placeholder="Select node"/>
     </div>
     <div class="col-md-2">
-      <label for="agent_selector" title="Agent id">Agent</label>
-      <input type="hidden" id="agent_selector" class="form-control"
+      <label for="agent_id_selector" title="Agent id">Agent</label>
+      <input type="hidden" id="agent_id_selector" class="form-control"
              data-placeholder="Select agent"/>
     </div>
   </div>
@@ -164,6 +293,31 @@
     </tbody>
   </table>
 </div>
+
+<script id="some-template" type="text/x-handlebars-template">
+  <table class="table table-striped" id="{{ table_id }}">
+    <thead>
+    <tr>
+      <th>Agent</th>
+      <th>Mode</th>
+      <th>IP</th>
+      <th>Node</th>
+      <th>Instance Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#agents}}
+    <tr>
+      <td>{{ id }}</td>
+      <td>{{ mode }}</td>
+      <td>{{ ip }}</td>
+      <td>{{ node }}</td>
+      <td>{{ instance_name }}</td>
+    </tr>
+    {{/agents}}
+    </tbody>
+  </table>
+</script>
 
 </body>
 </html>
