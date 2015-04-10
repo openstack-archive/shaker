@@ -31,62 +31,73 @@ from shaker.engine import utils
 LOG = logging.getLogger(__name__)
 
 
-def calculate_stats(data):
-    for test_result in data.get('result', []):
-        aggregator = aggregators.get_aggregator(test_result['definition'])
+def calculate_stats(records, tests):
+    aggregates = []
+    # scenario -> test -> concurrency -> [record]
+    rec_map = collections.defaultdict(
+        functools.partial(collections.defaultdict,
+                          functools.partial(collections.defaultdict, list)))
 
-        for iteration_result in test_result['results_per_iteration']:
-            for agent_result in iteration_result['results_per_agent']:
-                aggregator.agent_summary(agent_result)
+    for record in records:
+        aggregator = aggregators.get_aggregator(tests[record['test']])
+        aggregator.record_summary(record)
 
-            aggregator.iteration_summary(iteration_result)
+        rec_map[record['scenario']][record['test']][
+            record['concurrency']].append(record)
 
-        aggregator.test_summary(test_result)
+    for scenario, per_scenario in rec_map.items():
+        for test, per_test in per_scenario.items():
+            aggregator = aggregators.get_aggregator(tests[test])
 
+            concurrency_aggregates = []
+            for concurrency, per_concurrency in per_test.items():
+                summary = aggregator.concurrency_summary(per_concurrency)
+                if summary:
+                    summary.update(dict(scenario=scenario, test=test,
+                                        concurrency=concurrency,
+                                        type='agg_concurrency'))
+                    aggregates.append(summary)
+                    concurrency_aggregates.append(summary)
+
+            per_test_summary = aggregator.test_summary(concurrency_aggregates)
+            if per_test_summary:
+                per_test_summary.update(dict(scenario=scenario, test=test,
+                                             type='agg_test'))
+                aggregates.append(per_test_summary)
+
+    return aggregates
 
 SLARecord = collections.namedtuple('SLARecord',
                                    ['sla', 'status', 'location', 'stats'])
 
 
-def _verify_stats_against_sla(sla, stats, location):
+def _verify_stats_against_sla(sla, record, location):
     res = []
     for term in sla:
-        status = utils.eval_expr(term, stats)
+        status = utils.eval_expr(term, record['stats'])
         sla_record = SLARecord(sla=term, status=status,
-                               location=location, stats=stats)
+                               location=location, stats=record['stats'])
         res.append(sla_record)
         LOG.debug('SLA: %s', sla_record)
     return res
 
 
-def verify_sla(data):
-    res = []
-    for test_result in data.get('result', []):
-        test_name = (test_result['definition'].get('title') or
-                     test_result['definition'].get('class'))
-        sla = test_result['definition'].get('sla')
-        if not sla:
-            continue
+def verify_sla(records, tests):
+    sla_results = []
+    # test -> [sla]
+    sla_map = dict((test_id, test['sla'])
+                   for test_id, test in tests.items() if 'sla' in test)
 
-        for iteration_result in test_result['results_per_iteration']:
-            size = str(len(iteration_result['results_per_agent']))
-
-            sla_info = _verify_stats_against_sla(
-                sla, iteration_result['stats'],
-                '%s.%s' % (test_name, size))
-            res += sla_info
-            iteration_result['sla_info'] = sla_info
-
-            for agent_result in iteration_result['results_per_agent']:
-                agent_id = agent_result['agent']['id']
-
-                sla_info = _verify_stats_against_sla(
-                    sla, agent_result['stats'],
-                    '%s.%s.%s' % (test_name, size, agent_id))
-                res += sla_info
-                agent_result['sla_info'] = sla_info
-
-    return res
+    for record in records:
+        if (record['test'] in sla_map) and ('stats' in record):
+            sla = sla_map[record['test']]
+            path = [str(record[key])
+                    for key in ['test', 'concurrency', 'node', 'agent_id']
+                    if key in record]
+            info = _verify_stats_against_sla(sla, record, '.'.join(path))
+            sla_results += info
+            record['sla_info'] = info
+    return sla_results
 
 
 def save_to_subunit(sla_res, subunit_filename):
@@ -122,14 +133,18 @@ def generate_report(data, report_template, report_filename, subunit_filename):
     LOG.debug('Generating report, template: %s, output: %s',
               report_template, report_filename or '<dummy>')
 
-    calculate_stats(data)
-    sla_res = verify_sla(data)
+    data['records'] += calculate_stats(data['records'], data['tests'])
+
+    sla_res = verify_sla(data['records'], data['tests'])
 
     if subunit_filename:
         save_to_subunit(sla_res, subunit_filename)
 
     # add more filters to jinja
-    jinja_env = jinja2.Environment()
+    jinja_env = jinja2.Environment(variable_start_string='[[[',
+                                   variable_end_string=']]]',
+                                   comment_start_string='[[#',
+                                   comment_end_string='#]]')
     jinja_env.filters['json'] = json.dumps
     jinja_env.filters['yaml'] = functools.partial(yaml.safe_dump, indent=2,
                                                   default_flow_style=False)

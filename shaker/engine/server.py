@@ -17,7 +17,7 @@ import copy
 import json
 import multiprocessing
 import os
-import uuid
+import re
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -47,6 +47,11 @@ def _extend_agents(agents_map):
     return extended_agents
 
 
+def _make_test_title(test):
+    s = test.get('title') or test.get('class')
+    return re.sub(r'[^\x21-\x7e\x80-\xff]+', '_', s).lower()
+
+
 def _pick_agents(agents, size):
     # slave agents do not execute any tests
     agents = [a for a in agents.values() if a.get('mode') != 'slave']
@@ -68,41 +73,38 @@ def _pick_agents(agents, size):
 
 
 def execute(quorum, execution, agents):
-    agents = _extend_agents(agents)
-
-    result = []
+    records = []
 
     for test in execution['tests']:
         LOG.debug('Running test %s on all agents', test)
+        test_title = _make_test_title(test)
 
-        results_per_iteration = []
         for selected_agents in _pick_agents(agents, execution.get('size')):
             executors = dict((a['id'], executors_classes.get_executor(test, a))
                              for a in selected_agents)
 
             execution_result = quorum.execute(executors)
 
-            values = execution_result.values()
-            for v in values:
-                v['uuid'] = str(uuid.uuid4())
-            results_per_iteration.append({
-                'agents': selected_agents,
-                'results_per_agent': values,
-            })
-
-        test['uuid'] = str(uuid.uuid4())
-        result.append({
-            'results_per_iteration': results_per_iteration,
-            'definition': test,
-        })
+            for agent_id, data in execution_result.items():
+                data.update(dict(
+                    agent_id=agent_id,
+                    node=agents[agent_id].get('node'),
+                    concurrency=len(selected_agents),
+                    test=test_title,
+                    executor=test.get('class'),
+                    type='raw',
+                ))
+                records.append(data)
 
     LOG.info('Execution is done')
-    return result
+    return records
 
 
 def play_scenario(scenario):
     deployment = None
-    output = dict(scenario=scenario)
+    output = dict(scenario=scenario, records=[], agents={})
+    output['tests'] = dict((_make_test_title(test), test)
+                           for test in scenario['execution']['tests'])
 
     try:
         deployment = deploy.Deployment(cfg.CONF.server_endpoint)
@@ -117,6 +119,7 @@ def play_scenario(scenario):
 
         agents = deployment.deploy(scenario['deployment'],
                                    base_dir=os.path.dirname(cfg.CONF.scenario))
+        agents = _extend_agents(agents)
         output['agents'] = agents
         LOG.debug('Deployed agents: %s', agents)
 
@@ -139,14 +142,18 @@ def play_scenario(scenario):
             quorum.join(set(agents.keys()))
 
             execution_result = execute(quorum, scenario['execution'], agents)
-            output['result'] = execution_result
+            for record in execution_result:
+                record['scenario'] = (scenario.get('title') or
+                                      scenario.get('file_name'))
+            output['records'] = execution_result
     except BaseException as e:
         if isinstance(e, KeyboardInterrupt):
             LOG.info('Caught SIGINT. Terminating')
         else:
             error_msg = 'Error while executing scenario: %s' % e
             LOG.error(error_msg)
-            output['error'] = error_msg
+            LOG.exception(e)
+            output['scenario']['error'] = error_msg
     finally:
         if deployment:
             deployment.cleanup()
@@ -160,13 +167,22 @@ def main():
         config.REPORT_OPTS
     )
 
-    scenario = utils.read_yaml_file(cfg.CONF.scenario)
-    scenario['file_name'] = cfg.CONF.scenario
+    output = dict(records=[], agents={}, scenarios={}, tests={})
 
-    output = play_scenario(scenario)
+    for scenario_file_name in [cfg.CONF.scenario]:
+        scenario = utils.read_yaml_file(scenario_file_name)
+        scenario['title'] = scenario.get('title') or scenario_file_name
+        scenario['file_name'] = cfg.CONF.scenario
+
+        play_output = play_scenario(scenario)
+
+        output['scenarios'][scenario['title']] = play_output['scenario']
+        output['records'] += play_output['records']
+        output['agents'].update(play_output['agents'])
+        output['tests'].update(play_output['tests'])
 
     if cfg.CONF.output:
-        utils.write_file(json.dumps(output), cfg.CONF.output)
+        utils.write_file(json.dumps(output, indent=2), cfg.CONF.output)
 
     if cfg.CONF.no_report_on_error and 'error' in output:
         LOG.info('Skipped report generation due to errors and '

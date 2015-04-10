@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import collections
-import uuid
 
 from oslo_log import log as logging
 
@@ -43,25 +42,25 @@ class TrafficAggregator(base.BaseAggregator):
     def __init__(self, test_definition):
         super(TrafficAggregator, self).__init__(test_definition)
 
-    def test_summary(self, test_data):
+    def test_summary(self, records):
         chart = []
         xs = []
         mean_v = collections.defaultdict(list)
 
-        for iteration in test_data['results_per_iteration']:
-            xs.append(len(iteration['results_per_agent']))
-            for k, v in iteration['stats'].items():
+        for record in records:
+            xs.append(record['concurrency'])
+            for k, v in record['stats'].items():
                 mean_v[k].append(v['mean'])
 
         for k in mean_v.keys():
             chart.append(['Mean %s' % k] + mean_v[k])
 
         chart.append(['x'] + xs)
-        test_data.update({
+        return {
             'chart': chart,
-        })
+        }
 
-    def iteration_summary(self, iteration_data):
+    def concurrency_summary(self, records):
         max_v = collections.defaultdict(list)
         min_v = collections.defaultdict(list)
         mean_v = collections.defaultdict(list)
@@ -69,11 +68,11 @@ class TrafficAggregator(base.BaseAggregator):
         chart = []
 
         nodes = []
-        for one in iteration_data['results_per_agent']:
-            nodes.append(one['agent']['node'])
-            chart += one['chart']
+        for record in records:
+            nodes.append(record['node'])
+            chart += record['chart']
 
-            for k, v in one['stats'].items():
+            for k, v in record['stats'].items():
                 max_v[k].append(v['max'])
                 min_v[k].append(v['min'])
                 mean_v[k].append(v['mean'])
@@ -91,39 +90,38 @@ class TrafficAggregator(base.BaseAggregator):
             node_chart.append(['Max %s' % k] + max_v[k])
             node_chart.append(['Min %s' % k] + min_v[k])
 
-        iteration_data.update({
-            'uuid': uuid.uuid4(),
+        return {
             'stats': stats,
             'x-chart': chart,
             'node_chart': node_chart,
-        })
+        }
 
-    def agent_summary(self, agent_data):
+    def record_summary(self, record):
         # convert bps to Mbps
-        for idx, item_meta in enumerate(agent_data.get('meta', [])):
+        for idx, item_meta in enumerate(record.get('meta', [])):
             if item_meta[1] == 'bps':
-                for row in agent_data.get('samples'):
+                for row in record.get('samples'):
                     if row[idx]:
                         row[idx] = float(row[idx]) / 1024 / 1024
                 item_meta[1] = 'Mbps'
 
         # calculate stats
-        agent_data['stats'] = dict()
-        agent_data['chart'] = []
+        record['stats'] = dict()
+        record['chart'] = []
 
-        for idx, item_meta in enumerate(agent_data.get('meta', [])):
-            column = [row[idx] for row in agent_data.get('samples')]
+        for idx, item_meta in enumerate(record.get('meta', [])):
+            column = [row[idx] for row in record.get('samples')]
 
             item_title = item_meta[0]
             if item_title != 'time':
-                agent_data['stats'][item_title] = {
+                record['stats'][item_title] = {
                     'max': safe_max(column),
                     'min': safe_min(column),
                     'mean': mean(column),
                     'unit': item_meta[1],
                 }
-            agent_data['chart'].append([item_title] + column)
+            record['chart'].append([item_title] + column)
 
         # drop stdout
-        if 'stdout' in agent_data:
-            del agent_data['stdout']
+        if 'stdout' in record:
+            del record['stdout']
