@@ -12,6 +12,9 @@ execution:
     title: Iperf TCP test
     class: iperf_graph
     time: 60
+    sla:
+    - bandwidth.mean > 100
+    - bandwidth.min > 80
   -
     title: TCP download
     class: netperf_wrapper

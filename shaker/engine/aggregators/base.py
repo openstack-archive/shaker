@@ -18,11 +18,11 @@ class BaseAggregator(object):
     def __init__(self, test_definition):
         self.test_definition = test_definition
 
-    def test_summary(self, test_data):
+    def test_summary(self, records):
         pass
 
-    def iteration_summary(self, iteration_data):
+    def concurrency_summary(self, records):
         pass
 
-    def agent_summary(self, agent_data):
+    def record_summary(self, record):
         pass

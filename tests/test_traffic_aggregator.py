@@ -36,7 +36,7 @@ class TestTrafficAggregator(testtools.TestCase):
                         [5, 1.9, None]],
         }
         processed = copy.deepcopy(original)
-        aggregator.agent_summary(processed)
+        aggregator.record_summary(processed)
 
         self.assertFalse('stdout' in processed)
 
@@ -61,58 +61,57 @@ class TestTrafficAggregator(testtools.TestCase):
                           ['TCP download', None, None, 60.0, 65.0, 61.0, None]]
         self.assertEqual(expected_chart, processed['chart'])
 
-    def test_iteration_summary(self):
+    def test_concurrency_summary(self):
         aggregator = traffic.TrafficAggregator(None)
 
-        original = {
-            'results_per_agent': [
-                {
-                    'agent': {'node': 'alpha'},
-                    'stats': {
-                        'Ping ICMP': {
-                            'max': 2.6,
-                            'min': 1.9,
-                            'mean': 2.2,
-                            'unit': 'ms',
-                        },
-                        'TCP download': {
-                            'max': 65.0,
-                            'min': 60.0,
-                            'mean': 62.0,
-                            'unit': 'Mbps',
-                        }
+        original = [
+            {
+                'agent_id': 'alpha_agent',
+                'node': 'alpha',
+                'stats': {
+                    'Ping ICMP': {
+                        'max': 2.6,
+                        'min': 1.9,
+                        'mean': 2.2,
+                        'unit': 'ms',
                     },
-                    'chart': [['time', 0, 1, 2, 3, 4, 5],
-                              ['Ping ICMP', 1.9, 2.4, 2.6, 2.2, 2.2, 1.9],
-                              ['TCP download', None, None, 60.0, 65.0, 61.0,
-                               None]]
+                    'TCP download': {
+                        'max': 65.0,
+                        'min': 60.0,
+                        'mean': 62.0,
+                        'unit': 'Mbps',
+                    }
                 },
-                {
-                    'agent': {'node': 'beta'},
-                    'stats': {
-                        'Ping ICMP': {
-                            'max': 3.6,
-                            'min': 2.9,
-                            'mean': 3.2,
-                            'unit': 'ms',
-                        },
-                        'TCP download': {
-                            'max': 75.0,
-                            'min': 70.0,
-                            'mean': 72.0,
-                            'unit': 'Mbps',
-                        }
+                'chart': [['time', 0, 1, 2, 3, 4, 5],
+                          ['Ping ICMP', 1.9, 2.4, 2.6, 2.2, 2.2, 1.9],
+                          ['TCP download', None, None, 60.0, 65.0, 61.0,
+                          None]]
+            },
+            {
+                'agent_id': 'beta_agent',
+                'node': 'beta',
+                'stats': {
+                    'Ping ICMP': {
+                        'max': 3.6,
+                        'min': 2.9,
+                        'mean': 3.2,
+                        'unit': 'ms',
                     },
-                    'chart': [['time', 0, 1, 2, 3, 4, 5],
-                              ['Ping ICMP', 2.9, 3.4, 3.6, 3.2, 3.2, 2.9],
-                              ['TCP download', None, None, 70.0, 75.0, 71.0,
-                               None]]
+                    'TCP download': {
+                        'max': 75.0,
+                        'min': 70.0,
+                        'mean': 72.0,
+                        'unit': 'Mbps',
+                    }
                 },
-            ]
-        }
-        processed = copy.deepcopy(original)
-        aggregator.iteration_summary(processed)
+                'chart': [['time', 0, 1, 2, 3, 4, 5],
+                          ['Ping ICMP', 2.9, 3.4, 3.6, 3.2, 3.2, 2.9],
+                          ['TCP download', None, None, 70.0, 75.0, 71.0,
+                          None]]
+            },
+        ]
 
+        aggregate = aggregator.concurrency_summary(original)
         expected_stats = {
             'Ping ICMP': {
                 'max': 3.6,
@@ -128,4 +127,4 @@ class TestTrafficAggregator(testtools.TestCase):
             }
         }
 
-        self.assertEqual(expected_stats, processed['stats'])
+        self.assertEqual(expected_stats, aggregate['stats'])
