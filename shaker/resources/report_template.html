@@ -12,16 +12,18 @@
           src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
   <script type="application/javascript"
           src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+  <script type="application/javascript"
+          src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.js"></script>
   <script type="text/javascript"
           src="https://cdn.datatables.net/1.10.2/js/jquery.dataTables.min.js"></script>
   <script type="text/javascript"
           src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/3.0.1/handlebars.min.js"></script>
   <script type="application/javascript"
+          src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.2.7/js-yaml.min.js"></script>
+  <script type="application/javascript"
           src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
   <script type="application/javascript"
           src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.js"></script>
-  <script type="application/javascript"
-          src="https://cdnjs.cloudflare.com/ajax/libs/select2/3.5.2/select2.min.js"></script>
 
   <!-- STYLES -->
 
@@ -30,38 +32,309 @@
   <link rel=stylesheet type=text/css
         href="https://cdn.datatables.net/1.10.2/css/jquery.dataTables.min.css">
   <link rel=stylesheet type=text/css
-        href="http://cdn.jsdelivr.net/select2/3.4.5/select2.css">
-  <link rel=stylesheet type=text/css
-        href="http://cdnjs.cloudflare.com/ajax/libs/select2/3.4.8/select2-bootstrap.css">
-  <link rel=stylesheet type=text/css
         href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.css">
   <link rel='stylesheet' type='text/css'
         href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,400italic&subset=latin,cyrillic'>
 
-  <script type="text/javascript">
-    function initSingleSelector(name) {
-      var selectorId = "#" + name + "_selector";
-      console.log($(selectorId));
-
-      //$(selectorId).val(0).select2();
-      $(selectorId).val(0).select2({
-        data: [
-          {id: 0, text: "Uno"},
-          {id: 1, text: "Duo"}
+  <script type="application/javascript">
+    var report = {
+  "scenarios": {
+    "scenarios/misc/static_agent.yaml": {
+      "file_name": "scenarios/misc/static_agent.yaml",
+      "title": "scenarios/misc/static_agent.yaml",
+      "execution": {
+        "tests": [
+          {
+            "program": "ls -al",
+            "class": "shell",
+            "title": "List all files"
+          },
+          {
+            "title": "Run sample script",
+            "class": "shell",
+            "script": "#!/bin/bash\necho \"hello\"\necho \"world\"\n"
+          }
         ]
-      }).select2("enable", true);
+      },
+      "description": "This scenario runs tests on pre-deployed static agents",
+      "deployment": {
+        "agents": [
+          {
+            "id": "the-agent",
+            "mode": "alone"
+          }
+        ]
+      }
     }
-
-    function initSelectors() {
-      initSingleSelector("scenario");
-      initSingleSelector("test");
-      initSingleSelector("concurrency");
-      initSingleSelector("node");
-      initSingleSelector("agent");
+  },
+  "records": [
+    {
+      "status": "ok",
+      "node": null,
+      "concurrency": 1,
+      "scenario": "scenarios/misc/static_agent.yaml",
+      "stdout": "total 24\ndrwxrwxr-x 3 ishakhat ishakhat 4096 Apr  8 15:45 .\ndrwxrwxr-x 7 ishakhat ishakhat 4096 Apr  8 15:30 ..\n-rw-rw-r-- 1 ishakhat ishakhat 3635 Apr  8 15:30 agent.py\n-rw-rw-r-- 1 ishakhat ishakhat 3581 Apr  8 15:45 agent.pyc\n-rw-rw-r-- 1 ishakhat ishakhat    0 Mar 19 16:59 __init__.py\n-rw-rw-r-- 1 ishakhat ishakhat  138 Mar 23 14:04 __init__.pyc\ndrwxrwxr-x 2 ishakhat ishakhat 4096 Apr  8 16:10 __pycache__\n",
+      "command": {
+        "data": "ls -al",
+        "type": "program"
+      },
+      "agent_id": "the-agent",
+      "stderr": "",
+      "executor": "shell",
+      "test": "list_all_files"
+    },
+    {
+      "status": "ok",
+      "node": null,
+      "concurrency": 1,
+      "scenario": "scenarios/misc/static_agent.yaml",
+      "stdout": "hello\nworld\n",
+      "command": {
+        "data": "#!/bin/bash\necho \"hello\"\necho \"world\"\n",
+        "type": "script"
+      },
+      "agent_id": "the-agent",
+      "stderr": "",
+      "executor": "shell",
+      "test": "run_sample_script"
     }
+  ],
+  "tests": {
+    "list_all_files": {
+      "program": "ls -al",
+      "class": "shell",
+      "title": "List all files"
+    },
+    "run_sample_script": {
+      "title": "Run sample script",
+      "class": "shell",
+      "script": "#!/bin/bash\necho \"hello\"\necho \"world\"\n"
+    }
+  },
+  "agents": {
+    "the-agent": {
+      "id": "the-agent",
+      "mode": "alone"
+    }
+  }
+}
+  </script>
 
-    $(document).ready(function () {
-      initSelectors();
+  <script type="text/javascript">
+    "use strict";
+
+    $(function () {
+
+      var fields = ["scenario", "test", "concurrency", "node", "agent_id"];
+      var state = {
+        scenario: "",
+        test: "",
+        concurrency: "",
+        node: "",
+        agent_id: ""
+      };
+
+      // compiled templates
+      var scenario_source_template = Handlebars.compile($("#scenario_source_template").html());
+      var test_specification_template = Handlebars.compile($("#test_specification_template").html());
+      var agents_table_template = Handlebars.compile($("#agents_table_template").html());
+      var records_table_template = Handlebars.compile($("#records_table_template").html());
+      var executor_template = Handlebars.compile($("#executor_template").html());
+
+      function initSingleSelector(name, values) {
+        var selectorId = "#" + name + "_selector";
+
+        var selector_inst = $(selectorId);
+        selector_inst.empty();
+        selector_inst.append($("<option>", {
+          style: "font-style: italic; text-decoration: underline;",
+          value: "",
+          text: selector_inst.data('placeholder')
+        }));
+
+        $.each(values, function (key, item) {
+          selector_inst.append($('<option>', {
+            value: item, //(key + 1),
+            text: item
+          }));
+        });
+
+        selector_inst.val(state[name]);
+
+        selector_inst.
+            on("change", function (e) {
+              state[name] = this.value;
+              console.log(this.value);
+
+              // convert state -> url
+              var tokens = [];
+              $.each(fields.sort(), function (i, field) {
+                if (state[field] != "") {
+                  tokens.push(field + "=" + state[field]);
+                }
+              });
+              window.location.href = "#" + tokens.join(":");
+            });
+      }
+
+      function updateSelectors() {
+        var records = report.records;
+
+        $.each(fields, function (i, field) {
+          var values_set = {};
+
+          $.each(records, function (j, record) {
+            values_set["" + record[field]] = true;
+          });
+
+          var values = $.map(values_set, function (value, key) {
+            return key;
+          });
+          values.sort();
+
+          initSingleSelector(field, values);
+        });
+      }
+
+      function filterRecords(records) {
+        var res = [];
+        for (var i = 0; i < records.length; i++) {
+          var record = records[i];
+          var flag = true;
+          $.each(state, function (key, value) {
+            if (value != "") {
+              flag &= record[key] == value;
+            }
+          });
+          if (flag) {
+            res.push(record);
+          }
+        }
+        return res;
+      }
+
+      function getAgentsByIds(agent_ids) {
+        var agents = [];
+        $.each(agent_ids, function(agent_id){
+          agents.push(report.agents[agent_id]);
+        });
+        return agents;
+      }
+
+      /* Template Rendering Funcs */
+
+      function showScenarioSource(contentArea, scenario) {
+        contentArea.append(scenario_source_template(
+            {data: jsyaml.safeDump(scenario)}));
+      }
+
+      function showTestSpecification(contentArea) {
+        contentArea.append(test_specification_template(
+            {data: "foo"}
+        ))
+      }
+
+      function showExecutor(contentArea, records) {
+        contentArea.append(executor_template(
+            {record: records[0]}
+        ))
+      }
+
+      function showAgentsTable(contentArea, filteredRecords) {
+        var agent_ids = {};
+        $.each(filteredRecords, function(_i, record){
+          console.log(record);
+          agent_ids[record.agent_id] = true;
+        });
+
+        var agents = getAgentsByIds(agent_ids);
+
+        contentArea.append(agents_table_template({
+          agents: agents,
+          table_id: "agents_table"
+        }));
+        $("#agents_table").dataTable({
+          "autoWidth": true,
+          "paging": false,
+          "ordering": false,
+          "info": false
+        });
+      }
+
+      function showRecordsTable(contentArea, filteredRecords) {
+        contentArea.append(records_table_template({
+          records: filteredRecords,
+          table_id: "records_table"
+        }));
+        $("#records_table").dataTable({
+          "autoWidth": true,
+          "paging": false,
+          "ordering": false,
+          "info": false
+        });
+      }
+
+      /* Update cycle */
+
+      function update() {
+        var filteredRecords = filterRecords(report.records);
+        console.log(filteredRecords);
+
+        var contentArea = $("#content_area");
+        contentArea.empty();
+
+        updateSelectors();
+
+        // serialize state
+        var nonZeroFields = [];
+        $.each(fields.sort(), function (i, field) {
+          if (state[field] != "") {
+            nonZeroFields.push(field);
+          }
+        });
+        console.log(nonZeroFields);
+        var serializedState = nonZeroFields.join(":");
+
+        // main logic that decides which blocks to show
+        if (serializedState == "" || serializedState == "scenario") {
+          showRecordsTable(contentArea, filteredRecords);
+        }
+        if (state["scenario"] != "") {
+          showScenarioSource(contentArea, report.scenarios[state["scenario"]]);
+        }
+        if (state["agent_id"] == "") {
+          showAgentsTable(contentArea, filteredRecords);
+        }
+        if (state["test"] != "") {
+          showTestSpecification(contentArea);
+        }
+        if (state["test"] != "" && state["agent_id"] != "" && state["scenario"] != "") {
+          showExecutor(contentArea, filteredRecords);
+        }
+      }
+
+      // entry-point
+      var hashUrl = window.location.hash.substr(1);
+
+      $.each(hashUrl.split(":"), function (_i, pair) {
+        var kv = pair.split("=");
+        if (kv.length == 2) {
+          state[kv[0]] = kv[1];
+        }
+      });
+
+      console.log(state);
+
+      // pre-process records
+      $.each(report.records, function(_i, record) {
+        record["is_status_ok"] = record["status"] == "ok"
+      });
+
+      update();
+
+      $(window).on('hashchange', function() {
+        update()
+      });
     });
 
     $(function () {
@@ -99,7 +372,7 @@
 
 <body>
 
-<div class="container">
+<div class="container" id="container">
   <div class="row text-center">
     <h1>Shaker | The Report</h1>
   </div>
@@ -107,63 +380,143 @@
   <div class="row">
     <div class="col-md-2">
       <label for="scenario_selector" title="Scenario name">Scenario</label>
-      <input type="hidden" id="scenario_selector" class="form-control"
-             data-placeholder="Select scenario"/>
+      <select id="scenario_selector" class="form-control" data-placeholder="Any scenario"></select>
     </div>
     <div class="col-md-2">
       <label for="test_selector" title="Test name">Test Case</label>
-      <input type="hidden" id="test_selector" class="form-control"
-             data-placeholder="Select test case"/>
+      <select id="test_selector" class="form-control" data-placeholder="Any test case"></select>
     </div>
     <div class="col-md-2">
       <label for="concurrency_selector" title="Concurrency">Concurrency</label>
-      <input type="hidden" id="concurrency_selector" class="form-control"
-             data-placeholder="Select concurrency"/>
+      <select id="concurrency_selector" class="form-control" data-placeholder="Any concurrency"></select>
     </div>
     <div class="col-md-2">
       <label for="node_selector" title="Compute node">Compute Node</label>
-      <input type="hidden" id="node_selector" class="form-control"
-             data-placeholder="Select node"/>
+      <select id="node_selector" class="form-control" data-placeholder="Any node"></select>
     </div>
     <div class="col-md-2">
-      <label for="agent_selector" title="Agent id">Agent</label>
-      <input type="hidden" id="agent_selector" class="form-control"
-             data-placeholder="Select agent"/>
+      <label for="agent_id_selector" title="Agent id">Agent</label>
+      <select id="agent_id_selector" class="form-control" data-placeholder="Any agent"></select>
     </div>
   </div>
+
   <h2>Title</h2>
 
   <img src="http://placehold.it/150X150" class="img-rounded img-responsive"
        alt=""> <span class="label label-success">success</span>
   <pre>inline code</pre>
 
-  <div
-      class="panel panel-default">
-    <div class="panel-heading">Title</div>
-    <div class="panel-body">Content here..</div>
-  </div>
-
   <div class="row">
     <div id="chart"></div>
   </div>
 
-  <table class="table table-striped" id="the_table">
+  <div id="content_area" class="row">
+    <!-- Container for the screen content -->
+  </div>
+</div>
+
+<!-- TEMPLATES --------------------------------------------------------------->
+
+<!-- Scenario File -->
+<script id="scenario_source_template" type="text/x-handlebars-template">
+  <h2>Scenario</h2>
+  <pre>{{ data }}</pre>
+</script>
+
+<!-- Test Specification -->
+<script id="test_specification_template" type="text/x-handlebars-template">
+  <h2>Test Specification</h2>
+  <pre>{{ data }}</pre>
+</script>
+
+<!-- Executor Result -->
+<script id="executor_template" type="text/x-handlebars-template">
+  <h2>Execution Summary</h2>
+  {{#with record}}
+  <h3>Status:</h3>
+  {{#if status}}
+  <span class="label label-success">success</span>
+  {{else}}
+  <span class="label label-fail">fail</span>
+  {{/if}}
+  <h3>Command: {{ command }}</h3>
+  {{#if stdout}}
+    <h3>Stdout</h3>
+    <pre>{{ stdout }}</pre>
+  {{/if}}
+  {{#if stderr}}
+    <h3>Stderr</h3>
+    <pre>{{ stderr }}</pre>
+  {{/if}}
+  {{/with}}
+</script>
+
+<!-- Records Table -->
+<script id="records_table_template" type="text/x-handlebars-template">
+  <table class="table table-striped" id="{{ table_id  }}">
     <thead>
     <tr>
-      <th>Col 1</th>
-      <th>Col 2</th>
-      <th>Col 3</th>
+      <th>Scenario</th>
+      <th>Test Case</th>
+      <th>Concurrency</th>
+      <th>Compute Node</th>
+      <th>Agent</th>
+      <th>Status</th>
     </tr>
     </thead>
     <tbody>
+    {{#records}}
     <tr>
-      <td>..</td>
-      <td>..</td>
-      <td>..</td>
+      <td>{{ scenario }}</td>
+      <td>{{ test }}</td>
+      <td>{{ concurrency }}</td>
+      <td>{{ node }}</td>
+      <td>{{ agent_id }}</td>
+      <td>
+        {{#if is_status_ok }}
+          <span class="text-success">
+            <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+            {{ status }}
+          </span>
+        {{else}}
+          <span class="text-danger">
+            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            {{ status }}
+          </span>
+        {{/if}}
+      </td>
     </tr>
+    {{/records}}
     </tbody>
   </table>
-</div>
+</script>
+
+<!-- Agents List -->
+<script id="agents_table_template" type="text/x-handlebars-template">
+  <h2>Agents</h2>
+  <table class="table table-striped" id="{{ table_id }}">
+    <thead>
+    <tr>
+      <th>Agent</th>
+      <th>Mode</th>
+      <th>IP</th>
+      <th>Node</th>
+      <th>Instance Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    {{#agents}}
+    <tr>
+      <td>{{ id }}</td>
+      <td>{{ mode }}</td>
+      <td>{{ ip }}</td>
+      <td>{{ node }}</td>
+      <td>{{ instance_name }}</td>
+    </tr>
+    {{/agents}}
+    </tbody>
+  </table>
+</script>
 
 </body>
 </html>

@@ -129,7 +129,10 @@ def generate_report(data, report_template, report_filename, subunit_filename):
         save_to_subunit(sla_res, subunit_filename)
 
     # add more filters to jinja
-    jinja_env = jinja2.Environment()
+    jinja_env = jinja2.Environment(variable_start_string='[[[',
+                                   variable_end_string=']]]',
+                                   comment_start_string='[[#',
+                                   comment_end_string='#]]')
     jinja_env.filters['json'] = json.dumps
     jinja_env.filters['yaml'] = functools.partial(yaml.safe_dump, indent=2,
                                                   default_flow_style=False)

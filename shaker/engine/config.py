@@ -95,8 +95,8 @@ SERVER_OPTS = [
 REPORT_OPTS = [
     cfg.StrOpt('report-template',
                default=(utils.env('SHAKER_REPORT_TEMPLATE') or
-                        'shaker/resources/report_template.jinja2'),
-               help='Report template in Jinja format'),
+                        'shaker/resources/report_template.html'),
+               help='Report template file name'),
     cfg.StrOpt('report',
                default=utils.env('SHAKER_REPORT'),
                help='Report file name, defaults to env[SHAKER_REPORT]. '),
