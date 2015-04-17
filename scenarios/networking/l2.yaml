@@ -12,6 +12,9 @@ execution:
     title: Iperf TCP test
     class: iperf_graph
     time: 60
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.min > 100)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 200)"
   -
     title: TCP download
     class: netperf_wrapper

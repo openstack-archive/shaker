@@ -13,7 +13,7 @@ execution:
     class: iperf_graph
     time: 60
     sla:
-    - bandwidth.mean > 100
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 100)"
   -
     title: Iperf UDP 5 threads
     class: iperf

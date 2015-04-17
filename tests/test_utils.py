@@ -37,8 +37,3 @@ class TestUtils(testtools.TestCase):
         self.assertEqual(
             {'a': 1, 'b.c': 2, 'b.d': 3},
             dict(utils.flatten_dict({'a': 1, 'b': {'c': 2, 'd': 3}})))
-
-    def test_eval(self):
-        self.assertEqual(2 ** 6, utils.eval_expr('2**6'))
-        self.assertEqual(True, utils.eval_expr('11 > a > 5', {'a': 7}))
-        self.assertEqual(42, utils.eval_expr('2 + a.b', {'a': {'b': 40}}))

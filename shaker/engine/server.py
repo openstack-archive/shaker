@@ -92,7 +92,7 @@ def execute(quorum, execution, agents):
                     concurrency=len(selected_agents),
                     test=test_title,
                     executor=test.get('class'),
-                    type='raw',
+                    type='agent',
                 ))
                 records.append(data)
 
