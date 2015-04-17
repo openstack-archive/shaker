@@ -160,7 +160,8 @@ def flatten_dict(d, prefix='', sep='.'):
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
              ast.Div: op.truediv, ast.Pow: op.pow, ast.BitXor: op.xor,
              ast.USub: op.neg, ast.Lt: op.lt, ast.Gt: op.gt, ast.LtE: op.le,
-             ast.GtE: op.ge, ast.Eq: op.eq}
+             ast.GtE: op.ge, ast.Eq: op.eq, ast.And: op.and_, ast.Or: op.or_,
+             ast.Not: op.not_}
 
 
 def eval_expr(expr, ctx=None):
@@ -186,9 +187,20 @@ def _eval(node, ctx):
         return node.n
     elif isinstance(node, ast.Name):
         return ctx.get(node.id)
+    elif isinstance(node, ast.Str):
+        return node.s
     elif isinstance(node, ast.BinOp):
-        return operators[type(node.op)](_eval(node.left, ctx),
-                                        _eval(node.right, ctx))
+        if isinstance(node.op, ast.RShift):
+            # left -- array, right -- condition
+            filtered = _eval(node.left, ctx)
+            result = []
+            for item in filtered:
+                cond = _eval(node.right, item)
+                result.append((item, cond))
+            return result
+        else:
+            return operators[type(node.op)](_eval(node.left, ctx),
+                                            _eval(node.right, ctx))
     elif isinstance(node, ast.UnaryOp):
         return operators[type(node.op)](_eval(node.operand, ctx))
     elif isinstance(node, ast.Compare):
@@ -199,7 +211,65 @@ def _eval(node, ctx):
             r &= operators[type(node.ops[i])](x, y)
             x = y
         return r
+    elif isinstance(node, ast.BoolOp):
+        r = _eval(node.values[0], ctx)
+        for i in range(1, len(node.values)):
+            n = _eval(node.values[i], ctx)
+            r = operators[type(node.op)](r, n)
+        return r
     elif isinstance(node, ast.Attribute):
         return _eval(node.value, ctx).get(node.attr)
+    elif isinstance(node, ast.List):
+        records = ctx
+        filtered = []
+        for record in records:
+            for el in node.elts:
+                if _eval(el, record):
+                    filtered.append(record)
+        return filtered
     else:
         raise TypeError(node)
+
+
+def dump_ast_node(node):
+    _operators = {ast.Add: '+', ast.Sub: '-', ast.Mult: '*',
+             ast.Div: '/', ast.Pow: '**', ast.BitXor: '^',
+             ast.USub: '-', ast.Lt: '<', ast.Gt: '>', ast.LtE: '<=',
+             ast.GtE: '>=', ast.Eq: '==', ast.And: 'and', ast.Or: 'or',
+             ast.Not: 'not'}
+
+    def _format(node):
+        if isinstance(node, ast.Num):
+            return node.n
+        elif isinstance(node, ast.Name):
+            return node.id
+        elif isinstance(node, ast.Str):
+            return '\'node.s\''
+        elif isinstance(node, ast.BinOp):
+            return '%s %s %s' % (_format(node.left), _operators[type(node.op)],
+                                                _format(node.right))
+        elif isinstance(node, ast.UnaryOp):
+            return '%s %s' % (_operators[type(node.op)], _format(node.operand))
+        elif isinstance(node, ast.Compare):
+            x = _format(node.left)
+            r = '%s' % x
+            for i in range(len(node.ops)):
+                y = _format(node.comparators[i])
+                r = '%s %s %s' % (r, _operators[type(node.ops[i])], y)
+                x = y
+            return r
+        elif isinstance(node, ast.BoolOp):
+            r = _format(node.values[0])
+            for i in range(1, len(node.values)):
+                n = _format(node.values[i])
+                r = '%s %s %s' % (r, _operators[type(node.op)], n)
+            return r
+        elif isinstance(node, ast.Attribute):
+            return '%s.%s' % (_format(node.value), node.attr)
+        elif isinstance(node, ast.Expression):
+            return '(%s)' % _format(node.body)
+        else:
+            raise TypeError(node)
+    if not isinstance(node, ast.AST):
+        raise TypeError('expected AST, got %r' % node.__class__.__name__)
+    return _format(node)
