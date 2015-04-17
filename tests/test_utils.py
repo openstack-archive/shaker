@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import ast
 
 import testtools
 
@@ -42,3 +43,28 @@ class TestUtils(testtools.TestCase):
         self.assertEqual(2 ** 6, utils.eval_expr('2**6'))
         self.assertEqual(True, utils.eval_expr('11 > a > 5', {'a': 7}))
         self.assertEqual(42, utils.eval_expr('2 + a.b', {'a': {'b': 40}}))
+
+    def test_eval_sla(self):
+        records = [{'type': 'agent', 'test': 'iperf_tcp',
+                    'stats': {'bandwidth': {'mean': 700}}},
+                   {'type': 'agent', 'test': 'iperf_udp',
+                    'stats': {'bandwidth': {'mean': 1000}}},
+                   {'type': 'node', 'test': 'iperf_tcp',
+                    'stats': {'bandwidth': {'mean': 850}}}]
+
+        sla_records = utils.eval_expr(
+            '[type == "agent"] >> (stats.bandwidth.mean > 800)',
+            records)
+        self.assertEqual([(records[0], False), (records[1], True)],
+                         sla_records)
+
+        sla_records = utils.eval_expr(
+            '[test == "iperf_udp", type == "node"] >> '
+            '(stats.bandwidth.mean > 900)',
+            records)
+        self.assertEqual([(records[1], True), (records[2], False)],
+                         sla_records)
+
+    def test_dump_ast_node(self):
+        self.assertEqual('', utils.dump_ast_node(
+            ast.parse('stats.bandwidth.mean > 900', mode='eval')))

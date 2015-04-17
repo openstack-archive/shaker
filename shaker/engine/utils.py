@@ -186,9 +186,20 @@ def _eval(node, ctx):
         return node.n
     elif isinstance(node, ast.Name):
         return ctx.get(node.id)
+    elif isinstance(node, ast.Str):
+        return node.s
     elif isinstance(node, ast.BinOp):
-        return operators[type(node.op)](_eval(node.left, ctx),
-                                        _eval(node.right, ctx))
+        if isinstance(node.op, ast.RShift):
+            # left -- array, right -- condition
+            filtered = _eval(node.left, ctx)
+            result = []
+            for item in filtered:
+                cond = _eval(node.right, item)
+                result.append((item, cond))
+            return result
+        else:
+            return operators[type(node.op)](_eval(node.left, ctx),
+                                            _eval(node.right, ctx))
     elif isinstance(node, ast.UnaryOp):
         return operators[type(node.op)](_eval(node.operand, ctx))
     elif isinstance(node, ast.Compare):
@@ -201,5 +212,46 @@ def _eval(node, ctx):
         return r
     elif isinstance(node, ast.Attribute):
         return _eval(node.value, ctx).get(node.attr)
+    elif isinstance(node, ast.List):
+        records = ctx
+        filtered = []
+        for record in records:
+            for el in node.elts:
+                if _eval(el, record):
+                    filtered.append(record)
+        return filtered
     else:
         raise TypeError(node)
+
+
+def dump_ast_node(node):
+    def _iter_fields(_node):
+        """
+        Yield a tuple of ``(fieldname, value)`` for each field in ``node._fields``
+        that is present on *node*.
+        """
+        for field in _node._fields:
+            try:
+                yield field, getattr(_node, field)
+            except AttributeError:
+                pass
+
+    def _format(node):
+        if isinstance(node, ast.Num):
+            return node.n
+        elif isinstance(node, ast.Name):
+            return node.id
+        elif isinstance(node, ast.Str):
+            return node.s
+        elif isinstance(node, ast.AST):
+            fields = [(a, _format(b)) for a, b in _iter_fields(node)]
+            rv = '%s(%s' % (node.__class__.__name__, ', '.join(
+                (b for a, b in fields)
+            ))
+            return rv + ')'
+        elif isinstance(node, list):
+            return '[%s]' % ', '.join(_format(x) for x in node)
+        return repr(node)
+    if not isinstance(node, ast.AST):
+        raise TypeError('expected AST, got %r' % node.__class__.__name__)
+    return _format(node)
