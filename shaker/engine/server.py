@@ -73,7 +73,7 @@ def _pick_agents(agents, size):
 
 
 def execute(quorum, execution, agents):
-    records = []
+    records = {}
 
     for test in execution['tests']:
         LOG.debug('Running test %s on all agents', test)
@@ -85,16 +85,18 @@ def execute(quorum, execution, agents):
 
             execution_result = quorum.execute(executors)
 
-            for agent_id, data in execution_result.items():
-                data.update(dict(
-                    agent_id=agent_id,
+            for agent_id, record in execution_result.items():
+                record_id = utils.make_record_id()
+                record.update(dict(
+                    id=record_id,
+                    agent=agent_id,
                     node=agents[agent_id].get('node'),
                     concurrency=len(selected_agents),
                     test=test_title,
                     executor=test.get('class'),
                     type='agent',
                 ))
-                records.append(data)
+                records[record_id] = record
 
     LOG.info('Execution is done')
     return records
@@ -142,7 +144,8 @@ def play_scenario(scenario):
             quorum.join(set(agents.keys()))
 
             execution_result = execute(quorum, scenario['execution'], agents)
-            for record in execution_result:
+            # extend every record with reference to scenario
+            for record in execution_result.values():
                 record['scenario'] = (scenario.get('title') or
                                       scenario.get('file_name'))
             output['records'] = execution_result
@@ -167,7 +170,7 @@ def main():
         config.REPORT_OPTS
     )
 
-    output = dict(records=[], agents={}, scenarios={}, tests={})
+    output = dict(records={}, agents={}, scenarios={}, tests={})
 
     for scenario_file_name in [cfg.CONF.scenario]:
         scenario = utils.read_yaml_file(scenario_file_name)
@@ -177,7 +180,7 @@ def main():
         play_output = play_scenario(scenario)
 
         output['scenarios'][scenario['title']] = play_output['scenario']
-        output['records'] += play_output['records']
+        output['records'].update(play_output['records'])
         output['agents'].update(play_output['agents'])
         output['tests'].update(play_output['tests'])
 

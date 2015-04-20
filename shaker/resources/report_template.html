@@ -45,13 +45,13 @@
 
     $(function () {
 
-      const fields = ["scenario", "test", "concurrency", "node", "agent_id"];
+      const fields = ["scenario", "test", "concurrency", "node", "agent"];
       const state = {
         scenario: "",
         test: "",
         concurrency: "",
         node: "",
-        agent_id: ""
+        agent: ""
       };
       const tablePageSize = 10;
 
@@ -104,7 +104,7 @@
         var values_set = {};
 
         $.each(records, function (j, record) {
-          if (record["type"] == "raw") {
+          if (record["type"] == "agent" && record[field]) {
             values_set["" + record[field]] = true;
           }
         });
@@ -123,9 +123,8 @@
 
       function filterRecords(records, type) {
         var res = [];
-        for (var i = 0; i < records.length; i++) {
-          var record = records[i];
-          if (type != "" && record.type == type) {
+        $.each(records, function(_i, record){
+          if (type == "" || record.type == type) {
             var flag = true;
             $.each(state, function (key, value) {
               if (value != "") {
@@ -136,7 +135,7 @@
               res.push(record);
             }
           }
-        }
+        });
         return res;
       }
 
@@ -258,7 +257,7 @@
       function showAgentsTable(contentArea, filteredRecords) {
         var agent_ids = {};
         $.each(filteredRecords, function(_i, record){
-          agent_ids[record.agent_id] = true;
+          agent_ids[record.agent] = true;
         });
 
         var agents = getAgentsByIds(agent_ids);
@@ -324,7 +323,8 @@
       /* Update cycle */
 
       function update() {
-        var filteredRecords = filterRecords(report.records, "raw");
+        var filteredRecords = filterRecords(report.records, "agent");
+        console.log(filteredRecords);
         var slaRecords = [];
         $.each(filterRecords(report.records), function(_i, record) {
           if (record["sla_info"]) {
@@ -342,21 +342,21 @@
 
         if (state["scenario"] != "" && state["test"] != "" &&
                 state["concurrency"] != "" && state["node"] != "" &&
-                state["agent_id"] != "") {
+                state["agent"] != "") {
           showExecutorRecord(contentArea, filteredRecords[0]);
         }
         if (state["scenario"] != "" && state["test"] != "" &&
                 state["concurrency"] != "" && state["node"] == "" &&
-                state["agent_id"] == "") {
-          var agg_recs = filterRecords(report.records, "agg_concurrency");
+                state["agent"] == "") {
+          var agg_recs = filterRecords(report.records, "concurrency");
           if (agg_recs.length > 0) {
             showConcurrencySummary(contentArea, agg_recs[0]);
           }
         }
         if (state["scenario"] != "" && state["test"] != "" &&
                 state["concurrency"] == "" && state["node"] == "" &&
-                state["agent_id"] == "") {
-          var test_recs = filterRecords(report.records, "agg_test");
+                state["agent"] == "") {
+          var test_recs = filterRecords(report.records, "test");
           if (test_recs.length > 0) {
             showTestSummary(contentArea, test_recs[0]);
           }
@@ -367,7 +367,7 @@
         if (state["scenario"] != "") {
           showScenarioSource(contentArea, report.scenarios[state["scenario"]]);
         }
-        if (state["agent_id"] == "") {
+        if (state["agent"] == "") {
           showAgentsTable(contentArea, filteredRecords);
         }
       }
@@ -443,8 +443,8 @@
       <select id="node_selector" class="form-control" data-placeholder="- Any node -"></select>
     </div>
     <div class="col-md-2">
-      <label for="agent_id_selector" title="Agent id">Agent</label>
-      <select id="agent_id_selector" class="form-control" data-placeholder="- Any agent -"></select>
+      <label for="agent_selector" title="Agent">Agent</label>
+      <select id="agent_selector" class="form-control" data-placeholder="- Any agent -"></select>
     </div>
   </div>
 
@@ -538,7 +538,7 @@
       <td><a href="{{ test_url }}">{{ test }}</a></td>
       <td><a href="{{ concurrency_url }}">{{ concurrency }}</a></td>
       <td><a href="{{ node_url }}">{{ node }}</a></td>
-      <td><a href="{{ agent_id_url }}">{{ agent_id }}</a></td>
+      <td><a href="{{ agent_url }}">{{ agent }}</a></td>
       <td>
         {{#if is_status_ok }}
           <span class="text-success">

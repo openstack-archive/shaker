@@ -56,6 +56,12 @@ class TestSla(testtools.TestCase):
             sla_records)
 
     def test_dump_ast_node(self):
+        self.assertEqual('(stderr == "")', sla.dump_ast_node(
+            ast.parse('stderr == ""', mode='eval')))
+
+        self.assertEqual('(stderr & ".*")', sla.dump_ast_node(
+            ast.parse('stderr & ".*"', mode='eval')))
+
         self.assertEqual('(stats.bandwidth.mean > 900)', sla.dump_ast_node(
             ast.parse('stats.bandwidth.mean > 900', mode='eval')))
 

@@ -16,6 +16,7 @@
 import logging as std_logging
 import os
 import random
+import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -136,6 +137,10 @@ def read_uri(uri):
 
 def random_string(length=6):
     return ''.join(random.sample('adefikmoprstuz', length))
+
+
+def make_record_id():
+    return str(uuid.uuid4())
 
 
 def copy_dict_kv(source):
