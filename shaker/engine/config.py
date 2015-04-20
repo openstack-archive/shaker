@@ -118,8 +118,7 @@ INPUT_OPTS = [
 AGENT_OPTS = [
     cfg.StrOpt('agent-id',
                default=utils.env('SHAKER_AGENT_ID'),
-               required=True,
-               help='Agent unique id, defaults to env[SHAKER_AGENT_ID].'),
+               help='Agent unique id, defaults to MAC of primary interface.'),
 ]
 
 IMAGE_BUILDER_OPTS = [

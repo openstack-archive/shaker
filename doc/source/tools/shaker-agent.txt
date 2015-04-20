@@ -10,7 +10,7 @@ usage: shaker-agent [-h] [--agent-id AGENT_ID] [--config-dir DIR]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --agent-id AGENT_ID   Agent unique id, defaults to env[SHAKER_AGENT_ID].
+  --agent-id AGENT_ID   Agent unique id, defaults to MAC of primary interface.
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
                         predictable parse order if individual options are

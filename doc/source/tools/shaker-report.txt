@@ -65,4 +65,4 @@ optional arguments:
                         instead of default WARNING level).
   --version             show program's version number and exit
   --report-template REPORT_TEMPLATE
-                        Report template in Jinja format
+                        Report template file name

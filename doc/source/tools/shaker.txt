@@ -90,7 +90,7 @@ optional arguments:
                         How frequently the agent polls server, in seconds
   --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
   --report-template REPORT_TEMPLATE
-                        Report template in Jinja format
+                        Report template file name
   --scenario SCENARIO   Scenario file name, defaults to env[SHAKER_SCENARIO].
   --subunit SUBUNIT     Subunit stream file name, defaults to
                         env[SHAKER_SUBUNIT].
