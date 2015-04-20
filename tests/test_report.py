@@ -22,12 +22,12 @@ from shaker.engine import sla
 class TestReport(testtools.TestCase):
 
     def test_verify_sla(self):
-        records = [{'type': 'agent', 'test': 'iperf_tcp',
-                    'stats': {'bandwidth': {'mean': 700, 'min': 400}}},
-                   {'type': 'agent', 'test': 'iperf_udp',
-                    'stats': {'bandwidth': {'mean': 1000, 'min': 800}}},
-                   {'type': 'agent', 'test': 'iperf_tcp',
-                    'stats': {'bandwidth': {'mean': 850, 'min': 600}}}]
+        records = {0: {'id': 0, 'type': 'agent', 'test': 'iperf_tcp',
+                       'stats': {'bandwidth': {'mean': 700, 'min': 400}}},
+                   1: {'id': 1, 'type': 'agent', 'test': 'iperf_udp',
+                       'stats': {'bandwidth': {'mean': 1000, 'min': 800}}},
+                   2: {'id': 2, 'type': 'agent', 'test': 'iperf_tcp',
+                       'stats': {'bandwidth': {'mean': 850, 'min': 600}}}}
 
         tests = {
             'iperf_tcp': {

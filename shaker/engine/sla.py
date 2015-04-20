@@ -112,7 +112,7 @@ def dump_ast_node(node):
         elif isinstance(node, ast.Name):
             return node.id
         elif isinstance(node, ast.Str):
-            return '\'node.s\''
+            return '"%s"' % node.s
         elif isinstance(node, ast.BinOp):
             return '%s %s %s' % (_format(node.left), _operators[type(node.op)],
                                  _format(node.right))

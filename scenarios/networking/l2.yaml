@@ -1,3 +1,5 @@
+title: L2
+
 description:
   This scenario launches pairs of VMs in the same private network. Every VM is
   hosted on a separate compute node.

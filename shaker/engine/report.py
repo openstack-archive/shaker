@@ -33,13 +33,12 @@ LOG = logging.getLogger(__name__)
 
 
 def calculate_stats(records, tests):
-    aggregates = []
     # scenario -> test -> concurrency -> [record]
     rec_map = collections.defaultdict(
         functools.partial(collections.defaultdict,
                           functools.partial(collections.defaultdict, list)))
 
-    for record in records:
+    for record in records.values():
         aggregator = aggregators.get_aggregator(tests[record['test']])
         aggregator.record_summary(record)
 
@@ -54,24 +53,26 @@ def calculate_stats(records, tests):
             for concurrency, per_concurrency in per_test.items():
                 summary = aggregator.concurrency_summary(per_concurrency)
                 if summary:
-                    summary.update(dict(scenario=scenario, test=test,
+                    record_id = utils.make_record_id()
+                    summary.update(dict(id=record_id,
+                                        scenario=scenario, test=test,
                                         concurrency=concurrency,
                                         type='concurrency'))
-                    aggregates.append(summary)
+                    records[record_id] = summary
                     concurrency_aggregates.append(summary)
 
             per_test_summary = aggregator.test_summary(concurrency_aggregates)
             if per_test_summary:
-                per_test_summary.update(dict(scenario=scenario, test=test,
+                record_id = utils.make_record_id()
+                per_test_summary.update(dict(id=record_id,
+                                             scenario=scenario, test=test,
                                              type='test'))
-                aggregates.append(per_test_summary)
-
-    return aggregates
+                records[record_id] = per_test_summary
 
 
 def verify_sla(records, tests):
     record_map = collections.defaultdict(list)  # test -> [record]
-    for r in records:
+    for r in records.values():
         if 'sla' in tests[r['test']]:
             record_map[r['test']].append(r)
 
@@ -81,6 +82,11 @@ def verify_sla(records, tests):
             sla_records += sla.eval_expr(sla_expr, records_per_test)
 
     return sla_records
+
+
+def output_sla(sla_records):
+    return [dict(record=item.record['id'], state=item.state,
+                 expression=item.expression) for item in sla_records]
 
 
 def _get_location(record):
@@ -122,9 +128,10 @@ def generate_report(data, report_template, report_filename, subunit_filename):
     LOG.debug('Generating report, template: %s, output: %s',
               report_template, report_filename or '<dummy>')
 
-    data['records'] += calculate_stats(data['records'], data['tests'])
+    calculate_stats(data['records'], data['tests'])
 
     sla_records = verify_sla(data['records'], data['tests'])
+    data['sla'] = output_sla(sla_records)
 
     if subunit_filename:
         save_to_subunit(sla_records, subunit_filename)

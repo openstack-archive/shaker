@@ -1,3 +1,5 @@
+title: Static Agents
+
 description:
   This scenario runs tests on pre-deployed static agents
 
@@ -13,10 +15,13 @@ execution:
     title: List all files
     class: shell
     program: ls -al
+    sla:
+    - "[type == 'agent'] >> (stderr == '')"
   -
     title: Run sample script
     class: shell
     script: |
       #!/bin/bash
-      echo "hello"
-      echo "world"
+      echo "hello world"
+    sla:
+    - "[type == 'agent'] >> (stdout & '.*hello world.*')"
