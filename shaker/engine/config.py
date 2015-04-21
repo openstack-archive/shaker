@@ -14,17 +14,33 @@
 # limitations under the License.
 
 import copy
+import re
 
 from oslo_config import cfg
+from oslo_config import types
 from shaker.engine import utils
 
 
+class Endpoint(types.String):
+
+    def __call__(self, value):
+        value = str(value)
+        if not re.match('\S+:\d+', value):
+            raise ValueError('Wrong value of server_endpoint, '
+                             'expected <host>:<port>, but got: %s' % value)
+        return value
+
+    def __repr__(self):
+        return "Endpoint <host:port>"
+
+
 COMMON_OPTS = [
-    cfg.StrOpt('server-endpoint',
-               default=utils.env('SHAKER_SERVER_ENDPOINT'),
-               required=True,
-               help='Address for server connections (host:port), '
-                    'defaults to env[SHAKER_SERVER_ENDPOINT].'),
+    cfg.Opt('server-endpoint',
+            default=utils.env('SHAKER_SERVER_ENDPOINT'),
+            required=True,
+            type=Endpoint(),
+            help='Address for server connections (host:port), '
+                 'defaults to env[SHAKER_SERVER_ENDPOINT].'),
     cfg.IntOpt('polling-interval',
                default=utils.env('SHAKER_POLLING_INTERVAL') or 10,
                help='How frequently the agent polls server, in seconds')

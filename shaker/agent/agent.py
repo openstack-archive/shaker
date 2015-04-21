@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import os
-import re
 import shlex
 import tempfile
 import time
@@ -158,11 +157,6 @@ def main():
     endpoint = cfg.CONF.server_endpoint
     polling_interval = cfg.CONF.polling_interval
     agent_id = cfg.CONF.agent_id
-
-    if not re.match('\S+:\d+', endpoint):
-        LOG.error('Wrong value of server_endpoint, expected <host>:<port>, '
-                  'but got: %s', endpoint)
-        exit(1)
 
     if check_if_already_running(endpoint):
         LOG.warning('Shaker-agent already running with the same endpoint')
