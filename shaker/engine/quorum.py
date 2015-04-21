@@ -13,9 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
 import time
 
 from oslo_log import log as logging
+
+from shaker.agent import agent as agent_process
+from shaker.engine import messaging
 
 
 LOG = logging.getLogger(__name__)
@@ -152,3 +156,20 @@ class Quorum(object):
 
     def execute(self, executors):
         return self._run(ExecuteOperation(executors))
+
+
+def make_quorum(agent_ids, server_endpoint, polling_interval,
+                agent_loss_timeout, agent_join_timeout):
+    message_queue = messaging.MessageQueue(server_endpoint)
+
+    heartbeat = multiprocessing.Process(
+        target=agent_process.work,
+        kwargs=dict(agent_id='heartbeat', endpoint=server_endpoint,
+                    polling_interval=polling_interval))
+    heartbeat.daemon = True
+    heartbeat.start()
+
+    quorum = Quorum(message_queue, polling_interval, agent_loss_timeout,
+                    agent_join_timeout)
+    quorum.join(set(agent_ids))
+    return quorum

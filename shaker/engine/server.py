@@ -15,18 +15,15 @@
 
 import copy
 import json
-import multiprocessing
 import os
 import re
 
 from oslo_config import cfg
 from oslo_log import log as logging
 
-from shaker.agent import agent as agent_process
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
-from shaker.engine import messaging
 from shaker.engine import quorum as quorum_pkg
 from shaker.engine import report
 from shaker.engine import utils
@@ -128,20 +125,10 @@ def play_scenario(scenario):
         if not agents:
             LOG.warning('No agents deployed.')
         else:
-            message_queue = messaging.MessageQueue(cfg.CONF.server_endpoint)
-
-            heartbeat = multiprocessing.Process(
-                target=agent_process.work,
-                kwargs=dict(agent_id='heartbeat',
-                            endpoint=cfg.CONF.server_endpoint,
-                            polling_interval=cfg.CONF.polling_interval))
-            heartbeat.daemon = True
-            heartbeat.start()
-
-            quorum = quorum_pkg.Quorum(
-                message_queue, cfg.CONF.polling_interval,
-                cfg.CONF.agent_loss_timeout, cfg.CONF.agent_join_timeout)
-            quorum.join(set(agents.keys()))
+            quorum = quorum_pkg.make_quorum(
+                agents.keys(), cfg.CONF.server_endpoint,
+                cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
+                cfg.CONF.agent_join_timeout)
 
             execution_result = execute(quorum, scenario['execution'], agents)
             # extend every record with reference to scenario
