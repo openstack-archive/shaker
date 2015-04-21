@@ -47,6 +47,6 @@ class MessageQueue(object):
                     break
 
         except BaseException as e:
-            if not isinstance(e, KeyboardInterrupt):
+            if not isinstance(e, KeyboardInterrupt):  # SIGINT is ok
                 LOG.exception(e)
-            raise
+                raise

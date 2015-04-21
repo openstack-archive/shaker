@@ -65,8 +65,9 @@ def _eval(node, ctx):
                                       expression=dump_ast_node(node.right)))
             return result
         elif isinstance(node.op, ast.BitAnd):
-            return re.match(_eval(node.right, ctx),
-                            _eval(node.left, ctx)) is not None
+            s = _eval(node.left, ctx)
+            return ((s is not None) and
+                    (re.match(_eval(node.right, ctx), s) is not None))
         else:
             return operators[type(node.op)](_eval(node.left, ctx),
                                             _eval(node.right, ctx))

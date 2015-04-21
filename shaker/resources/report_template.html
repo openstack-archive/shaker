@@ -104,7 +104,7 @@
         var values_set = {};
 
         $.each(records, function (j, record) {
-          if (record["type"] == "agent" && record[field]) {
+          if (record[field]) {
             values_set["" + record[field]] = true;
           }
         });
@@ -124,10 +124,10 @@
       function filterRecords(records, type) {
         var res = [];
         $.each(records, function(_i, record){
-          if (type == "" || record.type == type) {
+          if (typeof type === 'undefined' || record.type == type) {
             var flag = true;
             $.each(state, function (key, value) {
-              if (value != "") {
+              if (value) {
                 flag &= record[key] == value;
               }
             });
@@ -257,10 +257,13 @@
       function showAgentsTable(contentArea, filteredRecords) {
         var agent_ids = {};
         $.each(filteredRecords, function(_i, record){
-          agent_ids[record.agent] = true;
+          if (record.agent) {
+            agent_ids[record.agent] = true;
+          }
         });
 
         var agents = getAgentsByIds(agent_ids);
+        if (agents.length == 0) return;
 
         contentArea.append(agents_table_template({
           agents: agents,
@@ -323,7 +326,7 @@
       /* Update cycle */
 
       function update() {
-        var filteredRecords = filterRecords(report.records, "agent");
+        var filteredRecords = filterRecords(report.records);
         console.log(filteredRecords);
         var slaRecords = [];
         $.each(filterRecords(report.records), function(_i, record) {
@@ -341,7 +344,7 @@
         showSlaTable(contentArea, slaRecords);
 
         if (state["scenario"] != "" && state["test"] != "" &&
-                state["concurrency"] != "" && state["node"] != "" &&
+                state["concurrency"] != "" &&
                 state["agent"] != "") {
           showExecutorRecord(contentArea, filteredRecords[0]);
         }
@@ -390,7 +393,10 @@
       // pre-process records
       $.each(report.records, function(_i, record) {
         if (record.status) {
-          record["is_status_ok"] = record.status == "ok"
+          record["is_status_ok"] = record.status == "ok";
+          record["is_status_lost"] = record.status == "lost";
+          record["is_status_interrupted"] = record.status == "interrupted";
+          record["is_status_error"] = record.status == "error";
         }
       });
 
@@ -472,12 +478,10 @@
   <h3>Execution Summary</h3>
   {{#with record}}
   <div id="{{ chart_id }}"></div>
-  <h4>Status:</h4>
-  {{#if status}}
-  <span class="label label-success">success</span>
-  {{else}}
-  <span class="label label-fail">fail</span>
-  {{/if}}
+  {{#if is_status_ok}}<span class="label label-success"><span class="glyphicon glyphicon-ok" aria-hidden="true"></span>success</span>{{/if}}
+  {{#if is_status_lost}}<span class="label label-danger"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>lost</span>{{/if}}
+  {{#if is_status_interrupted}}<span class="label label-warning"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span>interrupted</span>{{/if}}
+  {{#if is_status_error}}<span class="label label-danger"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>error</span>{{/if}}
   {{#if stats_yaml}}
     <h4>Stats</h4>
     <pre>{{ stats_yaml }}</pre>
@@ -541,14 +545,27 @@
       <td><a href="{{ agent_url }}">{{ agent }}</a></td>
       <td>
         {{#if is_status_ok }}
-          <span class="text-success">
+          <span class="label label-success">
             <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
-            {{ status }}
+            success
           </span>
-        {{else}}
-          <span class="text-danger">
-            <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-            {{ status }}
+        {{/if}}
+        {{#if is_status_lost }}
+          <span class="label label-danger">
+            <span class="glyphicon glyphicon-alert" aria-hidden="true"></span>
+            lost
+          </span>
+        {{/if}}
+        {{#if is_status_interrupted }}
+          <span class="label label-warning">
+            <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+            interrupted
+          </span>
+        {{/if}}
+        {{#if is_status_error }}
+          <span class="label label-danger">
+            <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+            error
           </span>
         {{/if}}
       </td>

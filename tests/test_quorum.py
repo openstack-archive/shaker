@@ -64,12 +64,13 @@ class TestQuorum(testtools.TestCase):
 
         return reply_handler
 
-    def _message_queue_gen(self, event_stream):
+    def _message_queue_gen(self, event_stream, fail_at_end=True):
         for event in event_stream:
             self.mock_time.return_value = event['time']
             yield (event['msg'], self._reply(event['reply']))
 
-        self.fail('Unreachable state signalling that event loop hangs')
+        if fail_at_end:
+            self.fail('Unreachable state signalling that event loop hangs')
 
     def test_poll_reply(self):
         self.mock_time.return_value = 0
@@ -207,6 +208,33 @@ class TestQuorum(testtools.TestCase):
         result = quorum.execute(test_case)
         self.assertEqual(result.keys(), test_case.keys())
         self.assertEqual('ok', result['alpha']['status'])
+
+    def test_good_and_interrupted(self):
+        self.mock_time.return_value = 0
+        event_stream = [
+            dict(msg=dict(operation='poll', agent_id='alpha'),
+                 reply=dict(operation='execute', command='RUN',
+                            start_at=STEP * 2, expected_duration=STEP),
+                 time=1),
+            dict(msg=dict(operation='poll', agent_id='beta'),
+                 reply=dict(operation='execute', command='RUN',
+                            start_at=STEP * 2, expected_duration=STEP),
+                 time=2),
+            dict(msg=dict(operation='reply', agent_id='beta'),
+                 reply=dict(operation='none'),
+                 time=20),
+        ]
+
+        quorum = make_quorum(self._message_queue_gen(event_stream,
+                                                     fail_at_end=False))
+        test_case = {
+            'alpha': DummyExecutor(),
+            'beta': DummyExecutor(),
+        }
+        result = quorum.execute(test_case)
+        self.assertEqual(result.keys(), test_case.keys())
+        self.assertEqual('interrupted', result['alpha']['status'])
+        self.assertEqual('ok', result['beta']['status'])
 
     def test_join_succeed(self):
         self.mock_time.return_value = 0

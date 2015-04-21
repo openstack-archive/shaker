@@ -31,6 +31,8 @@ class TestSla(testtools.TestCase):
         self.assertEqual(True, sla.eval_expr('"some text" & "\w+\s+\w+"'))
         self.assertEqual(False, sla.eval_expr('"some text" & "\d+"'))
 
+        self.assertEqual(False, sla.eval_expr('a & "\d+"', {}))  # a == None
+
     def test_eval_sla(self):
         records = [{'type': 'agent', 'test': 'iperf_tcp',
                     'stats': {'bandwidth': {'mean': 700}}},

@@ -41,6 +41,9 @@ class BaseOperation(object):
     def process_failure(self, agent_id):
         return {'status': 'lost'}
 
+    def process_interrupt(self, agent_id):
+        return {'status': 'interrupted'}
+
 
 class JoinOperation(BaseOperation):
     def __init__(self, agent_ids, polling_interval, agent_join_timeout):
@@ -84,6 +87,11 @@ class ExecuteOperation(BaseOperation):
 
     def process_failure(self, agent_id):
         r = super(ExecuteOperation, self).process_failure(agent_id)
+        r.update(self.executors[agent_id].process_failure())
+        return r
+
+    def process_interrupt(self, agent_id):
+        r = super(ExecuteOperation, self).process_interrupt(agent_id)
         r.update(self.executors[agent_id].process_failure())
         return r
 
@@ -146,6 +154,13 @@ class Quorum(object):
 
                 LOG.info('Finished processing operation: %s', operation)
                 break
+
+        # treat missing agents as interrupted
+        interrupted = current - set(result.keys())
+        if interrupted:
+            LOG.info('Interrupted agents: %s', interrupted)
+            result.update(dict((a_id, operation.process_interrupt(a_id))
+                          for a_id in interrupted))
 
         return result
 

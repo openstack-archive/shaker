@@ -82,6 +82,7 @@ def execute(quorum, execution, agents):
 
             execution_result = quorum.execute(executors)
 
+            has_interrupted = False
             for agent_id, record in execution_result.items():
                 record_id = utils.make_record_id()
                 record.update(dict(
@@ -94,6 +95,11 @@ def execute(quorum, execution, agents):
                     type='agent',
                 ))
                 records[record_id] = record
+                has_interrupted |= record['status'] == 'interrupted'
+
+            if has_interrupted:
+                LOG.info('Execution is interrupted')
+                return records
 
     LOG.info('Execution is done')
     return records
@@ -101,7 +107,7 @@ def execute(quorum, execution, agents):
 
 def play_scenario(scenario):
     deployment = None
-    output = dict(scenario=scenario, records=[], agents={})
+    output = dict(scenario=scenario, records={}, agents={})
     output['tests'] = dict((_make_test_title(test), test)
                            for test in scenario['execution']['tests'])
 
@@ -123,31 +129,34 @@ def play_scenario(scenario):
         LOG.debug('Deployed agents: %s', agents)
 
         if not agents:
-            LOG.warning('No agents deployed.')
-        else:
-            quorum = quorum_pkg.make_quorum(
-                agents.keys(), cfg.CONF.server_endpoint,
-                cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
-                cfg.CONF.agent_join_timeout)
+            raise Exception('No agents deployed.')
 
-            execution_result = execute(quorum, scenario['execution'], agents)
-            # extend every record with reference to scenario
-            for record in execution_result.values():
-                record['scenario'] = (scenario.get('title') or
-                                      scenario.get('file_name'))
-            output['records'] = execution_result
+        quorum = quorum_pkg.make_quorum(
+            agents.keys(), cfg.CONF.server_endpoint,
+            cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
+            cfg.CONF.agent_join_timeout)
+
+        output['records'] = execute(quorum, scenario['execution'], agents)
+
     except BaseException as e:
         if isinstance(e, KeyboardInterrupt):
             LOG.info('Caught SIGINT. Terminating')
+            record = dict(id=utils.make_record_id(), status='interrupted')
         else:
             error_msg = 'Error while executing scenario: %s' % e
             LOG.error(error_msg)
             LOG.exception(e)
-            output['scenario']['error'] = error_msg
+            record = dict(id=utils.make_record_id(), status='error',
+                          stderr=error_msg)
+        output['records'][record['id']] = record
     finally:
         if deployment:
             deployment.cleanup()
 
+    # extend every record with reference to scenario
+    for record in output['records'].values():
+        record['scenario'] = (scenario.get('title') or
+                              scenario.get('file_name'))
     return output
 
 

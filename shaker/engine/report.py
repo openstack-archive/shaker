@@ -39,6 +39,9 @@ def calculate_stats(records, tests):
                           functools.partial(collections.defaultdict, list)))
 
     for record in records.values():
+        if 'test' not in record:
+            continue
+
         aggregator = aggregators.get_aggregator(tests[record['test']])
         aggregator.record_summary(record)
 
@@ -73,7 +76,7 @@ def calculate_stats(records, tests):
 def verify_sla(records, tests):
     record_map = collections.defaultdict(list)  # test -> [record]
     for r in records.values():
-        if 'sla' in tests[r['test']]:
+        if ('test' in r) and ('sla' in tests[r['test']]):
             record_map[r['test']].append(r)
 
     sla_records = []
