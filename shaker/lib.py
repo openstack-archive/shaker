@@ -25,8 +25,20 @@ LOG = logging.getLogger(__name__)
 class Shaker(object):
     """How to use Shaker as library
 
-    shaker = Shaker('127.0.0.1:5999', ['the-agent'])
-    res = shaker.run_program('the-agent', 'ls -al')
+>>> from shaker import lib
+>>> shaker = lib.Shaker('127.0.0.1:5999', ['the-agent'])
+>>> shaker.run_program('the-agent', 'date')
+{
+    'status': 'ok',
+    'stdout': 'Thu Apr 23 13:09:08 EAT 2015\n',
+    'agent': 'the-agent',
+    'command': {'data': 'date', 'type': 'program'},
+    'stderr': u'',
+    'executor': 'shell',
+    'test': 'shell',
+    'type': 'agent',
+    'id': '3a7c3d97-45f1-43ba-8460-2e37e679e3d5'
+}
     """
     def __init__(self, server_endpoint, agent_ids, polling_interval=1,
                  agent_loss_timeout=60, agent_join_timeout=600):
@@ -43,9 +55,7 @@ class Shaker(object):
         execution = {'tests': [test]}
         execution_result = server.execute(self.quorum, execution, agents)
 
-        results_per_iteration = execution_result[0]['results_per_iteration']
-        results_per_agent = results_per_iteration[0]['results_per_agent']
-        return dict((s['agent']['id'], s) for s in results_per_agent)
+        return list(execution_result.values())[0]
 
     def run_program(self, agent_id, program):
         return self._run(agent_id, {'program': program})
