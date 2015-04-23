@@ -114,20 +114,21 @@
         }).sort();
       }
 
-      function updateSelectors(records) {
+      function updateSelectors() {
         $.each(fields, function (i, field) {
-          var values = getFieldValues(field, records);
+          var values = getFieldValues(field, filterRecords(report.records, null, field));
+          console.log(values);
           initSingleSelector(field, values);
         });
       }
 
-      function filterRecords(records, type) {
+      function filterRecords(records, type, except_field) {
         var res = [];
         $.each(records, function(_i, record){
-          if (typeof type === 'undefined' || record.type == type) {
+          if (!type || typeof type === 'undefined' || record.type == type) {
             var flag = true;
             $.each(state, function (key, value) {
-              if (value) {
+              if (key != except_field && value) {
                 flag &= record[key] == value;
               }
             });
@@ -338,7 +339,7 @@
         var contentArea = $("#content_area");
         contentArea.empty();
 
-        updateSelectors(report.records);
+        updateSelectors();
 
         showRecordsTable(contentArea, filteredRecords);
         showSlaTable(contentArea, slaRecords);
