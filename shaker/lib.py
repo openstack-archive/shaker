@@ -26,7 +26,7 @@ class Shaker(object):
     """How to use Shaker as library
 
 >>> from shaker import lib
->>> shaker = lib.Shaker('127.0.0.1:5999', ['the-agent'])
+>>> shaker = lib.Shaker('127.0.0.1:5999')
 >>> shaker.run_program('the-agent', 'date')
 {
     'status': 'ok',
@@ -40,13 +40,14 @@ class Shaker(object):
     'id': '3a7c3d97-45f1-43ba-8460-2e37e679e3d5'
 }
     """
-    def __init__(self, server_endpoint, agent_ids, polling_interval=1,
+    def __init__(self, server_endpoint, agent_ids=None, polling_interval=1,
                  agent_loss_timeout=60, agent_join_timeout=600):
         self.quorum = quorum.make_quorum(
-            agent_ids, server_endpoint, polling_interval, agent_loss_timeout,
-            agent_join_timeout)
+            agent_ids or [], server_endpoint, polling_interval,
+            agent_loss_timeout, agent_join_timeout)
 
     def _run(self, agent_id, item):
+        self.quorum.join({agent_id})
         agents = dict([(agent_id, dict(id=agent_id, mode='alone'))])
 
         test = {'class': 'shell'}
