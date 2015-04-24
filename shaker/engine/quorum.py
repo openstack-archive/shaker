@@ -162,6 +162,10 @@ class Quorum(object):
             result.update(dict((a_id, operation.process_interrupt(a_id))
                           for a_id in interrupted))
 
+        # update records with scheduling time
+        for record in result.values():
+            record['schedule'] = start_at
+
         return result
 
     def join(self, agent_ids):

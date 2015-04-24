@@ -61,6 +61,8 @@ class BaseExecutor(object):
                   self.test_definition, self.agent, message)
         return dict(stdout=message.get('stdout'),
                     stderr=message.get('stderr'),
+                    start=message.get('start'),
+                    finish=message.get('finish'),
                     command=self.get_command())
 
     def process_failure(self):

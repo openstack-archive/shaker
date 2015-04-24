@@ -61,6 +61,7 @@ def send_reply(socket, agent_id, result):
 
 def run_command(command):
     command_stdout, command_stderr = None, None
+    start = time.time()
 
     if command['type'] == 'program':
         command_stdout, command_stderr = processutils.execute(
@@ -77,7 +78,8 @@ def run_command(command):
     else:
         command_stderr = 'Unknown command type : %s' % command['type']
 
-    return dict(stdout=command_stdout, stderr=command_stderr)
+    return dict(stdout=command_stdout, stderr=command_stderr,
+                start=start, finish=time.time())
 
 
 def work(agent_id, endpoint, polling_interval):
