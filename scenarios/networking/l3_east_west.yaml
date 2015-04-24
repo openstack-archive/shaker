@@ -4,7 +4,7 @@ description:
 
 deployment:
   template: l3_east_west.hot
-  vm_accommodation: [pair, single_room]
+  accommodation: [pair, single_room]
 
 execution:
   tests:

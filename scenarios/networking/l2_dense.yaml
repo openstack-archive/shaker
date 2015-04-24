@@ -5,7 +5,7 @@ description:
 
 deployment:
   template: l2.hot
-  vm_accommodation: [pair, single_room, density: 4, compute_nodes: 2]
+  accommodation: [pair, single_room, density: 4, compute_nodes: 2]
 
 execution:
   size: 'quadratic_progression'

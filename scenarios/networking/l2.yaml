@@ -6,7 +6,7 @@ description:
 
 deployment:
   template: l2.hot
-  vm_accommodation: [pair, single_room]
+  accommodation: [pair, single_room]
 
 execution:
   tests:

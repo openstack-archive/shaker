@@ -26,9 +26,9 @@ from shaker.openstack.clients import openstack
 LOG = logging.getLogger(__name__)
 
 
-def generate_agents(compute_nodes, vm_accommodation, unique):
+def generate_agents(compute_nodes, accommodation, unique):
     density = 1
-    for s in vm_accommodation:
+    for s in accommodation:
         if isinstance(s, dict):
             if s.get('density'):
                 density = s.get('density')
@@ -38,41 +38,41 @@ def generate_agents(compute_nodes, vm_accommodation, unique):
     cn_count = len(compute_nodes)
     iterations = cn_count * density
 
-    if 'single_room' in vm_accommodation and 'pair' in vm_accommodation:
+    if 'single_room' in accommodation and 'pair' in accommodation:
         iterations //= 2
     node_formula = lambda x: compute_nodes[x % cn_count]
 
     agents = {}
 
     for i in range(iterations):
-        if 'pair' in vm_accommodation:
+        if 'pair' in accommodation:
             master_id = '%s_master_%s' % (unique, i)
             slave_id = '%s_slave_%s' % (unique, i)
             master = dict(id=master_id, mode='master', slave_id=slave_id)
             slave = dict(id=slave_id, mode='slave', master_id=master_id)
 
-            if 'single_room' in vm_accommodation:
+            if 'single_room' in accommodation:
                 master['node'] = node_formula(i * 2)
                 slave['node'] = node_formula(i * 2 + 1)
-            elif 'double_room' in vm_accommodation:
+            elif 'double_room' in accommodation:
                 master['node'] = node_formula(i)
                 slave['node'] = node_formula(i)
-            elif 'mixed_room' in vm_accommodation:
+            elif 'mixed_room' in accommodation:
                 master['node'] = node_formula(i)
                 slave['node'] = node_formula(i + 1)
 
             agents[master['id']] = master
             agents[slave['id']] = slave
         else:
-            if 'single_room' in vm_accommodation:
+            if 'single_room' in accommodation:
                 agent_id = '%s_agent_%s' % (unique, i)
                 agents[agent_id] = dict(id=agent_id, node=node_formula(i),
                                         mode='alone')
 
     if not agents:
-        LOG.warning('Not enough compute nodes %(cn)s for requested '
-                    'instance accommodation %(acc)s',
-                    dict(cn=compute_nodes, acc=vm_accommodation))
+        raise Exception('Not enough compute nodes %(cn)s for requested '
+                        'instance accommodation %(acc)s' %
+                        dict(cn=compute_nodes, acc=accommodation))
 
     return agents
 
@@ -145,7 +145,8 @@ class Deployment(object):
     def _deploy_from_hot(self, specification, base_dir=None):
         agents = generate_agents(
             nova.get_available_compute_nodes(self.openstack_client.nova),
-            specification['vm_accommodation'],
+            specification.get('accommodation') or
+            specification.get('vm_accommodation'),
             self.stack_name)
 
         # render template by jinja

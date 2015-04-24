@@ -56,6 +56,11 @@ class TestDeploy(testtools.TestCase):
                                         unique)
         self.assertEqual(expected, actual)
 
+    def test_generate_agents_pair_single_room_not_enough(self):
+        unique = 'UU1D'
+        self.assertRaises(Exception, deploy.generate_agents, ['uno'],
+                          ['pair', 'single_room'], unique)  # NOQA
+
     def test_generate_agents_pair_double_room(self):
         unique = 'UU1D'
         expected = {

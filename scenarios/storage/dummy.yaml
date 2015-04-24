@@ -3,7 +3,7 @@ description:
 
 deployment:
   template: dummy.hot
-  vm_accommodation: [single_room]
+  accommodation: [single_room]
 
 execution:
   tests:
