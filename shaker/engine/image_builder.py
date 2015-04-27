@@ -58,7 +58,7 @@ def build_image():
         LOG.info('Using existing flavor: %s', flavor_name)
     else:
         openstack_client.nova.flavors.create(name=flavor_name,
-                                             ram=1024, vcpus=1, disk=3)
+                                             ram=512, vcpus=1, disk=3)
         LOG.info('Created flavor %s', flavor_name)
 
     if glance.get_image(openstack_client.glance, image_name):

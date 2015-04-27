@@ -54,7 +54,7 @@ def check_server_console(nova_client, server_id, len_limit=100):
                        dict(id=server_id, msg=line))
             LOG.error(message)
             return message
-        if re.search(r'error', line, flags=re.IGNORECASE):
+        if re.search(r'\[error', line, flags=re.IGNORECASE):
             LOG.error('Error message in instance %(id)s console: %(msg)s',
                       dict(id=server_id, msg=line))
         elif re.search(r'warn', line, flags=re.IGNORECASE):

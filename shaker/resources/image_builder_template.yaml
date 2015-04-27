@@ -44,7 +44,7 @@ resources:
       disk_format: qcow2
       location: https://cloud-images.ubuntu.com/releases/14.04.1/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img
       min_disk: 3
-      min_ram: 1000
+      min_ram: 512
       name: shaker_image_build_template
 
   master_image_server_port:
