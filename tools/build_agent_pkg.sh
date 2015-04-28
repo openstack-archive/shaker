@@ -2,6 +2,7 @@
 
 TEMP_DIR="$(mktemp -d)"
 cp -r shaker ${TEMP_DIR}/
+cp -r .git ${TEMP_DIR}/
 cp requirements-agent.txt ${TEMP_DIR}/requirements.txt
 cp setup-agent.cfg ${TEMP_DIR}/setup.cfg
 cp setup.py ${TEMP_DIR}/
