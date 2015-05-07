@@ -24,6 +24,9 @@ from shaker.engine import messaging
 
 LOG = logging.getLogger(__name__)
 
+HEARTBEAT_AGENT = '__heartbeat'
+CLEANER_AGENT = '__cleaner'
+
 
 class BaseOperation(object):
     def get_agent_join_timeout(self):
@@ -31,6 +34,9 @@ class BaseOperation(object):
 
     def get_active_agent_ids(self):
         pass
+
+    def get_default_reply(self, agent_id):
+        return {'operation': 'none'}
 
     def get_reply(self, agent_id, start_at):
         return {}
@@ -96,6 +102,21 @@ class ExecuteOperation(BaseOperation):
         return r
 
 
+class CleanOperation(BaseOperation):
+    def __init__(self, polling_interval):
+        self.polling_interval = polling_interval
+
+    def get_active_agent_ids(self):
+        return {CLEANER_AGENT}
+
+    def get_default_reply(self, agent_id):
+        reply = super(CleanOperation, self).get_default_reply(agent_id)
+        if agent_id != HEARTBEAT_AGENT:
+            # send all agents sleep
+            reply['start_at'] = time.time() + self.polling_interval * 4
+        return reply
+
+
 class Quorum(object):
     def __init__(self, message_queue, polling_interval, agent_loss_timeout,
                  agent_join_timeout):
@@ -103,6 +124,10 @@ class Quorum(object):
         self.polling_interval = polling_interval
         self.agent_loss_timeout = agent_loss_timeout
         self.agent_join_timeout = agent_join_timeout
+
+    def __del__(self):
+        LOG.info('Cleaning the quorum')
+        self._run(CleanOperation(self.polling_interval))
 
     def _run(self, operation):
         current = operation.get_active_agent_ids()
@@ -118,14 +143,14 @@ class Quorum(object):
 
         for message, reply_handler in self.message_queue:
             agent_id = message.get('agent_id')
-            op = message.get('operation')
-            reply = {'operation': 'none'}
+            reply = operation.get_default_reply(agent_id)
             now = time.time()
 
             if agent_id in (current - replied):
                 # message from a known not yet worked agent
                 lives[agent_id] = (now + self.polling_interval * 2 +
                                    self.agent_loss_timeout)
+                op = message.get('operation')
 
                 if op == 'poll':
                     reply = operation.get_reply(agent_id, start_at)
@@ -147,7 +172,9 @@ class Quorum(object):
 
             if replied | lost >= current:
                 if lost:
-                    LOG.warning('Lost agents: %s', lost)
+                    filtered = set(a for a in lost if a[0] != '_')
+                    if filtered:  # do not warn about private agents
+                        LOG.warning('Lost agents: %s', filtered)
                     # update result with info about lost agents
                     for agent_id in lost:
                         result[agent_id] = operation.process_failure(agent_id)
@@ -169,7 +196,7 @@ class Quorum(object):
         return result
 
     def join(self, agent_ids):
-        LOG.debug('Waiting for quorum of agents: %s', agent_ids)
+        LOG.info('Waiting for quorum of agents: %s', agent_ids)
         return self._run(JoinOperation(agent_ids, self.polling_interval,
                                        self.agent_join_timeout))
 
@@ -183,7 +210,7 @@ def make_quorum(agent_ids, server_endpoint, polling_interval,
 
     heartbeat = multiprocessing.Process(
         target=agent_process.work,
-        kwargs=dict(agent_id='heartbeat', endpoint=server_endpoint,
+        kwargs=dict(agent_id=HEARTBEAT_AGENT, endpoint=server_endpoint,
                     polling_interval=polling_interval))
     heartbeat.daemon = True
     heartbeat.start()

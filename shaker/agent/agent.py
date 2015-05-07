@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import os
 import shlex
 import tempfile
@@ -94,15 +95,20 @@ def work(agent_id, endpoint, polling_interval):
         while True:
             task = poll_task(socket, agent_id)
 
+            start_at = task.get('start_at')
+            if start_at:
+                now = time.time()
+                start_at_str = datetime.datetime.fromtimestamp(
+                    start_at).isoformat()
+
+                if start_at > now:
+                    LOG.debug('Scheduling task at %s', start_at_str)
+                    time.sleep(start_at - now)
+                else:
+                    LOG.warning('Scheduling in the past: %s', start_at_str)
+
             if task['operation'] == 'execute':
-                now = int(time.time())
-                start_at = task.get('start_at') or now
-                command = task.get('command')
-                LOG.debug('Scheduling command %s at %s', command, start_at)
-
-                time.sleep(start_at - now)
-
-                result = run_command(command)
+                result = run_command(task.get('command'))
                 send_reply(socket, agent_id, result)
 
             elif task['operation'] == 'configure':
