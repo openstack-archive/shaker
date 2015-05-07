@@ -84,8 +84,8 @@ optional arguments:
                         (Optional) Enables or disables syslog rfc5424 format
                         for logging. If enabled, prefixes the MSG part of the
                         syslog message with APP-NAME (RFC5424). The format
-                        without the APP-NAME is deprecated in I, and will be
-                        removed in J.
+                        without the APP-NAME is deprecated in K, and will be
+                        removed in L, along with this option.
   --verbose, -v         Print more verbose output (set logging level to INFO
                         instead of default WARNING level).
   --version             show program's version number and exit
