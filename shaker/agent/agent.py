@@ -83,7 +83,7 @@ def run_command(command):
                 start=start, finish=time.time())
 
 
-def work(agent_id, endpoint, polling_interval):
+def work(agent_id, endpoint, polling_interval, ignore_sigint=False):
     LOG.info('Agent id is: %s', agent_id)
     LOG.info('Connecting to server: %s', endpoint)
 
@@ -91,8 +91,8 @@ def work(agent_id, endpoint, polling_interval):
     socket = context.socket(zmq.REQ)
     socket.connect('tcp://%s' % endpoint)
 
-    try:
-        while True:
+    while True:
+        try:
             task = poll_task(socket, agent_id)
 
             start_at = task.get('start_at')
@@ -118,12 +118,16 @@ def work(agent_id, endpoint, polling_interval):
 
             time.sleep(polling_interval)
 
-    except BaseException as e:
-        if isinstance(e, KeyboardInterrupt):
-            LOG.info('The process is interrupted')
-            sys.exit(3)
-        else:
-            LOG.exception(e)
+        except BaseException as e:
+            if isinstance(e, KeyboardInterrupt):
+                if ignore_sigint:
+                    LOG.info('Got SIGINT, but configured to ignore it')
+                else:
+                    LOG.info('Process is interrupted')
+                    sys.exit(3)
+            else:
+                LOG.exception(e)
+                break
 
 
 def get_mac():

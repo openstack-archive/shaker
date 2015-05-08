@@ -211,11 +211,17 @@ def make_quorum(agent_ids, server_endpoint, polling_interval,
     heartbeat = multiprocessing.Process(
         target=agent_process.work,
         kwargs=dict(agent_id=HEARTBEAT_AGENT, endpoint=server_endpoint,
-                    polling_interval=polling_interval))
+                    polling_interval=polling_interval, ignore_sigint=True))
     heartbeat.daemon = True
     heartbeat.start()
 
     quorum = Quorum(message_queue, polling_interval, agent_loss_timeout,
                     agent_join_timeout)
-    quorum.join(set(agent_ids))
+    result = quorum.join(set(agent_ids))
+
+    failed = dict((agent_id, rec['status'])
+                  for agent_id, rec in result.items() if rec['status'] != 'ok')
+    if failed:
+        raise Exception('Agents failed to join: %s' % failed)
+
     return quorum

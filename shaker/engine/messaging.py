@@ -40,6 +40,7 @@ class MessageQueue(object):
 
                 def reply_handler(reply_message):
                     self.socket.send_json(reply_message)
+                    LOG.debug('Sent reply: %s', reply_message)
 
                 try:
                     yield message, reply_handler
@@ -47,6 +48,8 @@ class MessageQueue(object):
                     break
 
         except BaseException as e:
-            if not isinstance(e, KeyboardInterrupt):  # SIGINT is ok
+            if isinstance(e, KeyboardInterrupt):  # SIGINT is ok
+                LOG.info('Process is interrupted')
+            else:
                 LOG.exception(e)
                 raise

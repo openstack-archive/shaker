@@ -182,7 +182,7 @@ class TestQuorum(testtools.TestCase):
             'beta': DummyExecutor(),
         }
         result = quorum.execute(test_case)
-        self.assertEqual(result.keys(), test_case.keys())
+        self.assertEqual(set(result.keys()), set(test_case.keys()))
         self.assertEqual('lost', result['_lost']['status'])
         self.assertEqual('ok', result['beta']['status'])
 
