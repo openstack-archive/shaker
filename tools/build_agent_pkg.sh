@@ -13,7 +13,8 @@ export PBR_VERSION="$(git describe --exact-match)"
 
 cd ${TEMP_DIR}
 echo "Building pyshaker-agent version ${PBR_VERSION}"
-python setup.py sdist upload
+python setup.py sdist
+twine upload -s dist/*
 
 cd -
 rm -rf ${TEMP_DIR}

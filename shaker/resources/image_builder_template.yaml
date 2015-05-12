@@ -67,10 +67,9 @@ resources:
         #!/bin/bash
         sudo apt-add-repository "deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse"
         sudo apt-get update
-        sudo apt-get -y install iperf netperf git python-dev libzmq-dev screen
+        sudo apt-get -y install iperf netperf python-dev libzmq-dev screen
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
-        sudo pip install pbr netperf-wrapper
-        git clone git://git.openstack.org/stackforge/shaker && cd shaker && sudo pip install -r requirements.txt && sudo python setup.py develop
+        sudo pip install pbr netperf-wrapper pyshaker-agent
         sudo sed -i '1i supersede interface-mtu 1458;' /etc/dhcp/dhclient.conf
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s' | sudo tee /etc/init/iperf-tcp.conf
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s --udp' | sudo tee /etc/init/iperf-udp.conf
