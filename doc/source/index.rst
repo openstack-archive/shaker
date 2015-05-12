@@ -3,4 +3,23 @@ Welcome to Shaker!
 
 Shake VMs with our sheer-class tests!
 
-.. include:: tools.rst
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   readme
+   installation
+   usage
+   examples
+   tools
+   architecture
+   contributing
+
+.. Indices and tables
+.. ==================
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
+

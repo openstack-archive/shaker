@@ -1,10 +1,15 @@
 Shaker
 ======
 
-Shake VMs with our sheer-class tests!
+Distributed data-plane testing tool for OpenStack
 
 Installation
 ------------
+
+Prerequisites
+^^^^^^^^^^^^^
+
+
 
 The tool consists of a single server running on master node and set of dynamically
 provisioned agents. In order to run the server needs to know OpenStack parameters
