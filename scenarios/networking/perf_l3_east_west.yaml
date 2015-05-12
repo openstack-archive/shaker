@@ -1,0 +1,24 @@
+description:
+  This scenario launches 1 pair of VMs in different networks connected to one
+  router (L3 east-west). VMs are hosted on different compute nodes
+
+deployment:
+  template: l3_east_west.hot
+  accommodation: [pair, single_room, compute_nodes: 2]
+
+execution:
+  tests:
+  -
+    title: Iperf TCP
+    class: iperf_graph
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+  -
+    title: Iperf UDP
+    class: iperf_graph
+    udp: 1
+    bandwidth: 1000M
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
