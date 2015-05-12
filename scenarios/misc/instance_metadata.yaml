@@ -4,7 +4,7 @@ description:
 
 deployment:
   template: instance_metadata.hot
-  accommodation: [single_room, density: 2, compute_nodes: 1]
+  vm_accommodation: [single_room, density: 10, compute_nodes: 1]
 
 execution:
   tests:

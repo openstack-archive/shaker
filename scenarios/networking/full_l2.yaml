@@ -1,22 +1,24 @@
-title: L2
-
 description:
   This scenario launches pairs of VMs in the same private network. Every VM is
   hosted on a separate compute node.
 
 deployment:
   template: l2.hot
-  accommodation: [pair, single_room]
+  vm_accommodation: [pair, single_room]
 
 execution:
+  size: 'quadratic_progression'
   tests:
   -
-    title: Iperf TCP test
+    title: Iperf TCP
     class: iperf_graph
     time: 60
-    sla:
-    - "[type == 'agent'] >> (stats.bandwidth.min > 100)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 200)"
+  -
+    title: Iperf UDP
+    class: iperf
+    udp: 1
+    threads: 8
+    bandwidth: 1000M
   -
     title: TCP download
     class: netperf_wrapper
@@ -25,13 +27,3 @@ execution:
     title: TCP bi-directional
     class: netperf_wrapper
     method: tcp_bidirectional
-  -
-    title: Iperf UDP 8 threads
-    class: iperf
-    udp: 1
-    threads: 8
-  -
-    title: Netperf TCP_STREAM
-    class: netperf
-    method: TCP_STREAM
-    time: 60
