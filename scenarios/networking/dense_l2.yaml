@@ -1,0 +1,30 @@
+description:
+  This scenario launches several pairs of VMs on the same compute node.
+  VM are plugged into the same private network. Useful for testing performance
+  degradation when the number of VMs grows.
+
+deployment:
+  template: l2.hot
+  accommodation: [pair, double_room, density: 8, compute_nodes: 1]
+
+execution:
+  size: linear_progression
+  tests:
+  -
+    title: Iperf TCP
+    class: iperf_graph
+    time: 60
+  -
+    title: Iperf UDP
+    class: iperf
+    udp: 1
+    threads: 8
+    bandwidth: 1000M
+  -
+    title: TCP download
+    class: netperf_wrapper
+    method: tcp_download
+  -
+    title: TCP bi-directional
+    class: netperf_wrapper
+    method: tcp_bidirectional

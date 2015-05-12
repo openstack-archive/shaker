@@ -1,0 +1,30 @@
+description:
+  This scenario launches pairs of VMs on one compute node. VMs are in
+  the different networks connected via different routers, master accesses slave
+  by floating ip
+
+deployment:
+  template: l3_north_south.hot
+  accommodation: [pair, double_room, density: 8, compute_nodes: 1]
+
+execution:
+  size: linear_progression
+  tests:
+  -
+    title: Iperf TCP
+    class: iperf_graph
+    time: 60
+  -
+    title: Iperf UDP
+    class: iperf
+    udp: 1
+    threads: 8
+    bandwidth: 1000M
+  -
+    title: TCP download
+    class: netperf_wrapper
+    method: tcp_download
+  -
+    title: TCP bi-directional
+    class: netperf_wrapper
+    method: tcp_bidirectional

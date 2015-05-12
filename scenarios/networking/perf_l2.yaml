@@ -1,0 +1,24 @@
+description:
+  This scenario launches 1 pair of VMs in the same private network on different
+  compute nodes.
+
+deployment:
+  template: l2.hot
+  accommodation: [pair, single_room, compute_nodes: 2]
+
+execution:
+  tests:
+  -
+    title: Iperf TCP
+    class: iperf_graph
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+  -
+    title: Iperf UDP
+    class: iperf_graph
+    udp: 1
+    bandwidth: 1000M
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
