@@ -1,6 +1,25 @@
 Welcome to Shaker!
 ==================
 
-Shake VMs with our sheer-class tests!
+Distributed data-plane testing tool for OpenStack.
 
-.. include:: tools.rst
+Contents:
+
+.. toctree::
+   :maxdepth: 2
+
+   readme
+   installation
+   usage
+   examples
+   tools
+   architecture
+   contributing
+
+.. Indices and tables
+.. ==================
+
+.. * :ref:`genindex`
+.. * :ref:`modindex`
+.. * :ref:`search`
+
