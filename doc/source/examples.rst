@@ -49,7 +49,7 @@ L3 North-South
 --------------
 
 This scenario tests the bandwidth between pairs of instances deployed in different virtual networks. Instances
-with master agents are located in one network, instances with slave agents are reached via floating IP.
+with master agents are located in one network, instances with slave agents are reached via their floating IPs.
 Each instance is deployed on its own compute node. The test increases the load from 1 pair pair until
 all available instances are used.
 

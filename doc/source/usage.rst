@@ -68,6 +68,7 @@ The execution part of scenario contains a list of tests that are executed one by
 simultaneously on all available agents. The level of concurrency can be controlled by option ``size``. There are
 3 values available:
 
+    * ``size`` is not specified - all agents are involved;
     * ``size: linear_progression`` - the execution starts with 1 agent and increases by 1 until all agents are involved;
     * ``size: quadratic_progression`` - the execution starts with 1 agent (or 1 pair) and doubles until all agents are involved.
 
