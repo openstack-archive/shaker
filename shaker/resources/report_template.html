@@ -45,25 +45,25 @@
 
     $(function () {
 
-      const fields = ["scenario", "test", "concurrency", "node", "agent"];
-      const state = {
+      var fields = ["scenario", "test", "concurrency", "node", "agent"];
+      var state = {
         scenario: "",
         test: "",
         concurrency: "",
         node: "",
         agent: ""
       };
-      const tablePageSize = 10;
+      var tablePageSize = 10;
 
       // compiled templates
-      const scenario_source_template = Handlebars.compile($("#scenario_source_template").html());
-      const test_specification_template = Handlebars.compile($("#test_specification_template").html());
-      const agents_table_template = Handlebars.compile($("#agents_table_template").html());
-      const records_table_template = Handlebars.compile($("#records_table_template").html());
-      const executor_template = Handlebars.compile($("#executor_template").html());
-      const concurrency_summary_template = Handlebars.compile($("#concurrency_summary_template").html());
-      const test_summary_template = Handlebars.compile($("#test_summary_template").html());
-      const sla_table_template = Handlebars.compile($("#sla_table_template").html());
+      var scenario_source_template = Handlebars.compile($("#scenario_source_template").html());
+      var test_specification_template = Handlebars.compile($("#test_specification_template").html());
+      var agents_table_template = Handlebars.compile($("#agents_table_template").html());
+      var records_table_template = Handlebars.compile($("#records_table_template").html());
+      var executor_template = Handlebars.compile($("#executor_template").html());
+      var concurrency_summary_template = Handlebars.compile($("#concurrency_summary_template").html());
+      var test_summary_template = Handlebars.compile($("#test_summary_template").html());
+      var sla_table_template = Handlebars.compile($("#sla_table_template").html());
 
       function initSingleSelector(name, values) {
         var selectorId = "#" + name + "_selector";
