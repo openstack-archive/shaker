@@ -8,7 +8,7 @@ deployment:
   accommodation: [pair, double_room, density: 8, compute_nodes: 1]
 
 execution:
-  size: linear_progression
+  progression: linear
   tests:
   -
     title: Iperf TCP

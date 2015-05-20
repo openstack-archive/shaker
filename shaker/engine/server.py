@@ -49,16 +49,16 @@ def _make_test_title(test):
     return re.sub(r'[^\x21-\x7e\x80-\xff]+', '_', s).lower()
 
 
-def _pick_agents(agents, size):
+def _pick_agents(agents, progression):
     # slave agents do not execute any tests
     agents = [a for a in agents.values() if a.get('mode') != 'slave']
 
-    if not size or size == 'full':
+    if not progression:
         yield agents
-    elif size == 'linear_progression':
+    elif progression in ['arithmetic', 'linear', 'linear_progression']:
         for i in range(len(agents)):
             yield agents[:i + 1]
-    elif size == 'quadratic_progression':
+    elif progression in ['geometric', 'quadratic', 'quadratic_progression']:
         n = len(agents)
         seq = [n]
         while n > 1:
@@ -75,8 +75,9 @@ def execute(quorum, execution, agents):
     for test in execution['tests']:
         LOG.debug('Running test %s on all agents', test)
         test_title = _make_test_title(test)
+        progression = execution.get('progression', execution.get('size'))
 
-        for selected_agents in _pick_agents(agents, execution.get('size')):
+        for selected_agents in _pick_agents(agents, progression):
             executors = dict((a['id'], executors_classes.get_executor(test, a))
                              for a in selected_agents)
 

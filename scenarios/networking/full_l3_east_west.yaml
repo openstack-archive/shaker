@@ -7,7 +7,7 @@ deployment:
   accommodation: [pair, single_room]
 
 execution:
-  size: quadratic_progression
+  progression: quadratic
   tests:
   -
     title: Iperf TCP

@@ -46,7 +46,7 @@ class TestServer(testtools.TestCase):
                 'id': i, 'mode': 'alone', 'node': 'uno',
             }
         picked = [set(a['id'] for a in arr)
-                  for arr in server._pick_agents(agents, 'full')]
+                  for arr in server._pick_agents(agents, None)]
         self.assertEqual([set(range(10))], picked)
 
     def test_pick_agents_full_filter_slaves(self):
@@ -59,7 +59,7 @@ class TestServer(testtools.TestCase):
                 'id': 'slave_%s' % i, 'mode': 'slave', 'node': 'uno',
             }
         picked = [set(a['id'] for a in arr)
-                  for arr in server._pick_agents(agents, 'full')]
+                  for arr in server._pick_agents(agents, None)]
         self.assertEqual([set('master_%s' % i for i in range(10))],
                          picked)
 
@@ -70,7 +70,7 @@ class TestServer(testtools.TestCase):
                 'id': i, 'mode': 'alone', 'node': 'uno',
             }
         picked = [set(a['id'] for a in arr)
-                  for arr in server._pick_agents(agents, 'linear_progression')]
+                  for arr in server._pick_agents(agents, 'linear')]
         self.assertEqual([set(range(i + 1)) for i in range(0, 10)],
                          picked)
 
@@ -82,7 +82,7 @@ class TestServer(testtools.TestCase):
             }
         picked = [set(a['id'] for a in arr)
                   for arr in server._pick_agents(agents,
-                                                 'quadratic_progression')]
+                                                 'quadratic')]
         self.assertEqual([set(range(1)), set(range(2)),
                           set(range(5)), set(range(10))],
                          picked)
