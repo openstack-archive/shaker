@@ -15,6 +15,7 @@
 
 import testtools
 
+from shaker.engine.executors import base
 from shaker.engine.executors import iperf
 
 
@@ -69,3 +70,12 @@ class TestIperfGraphExecutor(testtools.TestCase):
                          message='Samples data')
         self.assertEqual(expected['meta'], reply['meta'],
                          message='Metadata')
+
+    def test_process_empty_reply(self):
+        executor = iperf.IperfGraphExecutor({}, AGENT)
+        message = {
+            'stdout': '',
+            'stderr': 'Error!',
+        }
+        self.assertRaises(
+            base.ExecutorException, executor.process_reply, message)

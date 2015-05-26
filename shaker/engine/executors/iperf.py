@@ -49,6 +49,9 @@ class IperfGraphExecutor(IperfExecutor):
     def process_reply(self, message):
         result = super(IperfGraphExecutor, self).process_reply(message)
 
+        if not result['stdout']:
+            raise base.ExecutorException(result, 'Empty result from iperf')
+
         samples = []
         threads_count = self.test_definition.get('threads') or 1
 

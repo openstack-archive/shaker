@@ -67,3 +67,9 @@ class BaseExecutor(object):
 
     def process_failure(self):
         return dict(command=self.get_command())
+
+
+class ExecutorException(Exception):
+    def __init__(self, record, message):
+        super(ExecutorException, self).__init__(message)
+        self.record = record

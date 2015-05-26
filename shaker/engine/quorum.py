@@ -19,6 +19,7 @@ import time
 from oslo_log import log as logging
 
 from shaker.agent import agent as agent_process
+from shaker.engine.executors import base as base_executors
 from shaker.engine import messaging
 
 
@@ -43,6 +44,9 @@ class BaseOperation(object):
 
     def process_reply(self, agent_id, message):
         return {'status': 'ok'}
+
+    def process_error(self, agent_id, exception):
+        return {'status': 'error', 'info': str(exception)}
 
     def process_failure(self, agent_id):
         return {'status': 'lost'}
@@ -87,8 +91,16 @@ class ExecuteOperation(BaseOperation):
         return reply
 
     def process_reply(self, agent_id, message):
-        r = super(ExecuteOperation, self).process_reply(agent_id, message)
-        r.update(self.executors[agent_id].process_reply(message))
+        try:
+            reply = self.executors[agent_id].process_reply(message)
+            r = super(ExecuteOperation, self).process_reply(agent_id, message)
+            r.update(reply)
+        except base_executors.ExecutorException as e:
+            r = super(ExecuteOperation, self).process_error(agent_id, e)
+            r.update(e.record)
+        except Exception as e:
+            r = super(ExecuteOperation, self).process_error(agent_id, e)
+
         return r
 
     def process_failure(self, agent_id):
