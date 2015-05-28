@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from shaker.engine.executors import flent
 from shaker.engine.executors import iperf
 from shaker.engine.executors import netperf
 from shaker.engine.executors import shell
@@ -24,6 +25,7 @@ EXECUTORS = {
     'iperf': iperf.IperfExecutor,
     'iperf_graph': iperf.IperfGraphExecutor,
     'netperf_wrapper': netperf.NetperfWrapperExecutor,
+    'flent': flent.FlentExecutor,
     '_default': shell.ShellExecutor,
 }
 

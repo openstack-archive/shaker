@@ -23,19 +23,23 @@ from shaker.engine.aggregators import base
 LOG = logging.getLogger(__name__)
 
 
+def _filter_none(array):
+    return [x for x in array if x]
+
+
 def mean(array):
-    if not array:
-        return 0
-    array = [x for x in array if x]
-    return sum(array) / len(array)
+    s = _filter_none(array)
+    return sum(s) / len(s) if s else 0
 
 
 def safe_max(array):
-    return max(x for x in array if x)
+    s = _filter_none(array)
+    return max(s) if s else None
 
 
 def safe_min(array):
-    return min(x for x in array if x)
+    s = _filter_none(array)
+    return min(s) if s else None
 
 
 class TrafficAggregator(base.BaseAggregator):

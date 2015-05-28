@@ -72,7 +72,7 @@ def run_command(command):
         fd = tempfile.mkstemp()
         os.write(fd[0], command['data'])
         os.close(fd[0])
-        LOG.debug('stored script into %s', fd[1])
+        LOG.debug('Stored script into %s', fd[1])
         command_stdout, command_stderr = processutils.execute(
             *shlex.split('bash %s' % fd[1]), check_exit_code=False)
 
