@@ -70,7 +70,7 @@ resources:
         sudo apt-get -y install iperf netperf python-dev libzmq-dev screen
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
         sudo pip install -U "pip<7.0"
-        sudo pip install pbr netperf-wrapper pyshaker-agent
+        sudo pip install pbr netperf-wrapper flent pyshaker-agent
         sudo sed -i '1i supersede interface-mtu 1458;' /etc/dhcp/dhclient.conf
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s' | sudo tee /etc/init/iperf-tcp.conf
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s --udp' | sudo tee /etc/init/iperf-udp.conf
