@@ -29,17 +29,18 @@ class TestIperfGraphExecutor(testtools.TestCase):
         executor = iperf.IperfGraphExecutor({}, AGENT)
 
         expected = {'data': ('sudo nice -n -20 iperf --client %s --format m '
-                             '--nodelay --len 8k --time 60 --parallel 1 '
+                             '--nodelay --time 60 --parallel 1 '
                              '--reportstyle C --interval 1') % IP,
                     'type': 'program'}
         self.assertEqual(expected, executor.get_command())
 
     def test_get_command_udp(self):
         executor = iperf.IperfGraphExecutor(
-            {'udp': True, 'bandwidth': '100M', 'time': 30}, AGENT)
+            {'udp': True, 'bandwidth': '100M', 'time': 30,
+             'datagram_size': 1470}, AGENT)
 
         expected = {'data': ('sudo nice -n -20 iperf --client %s --format m '
-                             '--nodelay --len 8k --udp --bandwidth 100M '
+                             '--nodelay --udp --bandwidth 100M --len 1470 '
                              '--time 30 --parallel 1 '
                              '--reportstyle C --interval 1') % IP,
                     'type': 'program'}
@@ -60,6 +61,36 @@ class TestIperfGraphExecutor(testtools.TestCase):
                 [1.0, 399507456],
                 [2.0, 412090368],
                 [3.0, 405798912],
+            ],
+            'meta': [
+                ['time', 's'], ['bandwidth', 'bps']
+            ]
+        }
+        reply = executor.process_reply(message)
+        self.assertEqual(expected['samples'], reply['samples'],
+                         message='Samples data')
+        self.assertEqual(expected['meta'], reply['meta'],
+                         message='Metadata')
+
+    def test_process_reply_multiple_threads(self):
+        executor = iperf.IperfGraphExecutor({'threads': 2}, AGENT)
+        message = {
+            'stdout': """
+20150610102341,10.0.0.3,53479,10.0.0.2,5001,4,0.0-1.0,30277632,242221056
+20150610102341,10.0.0.3,53478,10.0.0.2,5001,3,0.0-1.0,23461888,187695104
+20150610102341,10.0.0.3,0,10.0.0.2,5001,-1,0.0-1.0,53739520,429916160
+20150610102342,10.0.0.3,53479,10.0.0.2,5001,4,1.0-2.0,41418752,331350016
+20150610102342,10.0.0.3,53478,10.0.0.2,5001,3,1.0-2.0,22806528,182452224
+20150610102342,10.0.0.3,53478,10.0.0.2,5001,3,0.0-2.0,46268416,370147328
+20150610102342,10.0.0.3,0,10.0.0.2,5001,-1,1.0-2.0,64225280,513802240
+20150610102440,10.0.0.3,53479,10.0.0.2,5001,4,0.0-2.0,71696384,573571072
+20150610102440,10.0.0.3,0,10.0.0.2,5001,-1,0.0-2.0,117964800,479810974\n
+"""
+        }
+        expected = {
+            'samples': [
+                [1.0, 429916160],
+                [2.0, 513802240],
             ],
             'meta': [
                 ['time', 's'], ['bandwidth', 'bps']

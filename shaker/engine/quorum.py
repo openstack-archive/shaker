@@ -15,6 +15,7 @@
 
 import multiprocessing
 import time
+import traceback
 
 from oslo_log import log as logging
 
@@ -46,7 +47,8 @@ class BaseOperation(object):
         return {'status': 'ok'}
 
     def process_error(self, agent_id, exception):
-        return {'status': 'error', 'info': str(exception)}
+        return {'status': 'error', 'info': str(exception),
+                'traceback': traceback.format_exc()}
 
     def process_failure(self, agent_id):
         return {'status': 'lost'}

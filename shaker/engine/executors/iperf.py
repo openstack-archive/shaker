@@ -26,11 +26,14 @@ class IperfExecutor(base.BaseExecutor):
         cmd.add('--nodelay')
         if self.test_definition.get('mss'):
             cmd.add('--mss', self.test_definition.get('mss'))
-        cmd.add('--len', self.test_definition.get('buffer_size') or '8k')
+        if self.test_definition.get('buffer_size'):
+            cmd.add('--len', self.test_definition.get('buffer_size'))
         if self.test_definition.get('udp'):
             cmd.add('--udp')
             if self.test_definition.get('bandwidth'):
                 cmd.add('--bandwidth', self.test_definition.get('bandwidth'))
+            if self.test_definition.get('datagram_size'):
+                cmd.add('--len', self.test_definition.get('datagram_size'))
         cmd.add('--time', self.get_expected_duration())
         cmd.add('--parallel', self.test_definition.get('threads') or 1)
         if self.test_definition.get('csv'):
@@ -58,14 +61,15 @@ class IperfGraphExecutor(IperfExecutor):
         for row in csv.reader(result['stdout'].split('\n')):
             if row and len(row) > 8:
                 thread = row[5]
-                if threads_count > 1 and thread != -1:
+                if threads_count > 1 and thread != '-1':
                     # ignore individual per-thread data
                     continue
 
                 start, end = row[6].split('-')
                 samples.append([float(end), int(row[8])])
 
-        samples.pop()  # the last line is summary, remove it
+        if samples:
+            samples.pop()  # the last line is summary, remove it
 
         result['samples'] = samples
         result['meta'] = [['time', 's'], ['bandwidth', 'bps']]

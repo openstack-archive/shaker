@@ -62,7 +62,7 @@ class TestOperations(testtools.TestCase):
             'info': 'Error!'
         }
         executor.process_reply.assert_called_once_with(message)
-        self.assertEqual(expected, reply)
+        self.assertDictContainsSubset(expected, reply)
 
     def test_execute_operation_process_reply_with_unhandled_exception(self):
         executor = mock.MagicMock()
@@ -80,4 +80,4 @@ class TestOperations(testtools.TestCase):
             'info': 'Boom!'
         }
         executor.process_reply.assert_called_once_with(message)
-        self.assertEqual(expected, reply)
+        self.assertDictContainsSubset(expected, reply)
