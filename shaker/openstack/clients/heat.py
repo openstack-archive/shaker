@@ -56,6 +56,7 @@ def wait_stack_completion(heat_client, stack_id):
                           dict(res=res.logical_resource_id,
                                type=res.resource_type,
                                reason=res.resource_status_reason))
+        heat_client.stacks.delete(stack_id)
         raise Exception('Failed to deploy Heat stack %(id)s. Expected status '
                         'COMPLETE, but got %(status)s. Reason: %(reason)s' %
                         dict(id=stack_id, status=status, reason=reason))
