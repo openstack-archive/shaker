@@ -67,7 +67,7 @@ class TestNetperfWrapperExecutor(testtools.TestCase):
                 [14.0, 0.0603987445198, None],
             ],
             'meta': [
-                ['time', 's'], ['Ping ICMP', 'ms'], ['TCP download', 'Mbps'],
+                ['time', 's'], ['Ping ICMP', 'ms'], ['TCP download', 'Mbit/s'],
             ]
         }
         reply = executor.process_reply(message)

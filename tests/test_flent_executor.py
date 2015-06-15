@@ -58,7 +58,7 @@ class TestFlentExecutor(testtools.TestCase):
       },
       "TCP upload": {
         "MEAN_VALUE": 14536.94,
-        "UNITS": "Mbps"
+        "UNITS": "Mbit/s"
       }
     },
     "TOTAL_LENGTH": 5
@@ -98,7 +98,7 @@ class TestFlentExecutor(testtools.TestCase):
                 [0.8, 0.07994293923635702, None]
             ],
             'meta': [
-                ['time', 's'], ['Ping ICMP', 'ms'], ['TCP upload', 'Mbps'],
+                ['time', 's'], ['Ping ICMP', 'ms'], ['TCP upload', 'Mbit/s'],
             ]
         }
         reply = executor.process_reply(message)

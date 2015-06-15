@@ -63,7 +63,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
                 [3.0, 405798912],
             ],
             'meta': [
-                ['time', 's'], ['bandwidth', 'bps']
+                ['time', 's'], ['bandwidth', 'bit/s']
             ]
         }
         reply = executor.process_reply(message)
@@ -93,7 +93,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
                 [2.0, 513802240],
             ],
             'meta': [
-                ['time', 's'], ['bandwidth', 'bps']
+                ['time', 's'], ['bandwidth', 'bit/s']
             ]
         }
         reply = executor.process_reply(message)

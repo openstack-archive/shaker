@@ -101,13 +101,13 @@ class TrafficAggregator(base.BaseAggregator):
         }
 
     def record_summary(self, record):
-        # convert bps to Mbps
+        # convert bit/s to Mbit/s
         for idx, item_meta in enumerate(record.get('meta', [])):
-            if item_meta[1] == 'bps':
+            if item_meta[1] in ['bit/s', 'bits/s']:
                 for row in record.get('samples'):
                     if row[idx]:
                         row[idx] = float(row[idx]) / 1024 / 1024
-                item_meta[1] = 'Mbps'
+                item_meta[1] = 'Mbit/s'
 
         # calculate stats
         record['stats'] = dict()

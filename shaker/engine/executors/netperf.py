@@ -48,7 +48,7 @@ class NetperfWrapperExecutor(base.BaseExecutor):
             if el.find('Ping') >= 0:
                 meta.append([el, 'ms'])
             else:
-                meta.append([el, 'Mbps'])
+                meta.append([el, 'Mbit/s'])
         result['meta'] = meta
 
         result['samples'] = [[(float(x) if x else None) for x in row]

@@ -27,7 +27,7 @@ class TestTrafficAggregator(testtools.TestCase):
         original = {
             "stderr": "", "stdout": '',
             "meta": [["time", "s"], ["Ping ICMP", "ms"],
-                     ["TCP download", "bps"]],
+                     ["TCP download", "bit/s"]],
             "samples": [[0, 1.9, None],
                         [1, 2.4, None],
                         [2, 2.6, 60 * 1024 * 1024],
@@ -51,7 +51,7 @@ class TestTrafficAggregator(testtools.TestCase):
                 'max': 65.0,
                 'min': 60.0,
                 'mean': 62.0,
-                'unit': 'Mbps',
+                'unit': 'Mbit/s',
             }
         }
         self.assertEqual(expected_stats, processed['stats'])
@@ -79,7 +79,7 @@ class TestTrafficAggregator(testtools.TestCase):
                         'max': 65.0,
                         'min': 60.0,
                         'mean': 62.0,
-                        'unit': 'Mbps',
+                        'unit': 'Mbit/s',
                     }
                 },
                 'chart': [['time', 0, 1, 2, 3, 4, 5],
@@ -101,7 +101,7 @@ class TestTrafficAggregator(testtools.TestCase):
                         'max': 75.0,
                         'min': 70.0,
                         'mean': 72.0,
-                        'unit': 'Mbps',
+                        'unit': 'Mbit/s',
                     }
                 },
                 'chart': [['time', 0, 1, 2, 3, 4, 5],
@@ -123,7 +123,7 @@ class TestTrafficAggregator(testtools.TestCase):
                 'max': 75.0,
                 'min': 60.0,
                 'mean': 67.0,
-                'unit': 'Mbps',
+                'unit': 'Mbit/s',
             }
         }
 
