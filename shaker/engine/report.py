@@ -148,7 +148,8 @@ def generate_report(data, report_template, report_filename, subunit_filename):
     jinja_env.filters['yaml'] = functools.partial(yaml.safe_dump, indent=2,
                                                   default_flow_style=False)
 
-    template = utils.read_file(report_template)
+    alias_mapper = lambda f: config.REPORT_TEMPLATES + '%s.html' % f
+    template = utils.read_file(report_template, alias_mapper=alias_mapper)
     compiled_template = jinja_env.from_string(template)
     rendered_template = compiled_template.render(dict(report=data))
 

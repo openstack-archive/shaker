@@ -35,9 +35,9 @@ optional arguments:
                         Name of image flavor. The default is created by
                         shaker-image-builder.
   --image-builder-template IMAGE_BUILDER_TEMPLATE
-                        File name of Heat template that contains receipt of
+                        File name of Heat template containing receipt of
                         building the image. Or one of predefined names from
-                        the list: "ubuntu", "debian"
+                        the list: "debian", "ubuntu"
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.

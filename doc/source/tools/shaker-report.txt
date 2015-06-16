@@ -65,4 +65,5 @@ optional arguments:
                         instead of default WARNING level).
   --version             show program's version number and exit
   --report-template REPORT_TEMPLATE
-                        Report template file name
+                        File name of report template or one of predefined
+                        names from the list: "dump", "interactive"

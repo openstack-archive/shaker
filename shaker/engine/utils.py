@@ -174,4 +174,4 @@ def flatten_dict(d, prefix='', sep='.'):
 def make_help_options(message, base):
     path = resolve_relative_path(base)
     return message % ', '.join('"%s"' % os.path.basename(f).partition('.')[0]
-                               for f in os.listdir(path))
+                               for f in sorted(os.listdir(path)))
