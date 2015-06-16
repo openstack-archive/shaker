@@ -21,7 +21,8 @@ from oslo_config import types
 from shaker.engine import utils
 
 
-IMAGE_BUILDER_RESOURCES = 'shaker/resources/image_builder_templates/'
+IMAGE_BUILDER_TEMPLATES = 'shaker/resources/image_builder_templates/'
+REPORT_TEMPLATES = 'shaker/resources/report_templates/'
 
 
 class Endpoint(types.String):
@@ -113,9 +114,11 @@ SERVER_OPTS = [
 
 REPORT_OPTS = [
     cfg.StrOpt('report-template',
-               default=(utils.env('SHAKER_REPORT_TEMPLATE') or
-                        'shaker/resources/report_template.html'),
-               help='Report template file name'),
+               default=(utils.env('SHAKER_REPORT_TEMPLATE') or 'interactive'),
+               help=utils.make_help_options(
+                   'Template for report. Can be a file name or one of '
+                   'aliases: %s. Defaults to "interactive".',
+                   REPORT_TEMPLATES)),
     cfg.StrOpt('report',
                default=utils.env('SHAKER_REPORT'),
                help='Report file name, defaults to env[SHAKER_REPORT]. '),
@@ -145,9 +148,9 @@ IMAGE_BUILDER_OPTS = [
                default=(utils.env('SHAKER_IMAGE_BUILDER_TEMPLATE') or
                         'ubuntu'),
                help=utils.make_help_options(
-                   'File name of Heat template that contains receipt of '
-                   'building the image. Or one of predefined names from the '
-                   'list: %s', IMAGE_BUILDER_RESOURCES)),
+                   'Heat template containing receipt of building the image. '
+                   'Can be a file name or one of aliases: %s. '
+                   'Defaults to "ubuntu".', IMAGE_BUILDER_TEMPLATES)),
 ]
 
 
