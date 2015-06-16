@@ -67,7 +67,8 @@ def build_image():
         template = None
         template_filename = cfg.CONF.image_builder_template
         try:
-            template = utils.read_file(template_filename)
+            am = lambda f: config.IMAGE_BUILDER_RESOURCES + '%s.yaml' % f
+            template = utils.read_file(template_filename, alias_mapper=am)
         except IOError:
             LOG.error('Error reading template file: %s. '
                       'Please verify correctness of --image-builder-template '

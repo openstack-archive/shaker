@@ -67,8 +67,21 @@ def init_config_and_logging(opts):
     conf.log_opt_values(LOG, std_logging.DEBUG)
 
 
-def read_file(file_name, base_dir=''):
+def resolve_relative_path(file_name):
+    return os.path.normpath(os.path.join(
+        os.path.dirname(__import__('shaker').__file__), '../', file_name))
+
+
+def read_file(file_name, base_dir='', alias_mapper=None):
     full_path = os.path.normpath(os.path.join(base_dir, file_name))
+
+    if alias_mapper:  # interpret file_name as alias
+        alias_path = resolve_relative_path(alias_mapper(file_name))
+        if os.path.exists(alias_path):
+            full_path = alias_path
+            LOG.info('Alias "%s" is resolved into file "%s"',
+                     file_name, full_path)
+
     if not os.path.exists(full_path):
         # treat file_name as relative to shaker's package root
         full_path = os.path.normpath(os.path.join(
@@ -156,3 +169,9 @@ def flatten_dict(d, prefix='', sep='.'):
         else:
             res.append((path, v))
     return res
+
+
+def make_help_options(message, base):
+    path = resolve_relative_path(base)
+    return message % ', '.join('"%s"' % os.path.basename(f).partition('.')[0]
+                               for f in os.listdir(path))
