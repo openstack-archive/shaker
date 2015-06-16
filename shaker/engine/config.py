@@ -21,6 +21,9 @@ from oslo_config import types
 from shaker.engine import utils
 
 
+IMAGE_BUILDER_RESOURCES = 'shaker/resources/image_builder_templates/'
+
+
 class Endpoint(types.String):
 
     def __call__(self, value):
@@ -140,8 +143,11 @@ AGENT_OPTS = [
 IMAGE_BUILDER_OPTS = [
     cfg.StrOpt('image-builder-template',
                default=(utils.env('SHAKER_IMAGE_BUILDER_TEMPLATE') or
-                        'shaker/resources/image_builder_template.yaml'),
-               help='Heat template for the image builder.'),
+                        'ubuntu'),
+               help=utils.make_help_options(
+                   'File name of Heat template that contains receipt of '
+                   'building the image. Or one of predefined names from the '
+                   'list %s', IMAGE_BUILDER_RESOURCES)),
 ]
 
 
