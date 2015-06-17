@@ -2,11 +2,12 @@ usage: shaker-image-builder [-h] [--config-dir DIR] [--config-file PATH]
                             [--debug] [--external-net EXTERNAL_NET]
                             [--flavor-name FLAVOR_NAME]
                             [--image-builder-template IMAGE_BUILDER_TEMPLATE]
-                            [--image-name IMAGE_NAME]
+                            [--image-name IMAGE_NAME] [--keep-failed-stack]
                             [--log-config-append PATH]
                             [--log-date-format DATE_FORMAT]
                             [--log-dir LOG_DIR] [--log-file PATH]
-                            [--log-format FORMAT] [--nodebug] [--nouse-syslog]
+                            [--log-format FORMAT] [--nodebug]
+                            [--nokeep-failed-stack] [--nouse-syslog]
                             [--nouse-syslog-rfc-format] [--noverbose]
                             [--os-password <auth-password>]
                             [--os-region-name <auth-region-name>]
@@ -43,6 +44,7 @@ optional arguments:
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.
+  --keep-failed-stack   Do not delete the stack in case of error.
   --log-config-append PATH, --log_config PATH
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.
@@ -63,6 +65,8 @@ optional arguments:
                         deprecated. Please use logging_context_format_string
                         and logging_default_format_string instead.
   --nodebug             The inverse of --debug
+  --nokeep-failed-stack
+                        The inverse of --keep-failed-stack
   --nouse-syslog        The inverse of --use-syslog
   --nouse-syslog-rfc-format
                         The inverse of --use-syslog-rfc-format

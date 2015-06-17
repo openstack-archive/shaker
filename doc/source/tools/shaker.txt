@@ -2,9 +2,10 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--agent-loss-timeout AGENT_LOSS_TIMEOUT] [--config-dir DIR]
               [--config-file PATH] [--debug] [--external-net EXTERNAL_NET]
               [--flavor-name FLAVOR_NAME] [--image-name IMAGE_NAME]
-              [--log-config-append PATH] [--log-date-format DATE_FORMAT]
-              [--log-dir LOG_DIR] [--log-file PATH] [--log-format FORMAT]
-              [--no-report-on-error] [--nodebug] [--nono-report-on-error]
+              [--keep-failed-stack] [--log-config-append PATH]
+              [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
+              [--log-file PATH] [--log-format FORMAT] [--no-report-on-error]
+              [--nodebug] [--nokeep-failed-stack] [--nono-report-on-error]
               [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
               [--os-auth-url <auth-url>] [--os-password <auth-password>]
               [--os-region-name <auth-region-name>]
@@ -45,6 +46,7 @@ optional arguments:
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.
+  --keep-failed-stack   Do not delete the stack in case of error.
   --log-config-append PATH, --log_config PATH
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.
@@ -66,6 +68,8 @@ optional arguments:
                         and logging_default_format_string instead.
   --no-report-on-error  Do not generate report for failed scenarios
   --nodebug             The inverse of --debug
+  --nokeep-failed-stack
+                        The inverse of --keep-failed-stack
   --nono-report-on-error
                         The inverse of --no-report-on-error
   --nouse-syslog        The inverse of --use-syslog

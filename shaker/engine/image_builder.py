@@ -84,29 +84,42 @@ def build_image():
             'template': template,
         }
 
-        stack = openstack_client.heat.stacks.create(**stack_params)['stack']
-        LOG.debug('New stack: %s', stack)
+        stack = None
 
-        heat.wait_stack_completion(openstack_client.heat, stack['id'])
+        try:
+            stack = openstack_client.heat.stacks.create(
+                **stack_params)['stack']
+            LOG.debug('New stack: %s', stack)
 
-        outputs = heat.get_stack_outputs(openstack_client.heat, stack['id'])
-        LOG.debug('Stack outputs: %s', outputs)
+            heat.wait_stack_completion(openstack_client.heat, stack['id'])
 
-        LOG.debug('Waiting for server to shutdown')
-        server_id = outputs['server_info'].get('id')
-        nova.wait_server_shutdown(openstack_client.nova, server_id)
+            outputs = heat.get_stack_outputs(openstack_client.heat,
+                                             stack['id'])
+            LOG.debug('Stack outputs: %s', outputs)
 
-        LOG.debug('Making snapshot')
-        openstack_client.nova.servers.create_image(
-            server_id, image_name)
+            LOG.debug('Waiting for server to shutdown')
+            server_id = outputs['server_info'].get('id')
+            nova.wait_server_shutdown(openstack_client.nova, server_id)
 
-        LOG.debug('Waiting for server to snapshot')
-        nova.wait_server_snapshot(openstack_client.nova, server_id)
+            LOG.debug('Making snapshot')
+            openstack_client.nova.servers.create_image(
+                server_id, image_name)
 
-        LOG.debug('Clearing up')
-        openstack_client.heat.stacks.delete(stack['id'])
+            LOG.debug('Waiting for server to snapshot')
+            nova.wait_server_snapshot(openstack_client.nova, server_id)
 
-        LOG.info('Created image: %s', image_name)
+            LOG.info('Created image: %s', image_name)
+        except BaseException as e:
+            if isinstance(e, KeyboardInterrupt):
+                LOG.info('Caught SIGINT. Terminating')
+            else:
+                error_msg = 'Error while building the image: %s' % e
+                LOG.error(error_msg)
+                LOG.exception(e)
+        finally:
+            if stack and not cfg.CONF.keep_failed_stack:
+                LOG.debug('Clearing up')
+                openstack_client.heat.stacks.delete(stack['id'])
 
 
 def cleanup():

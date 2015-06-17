@@ -120,8 +120,9 @@ def filter_agents(agents, stack_outputs):
 
 
 class Deployment(object):
-    def __init__(self, server_endpoint):
+    def __init__(self, server_endpoint, keep_failed_stack):
         self.server_endpoint = server_endpoint
+        self.keep_failed_stack = keep_failed_stack
         self.openstack_client = None
         self.stack_deployed = False
 
@@ -179,9 +180,9 @@ class Deployment(object):
         stack = self.openstack_client.heat.stacks.create(
             **stack_params)['stack']
         LOG.info('New stack: %s', stack)
+        self.stack_deployed = True
 
         heat.wait_stack_completion(self.openstack_client.heat, stack['id'])
-        self.stack_deployed = True
 
         # get info about deployed objects
         outputs = heat.get_stack_outputs(self.openstack_client.heat,
@@ -208,6 +209,6 @@ class Deployment(object):
         return agents
 
     def cleanup(self):
-        if self.stack_deployed:
+        if self.stack_deployed and not self.keep_failed_stack:
             LOG.debug('Cleaning up the stack: %s', self.stack_name)
             self.openstack_client.heat.stacks.delete(self.stack_name)

@@ -113,7 +113,8 @@ def play_scenario(scenario):
                            for test in scenario['execution']['tests'])
 
     try:
-        deployment = deploy.Deployment(cfg.CONF.server_endpoint)
+        deployment = deploy.Deployment(cfg.CONF.server_endpoint,
+                                       cfg.CONF.keep_failed_stack)
 
         if (cfg.CONF.os_username and cfg.CONF.os_password and
                 cfg.CONF.os_tenant_name and cfg.CONF.os_auth_url):

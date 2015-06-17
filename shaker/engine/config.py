@@ -87,6 +87,9 @@ OPENSTACK_OPTS = [
                default=utils.env('SHAKER_FLAVOR') or 'shaker-flavor',
                help='Name of image flavor. The default is created by '
                     'shaker-image-builder.'),
+    cfg.BoolOpt('keep-failed-stack',
+                default=(utils.env('SHAKER_KEEP_FAILED_STACK') or False),
+                help='Do not delete the stack in case of error.'),
 ]
 
 SERVER_OPTS = [
