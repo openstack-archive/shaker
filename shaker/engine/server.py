@@ -123,8 +123,9 @@ def play_scenario(scenario):
                 cfg.CONF.os_region_name, cfg.CONF.external_net,
                 cfg.CONF.flavor_name, cfg.CONF.image_name)
 
-        agents = deployment.deploy(scenario['deployment'],
-                                   base_dir=os.path.dirname(cfg.CONF.scenario))
+        base_dir = os.path.dirname(scenario['file_name'])
+        agents = deployment.deploy(scenario['deployment'], base_dir=base_dir)
+
         agents = _extend_agents(agents)
         output['agents'] = agents
         LOG.debug('Deployed agents: %s', agents)
@@ -169,10 +170,10 @@ def main():
 
     output = dict(records={}, agents={}, scenarios={}, tests={})
 
-    for scenario_file_name in [cfg.CONF.scenario]:
+    for scenario_file_name in cfg.CONF.scenario:
         scenario = utils.read_yaml_file(scenario_file_name)
         scenario['title'] = scenario.get('title') or scenario_file_name
-        scenario['file_name'] = cfg.CONF.scenario
+        scenario['file_name'] = scenario_file_name
 
         play_output = play_scenario(scenario)
 

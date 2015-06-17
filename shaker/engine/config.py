@@ -90,10 +90,12 @@ OPENSTACK_OPTS = [
 ]
 
 SERVER_OPTS = [
-    cfg.StrOpt('scenario',
-               default=utils.env('SHAKER_SCENARIO'),
-               required=True,
-               help='Scenario file name, defaults to env[SHAKER_SCENARIO].'),
+    cfg.MultiStrOpt('scenario',
+                    default=utils.env('SHAKER_SCENARIO'),
+                    required=True,
+                    help='Scenario file name, defaults to '
+                         'env[SHAKER_SCENARIO]. The option can be specified '
+                         'multiple times to play several scenarios at once.'),
 
     cfg.StrOpt('output',
                default=utils.env('SHAKER_OUTPUT'),

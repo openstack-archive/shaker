@@ -94,6 +94,8 @@ optional arguments:
                         aliases: "interactive", "json". Defaults to
                         "interactive".
   --scenario SCENARIO   Scenario file name, defaults to env[SHAKER_SCENARIO].
+                        The option can be specified multiple times to play
+                        several scenarios at once.
   --subunit SUBUNIT     Subunit stream file name, defaults to
                         env[SHAKER_SUBUNIT].
   --syslog-log-facility SYSLOG_LOG_FACILITY
