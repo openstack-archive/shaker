@@ -87,6 +87,11 @@ OPENSTACK_OPTS = [
                default=utils.env('SHAKER_FLAVOR') or 'shaker-flavor',
                help='Name of image flavor. The default is created by '
                     'shaker-image-builder.'),
+    cfg.BoolOpt('cleanup-on-error',
+                default=(utils.env('SHAKER_CLEANUP_ON_ERROR') or True),
+                help='Cleans up the heat-stack upon any error occured during '
+                     'scenario execution.'),
+
 ]
 
 SERVER_OPTS = [

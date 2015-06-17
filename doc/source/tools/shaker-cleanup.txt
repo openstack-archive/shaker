@@ -1,12 +1,14 @@
-usage: shaker-cleanup [-h] [--config-dir DIR] [--config-file PATH] [--debug]
+usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
+                      [--config-file PATH] [--debug]
                       [--external-net EXTERNAL_NET]
                       [--flavor-name FLAVOR_NAME]
                       [--image-builder-template IMAGE_BUILDER_TEMPLATE]
                       [--image-name IMAGE_NAME] [--log-config-append PATH]
                       [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
-                      [--log-file PATH] [--log-format FORMAT] [--nodebug]
-                      [--nouse-syslog] [--nouse-syslog-rfc-format]
-                      [--noverbose] [--os-password <auth-password>]
+                      [--log-file PATH] [--log-format FORMAT]
+                      [--nocleanup-on-error] [--nodebug] [--nouse-syslog]
+                      [--nouse-syslog-rfc-format] [--noverbose]
+                      [--os-password <auth-password>]
                       [--os-region-name <auth-region-name>]
                       [--os-tenant-name <auth-tenant-name>]
                       [--os-username <auth-username>]
@@ -16,6 +18,8 @@ usage: shaker-cleanup [-h] [--config-dir DIR] [--config-file PATH] [--debug]
 
 optional arguments:
   -h, --help            show this help message and exit
+  --cleanup-on-error    Cleans up the heat-stack upon any error occured during
+                        scenario execution.
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
                         predictable parse order if individual options are
@@ -60,6 +64,7 @@ optional arguments:
                         logging.LogRecord attributes. This option is
                         deprecated. Please use logging_context_format_string
                         and logging_default_format_string instead.
+  --nocleanup-on-error  The inverse of --cleanup-on-error
   --nodebug             The inverse of --debug
   --nouse-syslog        The inverse of --use-syslog
   --nouse-syslog-rfc-format

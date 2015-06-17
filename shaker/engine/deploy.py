@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import jinja2
+from oslo_config import cfg
 from oslo_log import log as logging
 
 from shaker.engine import utils
@@ -208,6 +209,8 @@ class Deployment(object):
         return agents
 
     def cleanup(self):
-        if self.stack_deployed:
+        if cfg.CONF.cleanup_on_error:
             LOG.debug('Cleaning up the stack: %s', self.stack_name)
             self.openstack_client.heat.stacks.delete(self.stack_name)
+        else:
+            LOG.info('No Heat Stack clean-up requested')
