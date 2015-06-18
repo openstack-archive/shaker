@@ -13,8 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
+from oslo_config import cfg
+from oslo_config import fixture as config_fixture_pkg
+from oslotest import mockpatch
 import testtools
 
+from shaker.engine import config
 from shaker.engine import server
 
 
@@ -86,3 +91,129 @@ class TestServer(testtools.TestCase):
         self.assertEqual([set(range(1)), set(range(2)),
                           set(range(5)), set(range(10))],
                          picked)
+
+
+class TestServerPlayScenario(testtools.TestCase):
+
+    scenario_file_name = 'folder/filename.yaml'
+    deployment = {}
+    scenario = {
+        'title': 'Hamlet',
+        'deployment': deployment,
+        'file_name': scenario_file_name,
+        'execution': {
+            'tests': []
+        }
+    }
+
+    def setUp(self):
+        super(TestServerPlayScenario, self).setUp()
+
+        conf = cfg.CONF
+        self.addCleanup(conf.reset)
+        self.config_fixture = self.useFixture(config_fixture_pkg.Config(conf))
+        conf.register_opts(
+            config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
+            config.REPORT_OPTS)
+
+        self.config_fixture.config(server_endpoint='127.0.0.1:5999')
+        self.config_fixture.config(scenario=self.scenario_file_name)
+
+        self.useFixture(mockpatch.Patch('shaker.engine.quorum.make_quorum'))
+
+    def assertContainsSimilarRecord(self, expected, output):
+        has = False
+        for actual in output['records'].values():
+            has |= all(item in actual.items() for item in expected.items())
+        s = 'Output should contain record similar to: %s' % expected
+        self.assertEqual(True, has, message=s)
+
+    def assertNotContainsSimilarRecord(self, expected, output):
+        has = False
+        for actual in output['records'].values():
+            has |= all(item in actual.items() for item in expected.items())
+        s = 'Output should not contain record similar to: %s' % expected
+        self.assertEqual(False, has, message=s)
+
+    @mock.patch('shaker.engine.server.execute')
+    @mock.patch('shaker.engine.deploy.Deployment')
+    def test_play_scenario(self, deploy_clz_mock, execute_mock):
+        deploy_obj = mock.Mock()
+        deploy_clz_mock.return_value = deploy_obj
+        execute_mock.return_value = {'UUID': {'id': 'UUID', 'status': 'ok'}}
+
+        deploy_obj.deploy.return_value = {
+            'ID': {'id': 'ID', 'mode': 'alone'}
+        }
+
+        # act!
+        output = server.play_scenario(self.scenario)
+
+        self.assertNotContainsSimilarRecord({'status': 'error'}, output)
+        self.assertContainsSimilarRecord({
+            'status': 'ok', 'id': 'UUID', 'scenario': self.scenario['title']},
+            output)
+
+        deploy_obj.deploy.assert_called_once_with(
+            self.deployment, base_dir='folder')
+        deploy_obj.cleanup.assert_called_once_with()
+
+    @mock.patch('shaker.engine.deploy.Deployment')
+    def test_play_scenario_with_openstack(self, deploy_clz_mock):
+        deploy_obj = mock.Mock()
+        deploy_clz_mock.return_value = deploy_obj
+        self.config_fixture.config(os_username='user')
+        self.config_fixture.config(os_password='password')
+        self.config_fixture.config(os_tenant_name='tenant')
+        self.config_fixture.config(os_auth_url='auth-url')
+
+        deploy_obj.deploy.return_value = {
+            'ID': {'id': 'ID', 'mode': 'alone'}
+        }
+
+        # act!
+        output = server.play_scenario(self.scenario)
+
+        self.assertNotContainsSimilarRecord({'status': 'error'}, output)
+
+        deploy_obj.deploy.assert_called_once_with(
+            self.deployment, base_dir='folder')
+        deploy_obj.connect_to_openstack.assert_called_once_with(
+            'user', 'password', 'tenant', 'auth-url', 'RegionOne', None,
+            'shaker-flavor', 'shaker-image'
+        )
+        deploy_obj.cleanup.assert_called_once_with()
+
+    @mock.patch('shaker.engine.deploy.Deployment')
+    def test_play_scenario_no_agents(self, deploy_clz_mock):
+        deploy_obj = mock.Mock()
+        deploy_clz_mock.return_value = deploy_obj
+
+        deploy_obj.deploy.return_value = {}
+
+        # act!
+        output = server.play_scenario(self.scenario)
+
+        self.assertEqual(1, len(output['records']))
+        self.assertContainsSimilarRecord({'status': 'error'}, output)
+
+        deploy_obj.deploy.assert_called_once_with(
+            self.deployment, base_dir='folder')
+        deploy_obj.cleanup.assert_called_once_with()
+
+    @mock.patch('shaker.engine.deploy.Deployment')
+    def test_play_scenario_interrupted(self, deploy_clz_mock):
+        deploy_obj = mock.Mock()
+        deploy_clz_mock.return_value = deploy_obj
+
+        deploy_obj.deploy.side_effect = KeyboardInterrupt
+
+        # act!
+        output = server.play_scenario(self.scenario)
+
+        self.assertEqual(1, len(output['records']))
+        self.assertContainsSimilarRecord({'status': 'interrupted'}, output)
+
+        deploy_obj.deploy.assert_called_once_with(
+            self.deployment, base_dir='folder')
+        deploy_obj.cleanup.assert_called_once_with()
