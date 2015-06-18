@@ -1,7 +1,9 @@
+title: L3 North-South Performance
+
 description:
   This scenario launches 1 pair of VMs on different compute nodes. VMs are in
   the different networks connected via different routers, master accesses slave
-  by floating ip
+  by floating ip. SLA on the bandwidth is verifyied.
 
 deployment:
   template: l3_north_south.hot
@@ -14,12 +16,12 @@ execution:
     class: iperf_graph
     sla:
     - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 9000)"
   -
     title: Iperf UDP
     class: iperf_graph
     udp: 1
     bandwidth: 1000M
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+    - "[type == 'agent'] >> (stats.bandwidth.min > 900)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 900)"

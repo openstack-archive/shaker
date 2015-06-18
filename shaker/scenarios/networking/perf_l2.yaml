@@ -1,6 +1,8 @@
+title: L2 Performance
+
 description:
   This scenario launches 1 pair of VMs in the same private network on different
-  compute nodes.
+  compute nodes and verifyies SLA on the bandwidth.
 
 deployment:
   template: l2.hot
@@ -13,12 +15,12 @@ execution:
     class: iperf_graph
     sla:
     - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 9000)"
   -
     title: Iperf UDP
     class: iperf_graph
     udp: 1
     bandwidth: 1000M
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+    - "[type == 'agent'] >> (stats.bandwidth.min > 900)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 900)"
