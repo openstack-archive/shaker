@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import jinja2
+from oslo_config import cfg
 from oslo_log import log as logging
 
 from shaker.engine import utils
@@ -123,7 +124,7 @@ class Deployment(object):
     def __init__(self, server_endpoint):
         self.server_endpoint = server_endpoint
         self.openstack_client = None
-        self.stack_deployed = False
+        self.stack_created = False
 
     def connect_to_openstack(self, os_username, os_password, os_tenant_name,
                              os_auth_url, os_region_name, external_net,
@@ -179,9 +180,9 @@ class Deployment(object):
         stack = self.openstack_client.heat.stacks.create(
             **stack_params)['stack']
         LOG.info('New stack: %s', stack)
+        self.stack_created = True
 
         heat.wait_stack_completion(self.openstack_client.heat, stack['id'])
-        self.stack_deployed = True
 
         # get info about deployed objects
         outputs = heat.get_stack_outputs(self.openstack_client.heat,
@@ -208,6 +209,9 @@ class Deployment(object):
         return agents
 
     def cleanup(self):
-        if self.stack_deployed:
+        if self.stack_created and cfg.CONF.cleanup_on_error:
             LOG.debug('Cleaning up the stack: %s', self.stack_name)
             self.openstack_client.heat.stacks.delete(self.stack_name)
+        else:
+            LOG.info('No Heat Stack clean-up as no cleanup on error'
+                     'requested or static agents were deployed')
