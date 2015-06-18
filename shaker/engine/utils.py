@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+import itertools
 import logging as std_logging
 import os
 import random
@@ -68,8 +70,10 @@ def init_config_and_logging(opts):
 
 
 def resolve_relative_path(file_name):
-    return os.path.normpath(os.path.join(
+    path = os.path.normpath(os.path.join(
         os.path.dirname(__import__('shaker').__file__), '../', file_name))
+    if os.path.exists(path):
+        return path
 
 
 def read_file(file_name, base_dir='', alias_mapper=None):
@@ -77,7 +81,7 @@ def read_file(file_name, base_dir='', alias_mapper=None):
 
     if alias_mapper:  # interpret file_name as alias
         alias_path = resolve_relative_path(alias_mapper(file_name))
-        if os.path.exists(alias_path):
+        if alias_path:
             full_path = alias_path
             LOG.info('Alias "%s" is resolved into file "%s"',
                      file_name, full_path)
@@ -171,7 +175,13 @@ def flatten_dict(d, prefix='', sep='.'):
     return res
 
 
-def make_help_options(message, base):
+def make_help_options(message, base, type_filter=None):
     path = resolve_relative_path(base)
-    return message % ', '.join('"%s"' % os.path.basename(f).partition('.')[0]
-                               for f in sorted(os.listdir(path)))
+    files = itertools.chain.from_iterable(
+        [map(functools.partial(os.path.join, root), files)
+         for root, dirs, files in os.walk(path)])  # list of files in a tree
+    if type_filter:
+        files = (f for f in files if type_filter(f))  # filtered list
+    rel_files = map(functools.partial(os.path.relpath, start=path), files)
+    return message % ', '.join('"%s"' % f.partition('.')[0]
+                               for f in sorted(rel_files))

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
 import testtools
 
 from shaker.engine import utils
@@ -37,3 +38,49 @@ class TestUtils(testtools.TestCase):
         self.assertEqual(
             {'a': 1, 'b.c': 2, 'b.d': 3},
             dict(utils.flatten_dict({'a': 1, 'b': {'c': 2, 'd': 3}})))
+
+    @mock.patch('os.walk')
+    @mock.patch('shaker.engine.utils.resolve_relative_path')
+    def test_make_help_options(self, resolve_mock, walk_mock):
+        base_dir = 'abc/def'
+        abs_dir = '/files/' + base_dir
+        walk_mock.side_effect = [
+            [(abs_dir, [], ['klm.yaml']), (abs_dir, [], ['ijk.yaml'])],
+        ]
+        resolve_mock.side_effect = [abs_dir]
+
+        expected = 'List: "ijk", "klm"'
+        observed = utils.make_help_options('List: %s', base_dir)
+        self.assertEqual(expected, observed)
+
+    @mock.patch('os.walk')
+    @mock.patch('shaker.engine.utils.resolve_relative_path')
+    def test_make_help_options_subdir(self, resolve_mock, walk_mock):
+        base_dir = 'abc/def'
+        abs_dir = '/files/' + base_dir
+        walk_mock.side_effect = [
+            [(abs_dir + '/sub', [], ['klm.yaml']),
+             (abs_dir + '/sub', [], ['ijk.yaml'])],
+        ]
+        resolve_mock.side_effect = [abs_dir]
+
+        expected = 'List: "sub/ijk", "sub/klm"'
+        observed = utils.make_help_options('List: %s', base_dir)
+        self.assertEqual(expected, observed)
+
+    @mock.patch('os.walk')
+    @mock.patch('shaker.engine.utils.resolve_relative_path')
+    def test_make_help_options_with_filter(self, resolve_mock, walk_mock):
+        base_dir = 'abc/def'
+        abs_dir = '/files/' + base_dir
+        walk_mock.side_effect = [
+            [(abs_dir + '/sub', [], ['klm.yaml']),
+             (abs_dir + '/sub', [], ['ijk.html']),
+             (abs_dir + '/sub', [], ['mno.yaml'])],
+        ]
+        resolve_mock.side_effect = [abs_dir]
+
+        expected = 'List: "sub/klm", "sub/mno"'
+        observed = utils.make_help_options(
+            'List: %s', base_dir, type_filter=lambda x: x.endswith('.yaml'))
+        self.assertEqual(expected, observed)

@@ -23,6 +23,7 @@ from shaker.engine import utils
 
 IMAGE_BUILDER_TEMPLATES = 'shaker/resources/image_builder_templates/'
 REPORT_TEMPLATES = 'shaker/resources/report_templates/'
+SCENARIOS = 'shaker/scenarios/'
 
 
 class Endpoint(types.String):
@@ -98,7 +99,10 @@ SERVER_OPTS = [
     cfg.StrOpt('scenario',
                default=utils.env('SHAKER_SCENARIO'),
                required=True,
-               help='Scenario file name, defaults to env[SHAKER_SCENARIO].'),
+               help=utils.make_help_options(
+                   'Scenario to play. Can be a file name or one of aliases: '
+                   '%s. Defaults to env[SHAKER_SCENARIO].', SCENARIOS,
+                   type_filter=lambda x: x.endswith('.yaml'))),
 
     cfg.StrOpt('output',
                default=utils.env('SHAKER_OUTPUT'),
