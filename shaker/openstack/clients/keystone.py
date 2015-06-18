@@ -32,6 +32,6 @@ def create_keystone_client(**kwargs):
         'Failed to discover keystone version for url %(auth_url)s.', **kwargs)
 
 
-def create_keystone_session(**kwargs):
+def create_keystone_session(cacert, **kwargs):
     auth = auth_v2.Password(**kwargs)
-    return session.Session(auth=auth)
+    return session.Session(auth=auth, verify=cacert)

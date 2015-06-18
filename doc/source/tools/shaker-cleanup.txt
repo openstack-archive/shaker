@@ -8,6 +8,7 @@ usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
                       [--log-file PATH] [--log-format FORMAT]
                       [--nocleanup-on-error] [--nodebug] [--nouse-syslog]
                       [--nouse-syslog-rfc-format] [--noverbose]
+                      [--os-cacert <auth-cacert>]
                       [--os-password <auth-password>]
                       [--os-region-name <auth-region-name>]
                       [--os-tenant-name <auth-tenant-name>]
@@ -70,6 +71,9 @@ optional arguments:
   --nouse-syslog-rfc-format
                         The inverse of --use-syslog-rfc-format
   --noverbose           The inverse of --verbose
+  --os-cacert <auth-cacert>
+                        Location of CA Certificate, defaults to
+                        env[OS_CACERT].
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
   --os-region-name <auth-region-name>
