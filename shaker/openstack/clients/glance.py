@@ -19,12 +19,13 @@ from glanceclient import client as glance_client_pkg
 GLANCE_VERSION = '1'
 
 
-def create_client(keystone_client, os_region_name):
+def create_client(keystone_client, os_region_name, cacert):
     image_api_url = keystone_client.service_catalog.url_for(
         service_type='image', region_name=os_region_name)
     return glance_client_pkg.Client(GLANCE_VERSION,
                                     endpoint=image_api_url,
-                                    token=keystone_client.auth_token)
+                                    token=keystone_client.auth_token,
+                                    cacert=cacert)
 
 
 def get_image(glance_client, image_name):

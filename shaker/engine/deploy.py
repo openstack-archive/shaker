@@ -128,13 +128,13 @@ class Deployment(object):
 
     def connect_to_openstack(self, os_username, os_password, os_tenant_name,
                              os_auth_url, os_region_name, external_net,
-                             flavor_name, image_name):
+                             flavor_name, image_name, os_cacert):
         LOG.debug('Connecting to OpenStack')
 
         self.openstack_client = openstack.OpenStackClient(
             username=os_username, password=os_password,
             tenant_name=os_tenant_name, auth_url=os_auth_url,
-            region_name=os_region_name)
+            region_name=os_region_name, cacert=os_cacert)
 
         self.flavor_name = flavor_name
         self.image_name = image_name

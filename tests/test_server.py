@@ -180,7 +180,7 @@ class TestServerPlayScenario(testtools.TestCase):
             self.deployment, base_dir='folder')
         deploy_obj.connect_to_openstack.assert_called_once_with(
             'user', 'password', 'tenant', 'auth-url', 'RegionOne', None,
-            'shaker-flavor', 'shaker-image'
+            'shaker-flavor', 'shaker-image', None
         )
         deploy_obj.cleanup.assert_called_once_with()
 

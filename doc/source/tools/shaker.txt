@@ -7,7 +7,8 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--log-file PATH] [--log-format FORMAT] [--no-report-on-error]
               [--nocleanup-on-error] [--nodebug] [--nono-report-on-error]
               [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
-              [--os-auth-url <auth-url>] [--os-password <auth-password>]
+              [--os-auth-url <auth-url>] [--os-cacert <auth-cacert>]
+              [--os-password <auth-password>]
               [--os-region-name <auth-region-name>]
               [--os-tenant-name <auth-tenant-name>]
               [--os-username <auth-username>] [--output OUTPUT]
@@ -78,6 +79,9 @@ optional arguments:
   --noverbose           The inverse of --verbose
   --os-auth-url <auth-url>
                         Authentication URL, defaults to env[OS_AUTH_URL].
+  --os-cacert <auth-cacert>
+                        Location of CA Certificate, defaults to
+                        env[OS_CACERT].
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
   --os-region-name <auth-region-name>

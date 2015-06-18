@@ -39,11 +39,12 @@ def init():
         openstack_client = openstack.OpenStackClient(
             username=cfg.CONF.os_username, password=cfg.CONF.os_password,
             tenant_name=cfg.CONF.os_tenant_name, auth_url=cfg.CONF.os_auth_url,
-            region_name=cfg.CONF.os_region_name)
+            region_name=cfg.CONF.os_region_name, cacert=cfg.CONF.os_cacert)
     except Exception as e:
         LOG.error('Error establishing connection to OpenStack: %s. '
                   'Please verify OpenStack credentials (--os-username, '
-                  '--os-password, --os-tenant-name, --os-auth-url)', e)
+                  '--os-password, --os-tenant-name, --os-auth-url, '
+                  '--os-cacert)', e)
         exit(1)
 
     return openstack_client
