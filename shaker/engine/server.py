@@ -123,8 +123,9 @@ def play_scenario(scenario):
                 cfg.CONF.os_region_name, cfg.CONF.external_net,
                 cfg.CONF.flavor_name, cfg.CONF.image_name)
 
-        agents = deployment.deploy(scenario['deployment'],
-                                   base_dir=os.path.dirname(cfg.CONF.scenario))
+        base_dir = os.path.dirname(scenario['file_name'])
+        agents = deployment.deploy(scenario['deployment'], base_dir=base_dir)
+
         agents = _extend_agents(agents)
         output['agents'] = agents
         LOG.debug('Deployed agents: %s', agents)
@@ -156,8 +157,7 @@ def play_scenario(scenario):
 
     # extend every record with reference to scenario
     for record in output['records'].values():
-        record['scenario'] = (scenario.get('title') or
-                              scenario.get('file_name'))
+        record['scenario'] = scenario['title']
     return output
 
 
@@ -169,10 +169,18 @@ def main():
 
     output = dict(records={}, agents={}, scenarios={}, tests={})
 
-    for scenario_file_name in [cfg.CONF.scenario]:
+    for scenario_param in [cfg.CONF.scenario]:
+        LOG.debug('Processing scenario: %s', scenario_param)
+
+        alias = '%s%s.yaml' % (config.SCENARIOS, scenario_param)
+        packaged = utils.resolve_relative_path(alias)
+        # use packaged scenario or fallback to full path
+        scenario_file_name = packaged or scenario_param
+
+        LOG.info('Play scenario: %s', scenario_file_name)
         scenario = utils.read_yaml_file(scenario_file_name)
         scenario['title'] = scenario.get('title') or scenario_file_name
-        scenario['file_name'] = cfg.CONF.scenario
+        scenario['file_name'] = scenario_file_name
 
         play_output = play_scenario(scenario)
 
