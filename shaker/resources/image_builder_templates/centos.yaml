@@ -1,0 +1,127 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to create a new neutron network plus a router to the public
+  network, and for deploying servers into the new network.
+
+parameters:
+  external_net:
+    type: string
+    description: ID or name of public network for which floating IP addresses will be allocated
+  flavor:
+    type: string
+    description: Flavor to use for servers
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: shaker_image_builder_net
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: 10.0.0.0/29
+      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+  master_image:
+    type: OS::Glance::Image
+    properties:
+      container_format: bare
+      disk_format: qcow2
+      location: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1503.qcow2
+      min_disk: 10
+      min_ram: 512
+      name: shaker_image_build_template
+
+  master_image_server_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  master_image_server:
+    type: OS::Nova::Server
+    properties:
+      name: shaker_image_builder_server
+      image: { get_resource: master_image }
+      flavor: { get_param: flavor }
+      networks:
+        - port: { get_resource: master_image_server_port }
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        yum clean all
+        yum update -y
+        cat<<'EOF' >> /etc/yum.repos.d/home_fengshuo_zeromq.repo
+        [home_fengshuo_zeromq]
+        name=The latest stable of zeromq builds CentOS_CentOS-6
+        type=rpm-md
+        baseurl=http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/CentOS_CentOS-6/
+        gpgcheck=1
+        gpgkey=http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/CentOS_CentOS-6/repodata/repomd.xml.key
+        enabled=1
+        EOF
+        yum update -y
+        yum install -y wget
+        wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+        rpm -Uvh epel-release-7*.rpm
+        wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+        rpm -Uvh rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+        yum install -y  iperf  gcc gcc-c++ python-devel  screen
+        yum install -y zeromq
+        yum install -y zeromq-devel
+        wget ftp://ftp.netperf.org/netperf/netperf-2.6.0.tar.gz
+        tar xvzf netperf-2.6.0.tar.gz
+        cd  netperf-2.6.0
+        ./configure --enable-demo=yes
+        make
+        make install
+        wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py &&  python get-pip.py
+        pip install -U "pip<7.0"
+        pip install pbr netperf-wrapper flent pyshaker-agent
+        sed -i -e 's/^MTU=/#&/' -e '$aMTU=1458' /etc/sysconfig/network-scripts/ifcfg-eth*
+        service network restart
+        cat<<'EOF' >> /etc/systemd/system/iperf.service
+        [Unit]
+        Description=iperf Service
+        After=network.target
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/iperf -s
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        cat<<'EOF' >> /etc/systemd/system/netperf.service
+        [Unit]
+        Description="Netperf netserver daemon"
+        After=network.target
+        [Service]
+        ExecStart=/usr/local/bin/netserver -D
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        systemctl start iperf
+        systemctl enable iperf
+        systemctl start netperf
+        systemctl enable netperf
+        setenforce 0
+        shutdown -h now
+
+outputs:
+  server_info:
+    value: { get_attr: [ master_image_server, show ] }

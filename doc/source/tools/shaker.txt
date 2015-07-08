@@ -14,9 +14,9 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--os-username <auth-username>] [--output OUTPUT]
               [--polling-interval POLLING_INTERVAL] [--report REPORT]
               [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
-              [--subunit SUBUNIT] [--syslog-log-facility SYSLOG_LOG_FACILITY]
-              [--use-syslog] [--use-syslog-rfc-format] [--verbose] [--version]
-              [--server-endpoint SERVER_ENDPOINT]
+              [--server-endpoint SERVER_ENDPOINT] [--subunit SUBUNIT]
+              [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
+              [--use-syslog-rfc-format] [--verbose] [--version]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -112,13 +112,15 @@ optional arguments:
                         "networking/perf_l2", "networking/perf_l3_east_west",
                         "networking/perf_l3_north_south". Defaults to
                         env[SHAKER_SCENARIO].
+  --server-endpoint SERVER_ENDPOINT
+                        Address for server connections (host:port), defaults
+                        to env[SHAKER_SERVER_ENDPOINT].
   --subunit SUBUNIT     Subunit stream file name, defaults to
                         env[SHAKER_SUBUNIT].
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines.
   --use-syslog          Use syslog for logging. Existing syslog format is
-                        DEPRECATED during I, and changed in J to honor
-                        RFC5424.
+                        DEPRECATED and will be changed later to honor RFC5424.
   --use-syslog-rfc-format
                         (Optional) Enables or disables syslog rfc5424 format
                         for logging. If enabled, prefixes the MSG part of the
@@ -128,6 +130,3 @@ optional arguments:
   --verbose, -v         Print more verbose output (set logging level to INFO
                         instead of default WARNING level).
   --version             show program's version number and exit
-  --server-endpoint SERVER_ENDPOINT
-                        Address for server connections (host:port), defaults
-                        to env[SHAKER_SERVER_ENDPOINT].

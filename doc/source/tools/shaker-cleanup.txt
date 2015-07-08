@@ -8,14 +8,14 @@ usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
                       [--log-file PATH] [--log-format FORMAT]
                       [--nocleanup-on-error] [--nodebug] [--nouse-syslog]
                       [--nouse-syslog-rfc-format] [--noverbose]
-                      [--os-cacert <auth-cacert>]
+                      [--os-auth-url <auth-url>] [--os-cacert <auth-cacert>]
                       [--os-password <auth-password>]
                       [--os-region-name <auth-region-name>]
                       [--os-tenant-name <auth-tenant-name>]
                       [--os-username <auth-username>]
                       [--syslog-log-facility SYSLOG_LOG_FACILITY]
                       [--use-syslog] [--use-syslog-rfc-format] [--verbose]
-                      [--version] [--os-auth-url <auth-url>]
+                      [--version]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -41,8 +41,8 @@ optional arguments:
                         shaker-image-builder.
   --image-builder-template IMAGE_BUILDER_TEMPLATE
                         Heat template containing receipt of building the
-                        image. Can be a file name or one of aliases: "debian",
-                        "ubuntu". Defaults to "ubuntu".
+                        image. Can be a file name or one of aliases: "centos",
+                        "debian", "ubuntu". Defaults to "ubuntu".
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.
@@ -71,6 +71,8 @@ optional arguments:
   --nouse-syslog-rfc-format
                         The inverse of --use-syslog-rfc-format
   --noverbose           The inverse of --verbose
+  --os-auth-url <auth-url>
+                        Authentication URL, defaults to env[OS_AUTH_URL].
   --os-cacert <auth-cacert>
                         Location of CA Certificate, defaults to
                         env[OS_CACERT].
@@ -87,8 +89,7 @@ optional arguments:
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines.
   --use-syslog          Use syslog for logging. Existing syslog format is
-                        DEPRECATED during I, and changed in J to honor
-                        RFC5424.
+                        DEPRECATED and will be changed later to honor RFC5424.
   --use-syslog-rfc-format
                         (Optional) Enables or disables syslog rfc5424 format
                         for logging. If enabled, prefixes the MSG part of the
@@ -98,5 +99,3 @@ optional arguments:
   --verbose, -v         Print more verbose output (set logging level to INFO
                         instead of default WARNING level).
   --version             show program's version number and exit
-  --os-auth-url <auth-url>
-                        Authentication URL, defaults to env[OS_AUTH_URL].
