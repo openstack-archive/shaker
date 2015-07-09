@@ -20,7 +20,7 @@ How To Run
 Scenario
 ^^^^^^^^
 
-.. literalinclude:: ../../scenarios/networking/full_l2.yaml
+.. literalinclude:: ../../shaker/scenarios/networking/full_l2.yaml
 
 
 L3 East-West
@@ -41,7 +41,7 @@ How To Run
 Scenario
 ^^^^^^^^
 
-.. literalinclude:: ../../scenarios/networking/full_l3_east_west.yaml
+.. literalinclude:: ../../shaker/scenarios/networking/full_l3_east_west.yaml
 
 
 
@@ -64,4 +64,4 @@ How To Run
 Scenario
 ^^^^^^^^
 
-.. literalinclude:: ../../scenarios/networking/full_l3_north_south.yaml
+.. literalinclude:: ../../shaker/scenarios/networking/full_l3_north_south.yaml
