@@ -14,12 +14,6 @@ execution:
     class: iperf_graph
     time: 60
   -
-    title: Iperf UDP
-    class: iperf
-    udp: 1
-    threads: 8
-    bandwidth: 1000M
-  -
     title: TCP download
     class: flent
     method: tcp_download
@@ -27,3 +21,8 @@ execution:
     title: TCP bi-directional
     class: flent
     method: tcp_bidirectional
+  -
+    title: Iperf UDP
+    class: iperf
+    udp: 1
+    bandwidth: 1000M
