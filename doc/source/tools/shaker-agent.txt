@@ -4,9 +4,9 @@ usage: shaker-agent [-h] [--agent-id AGENT_ID] [--config-dir DIR]
                     [--log-file PATH] [--log-format FORMAT] [--nodebug]
                     [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
                     [--polling-interval POLLING_INTERVAL]
+                    [--server-endpoint SERVER_ENDPOINT]
                     [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
                     [--use-syslog-rfc-format] [--verbose] [--version]
-                    [--server-endpoint SERVER_ENDPOINT]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -48,11 +48,13 @@ optional arguments:
   --noverbose           The inverse of --verbose
   --polling-interval POLLING_INTERVAL
                         How frequently the agent polls server, in seconds
+  --server-endpoint SERVER_ENDPOINT
+                        Address for server connections (host:port), defaults
+                        to env[SHAKER_SERVER_ENDPOINT].
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines.
   --use-syslog          Use syslog for logging. Existing syslog format is
-                        DEPRECATED during I, and changed in J to honor
-                        RFC5424.
+                        DEPRECATED and will be changed later to honor RFC5424.
   --use-syslog-rfc-format
                         (Optional) Enables or disables syslog rfc5424 format
                         for logging. If enabled, prefixes the MSG part of the
@@ -62,6 +64,3 @@ optional arguments:
   --verbose, -v         Print more verbose output (set logging level to INFO
                         instead of default WARNING level).
   --version             show program's version number and exit
-  --server-endpoint SERVER_ENDPOINT
-                        Address for server connections (host:port), defaults
-                        to env[SHAKER_SERVER_ENDPOINT].
