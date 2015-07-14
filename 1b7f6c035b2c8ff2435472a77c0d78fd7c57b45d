@@ -1,0 +1,8 @@
+Verified+2: Jenkins
+Code-Review+2: Ilya Shakhat <ishakhat@mirantis.com>
+Workflow+1: Ilya Shakhat <ishakhat@mirantis.com>
+Submitted-by: Jenkins
+Submitted-at: Tue, 14 Jul 2015 12:15:32 +0000
+Reviewed-on: https://review.openstack.org/201477
+Project: stackforge/shaker
+Branch: refs/heads/master
