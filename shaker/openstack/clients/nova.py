@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import itertools
 import re
 import time
 
@@ -41,6 +42,19 @@ def is_flavor_exists(nova_client, flavor_name):
         if flavor.to_dict()['name'] == flavor_name:
             return True
     return False
+
+
+def get_server_ip(nova_client, server_name, ip_type):
+    server = nova_client.servers.find(name=server_name)
+    addresses = server.addresses
+    ips = [v['addr'] for v in itertools.chain(*addresses.values())
+           if v['OS-EXT-IPS:type'] == ip_type]
+    if not ips:
+        raise Exception('Could not get IP address of server: %s' % server_name)
+    if len(ips) > 1:
+        raise Exception('Server %s has more than one IP addresses: %s' %
+                        (server_name, ips))
+    return ips[0]
 
 
 def check_server_console(nova_client, server_id, len_limit=100):

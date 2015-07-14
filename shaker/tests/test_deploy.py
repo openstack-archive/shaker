@@ -290,3 +290,32 @@ class TestDeploy(testtools.TestCase):
 
         filtered = deploy.filter_agents(agents, stack_outputs)
         self.assertEqual(expected, filtered)
+
+    def test_filter_agents_pair_single_room_with_overrides(self):
+        agents = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'node': 'uno',
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'node': 'dos'},
+        }
+        ips = {
+            'UU1D_master_0': '10.0.0.2',
+            'UU1D_slave_0': '10.0.0.4',
+        }
+        stack_outputs = {}
+        expected = {'UU1D_master_0': agents['UU1D_master_0'],
+                    'UU1D_slave_0': agents['UU1D_slave_0']}
+
+        def override(agent):
+            return dict(ip=ips[agent['id']])
+
+        filtered = deploy.filter_agents(agents, stack_outputs,
+                                        override=override)
+        self.assertEqual(expected, filtered)
+        self.assertEqual(filtered['UU1D_master_0']['ip'], ips['UU1D_master_0'])

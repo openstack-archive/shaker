@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import functools
+
 import jinja2
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -87,14 +89,17 @@ def _get_stack_values(stack_outputs, vm_name, params):
     return result
 
 
-def filter_agents(agents, stack_outputs):
+def filter_agents(agents, stack_outputs, override=None):
     deployed_agents = {}
 
     # first pass, ignore non-deployed
     for agent in agents.values():
-        stack_values = _get_stack_values(stack_outputs, agent['id'],
-                                         ['ip', 'instance_name'])
-        if not stack_values.get('instance_name'):
+        stack_values = _get_stack_values(stack_outputs, agent['id'], ['ip'])
+
+        if override:
+            stack_values.update(override(agent))
+
+        if not stack_values.get('ip'):
             LOG.info('Ignore non-deployed agent: %s', agent)
             continue
 
@@ -187,8 +192,19 @@ class Deployment(object):
         # get info about deployed objects
         outputs = heat.get_stack_outputs(self.openstack_client.heat,
                                          stack['id'])
+        override = self._get_override(specification.get('override'))
 
-        return filter_agents(agents, outputs)
+        return filter_agents(agents, outputs, override)
+
+    def _get_override(self, override_spec):
+        def override_ip(agent, ip_type):
+            return dict(ip=nova.get_server_ip(
+                self.openstack_client.nova, agent['id'], ip_type))
+
+        if override_spec:
+            if override_spec.get('ip'):
+                return functools.partial(override_ip,
+                                         ip_type=override_spec.get('ip'))
 
     def deploy(self, deployment, base_dir=None):
         agents = {}
