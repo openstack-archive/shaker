@@ -34,6 +34,21 @@ def create_client(keystone_client, os_region_name, cacert):
                                   ca_file=cacert)
 
 
+def create_stack(heat_client, stack_name, template, parameters):
+    stack_params = {
+        'stack_name': stack_name,
+        'template': template,
+        'parameters': parameters,
+    }
+
+    stack = heat_client.stacks.create(**stack_params)['stack']
+    LOG.info('New stack: %s', stack)
+
+    wait_stack_completion(heat_client, stack['id'])
+
+    return stack['id']
+
+
 def wait_stack_completion(heat_client, stack_id):
     reason = None
     status = None
