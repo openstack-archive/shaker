@@ -175,23 +175,12 @@ class Deployment(object):
         }
         merged_parameters.update(specification.get('template_parameters', {}))
 
-        stack_params = {
-            'stack_name': self.stack_name,
-            'parameters': merged_parameters,
-            'template': rendered_template,
-        }
-        LOG.debug('Creating stack with parameters: %s', stack_params)
-
-        stack = self.openstack_client.heat.stacks.create(
-            **stack_params)['stack']
-        LOG.info('New stack: %s', stack)
+        stack_id = heat.create_stack(openstack.heat, self.stack_name,
+                                     rendered_template, merged_parameters)
         self.stack_created = True
 
-        heat.wait_stack_completion(self.openstack_client.heat, stack['id'])
-
         # get info about deployed objects
-        outputs = heat.get_stack_outputs(self.openstack_client.heat,
-                                         stack['id'])
+        outputs = heat.get_stack_outputs(self.openstack_client.heat, stack_id)
         override = self._get_override(specification.get('override'))
 
         return filter_agents(agents, outputs, override)

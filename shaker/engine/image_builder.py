@@ -78,24 +78,17 @@ def build_image():
 
         external_net = (cfg.CONF.external_net or
                         neutron.choose_external_net(openstack_client.neutron))
-        stack_params = {
-            'stack_name': 'shaker_%s' % uuid.uuid4(),
-            'parameters': {'external_net': external_net,
-                           'flavor': flavor_name},
-            'template': template,
-        }
+        stack_name = 'shaker_%s' % uuid.uuid4()
+        stack_parameters = {'external_net': external_net,
+                            'flavor': flavor_name}
 
-        stack = None
+        stack_id = None
 
         try:
-            stack = openstack_client.heat.stacks.create(
-                **stack_params)['stack']
-            LOG.debug('New stack: %s', stack)
+            stack_id = heat.create_stack(openstack_client.heat, stack_name,
+                                         template, stack_parameters)
 
-            heat.wait_stack_completion(openstack_client.heat, stack['id'])
-
-            outputs = heat.get_stack_outputs(openstack_client.heat,
-                                             stack['id'])
+            outputs = heat.get_stack_outputs(openstack_client.heat, stack_id)
             LOG.debug('Stack outputs: %s', outputs)
 
             LOG.debug('Waiting for server to shutdown')
@@ -118,9 +111,9 @@ def build_image():
                 LOG.error(error_msg)
                 LOG.exception(e)
         finally:
-            if stack and cfg.CONF.cleanup_on_error:
-                LOG.debug('Cleaning up the stack: %s', stack['id'])
-                openstack_client.heat.stacks.delete(stack['id'])
+            if stack_id and cfg.CONF.cleanup_on_error:
+                LOG.debug('Cleaning up the stack: %s', stack_id)
+                openstack_client.heat.stacks.delete(stack_id)
 
 
 def cleanup():
