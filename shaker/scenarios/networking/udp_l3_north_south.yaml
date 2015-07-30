@@ -12,7 +12,7 @@ execution:
   tests:
   -
     title: Iperf UDP
-    class: iperf
-    udp: 1
-    threads: 2
+    class: iperf3
+    udp: on
     bandwidth: 1000M
+    datagram_size: 32
