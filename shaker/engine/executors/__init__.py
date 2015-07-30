@@ -24,6 +24,7 @@ EXECUTORS = {
     'netperf': netperf.NetperfExecutor,
     'iperf': iperf.IperfExecutor,
     'iperf_graph': iperf.IperfGraphExecutor,
+    'iperf3': iperf.Iperf3Executor,
     'netperf_wrapper': netperf.NetperfWrapperExecutor,
     'flent': flent.FlentExecutor,
     '_default': shell.ShellExecutor,
