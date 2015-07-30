@@ -173,6 +173,7 @@
             {record: $.extend({}, record, ext_options)}
         ));
         if (record["chart"]) {
+          var meta = record["meta"];
           c3.generate({
             bindto: "#" + chart_id,
             data: {
@@ -181,8 +182,8 @@
               types: {y: 'area'}
             },
             axis: {
-              x: {label: 'time, s'},
-              y: {label: 'Bandwidth, Mbit/s', min: 0}
+              x: {label: meta[0][0] + ", " + meta[0][1]},
+              y: {label: meta[1][0] + ", " + meta[1][1], min: 0}
             }
           });
         }

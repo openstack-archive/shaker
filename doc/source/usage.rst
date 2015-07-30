@@ -75,11 +75,12 @@ simultaneously on all available agents. The level of concurrency can be controll
 Tests are executed in order of definition. The exact action is defined by option ``class``, additional attributes are provided
 by respective parameters. The following classes are available:
 
-    * ``iperf_graph`` - runs ``iperf`` tool and shows chart and statistics
+    * ``iperf3`` - runs ``iperf3`` tool and shows chart and statistics
     * ``flent`` - runs ``flent`` (http://flent.org) and shows chart and statistics
     * ``iperf`` - runs ``iperf`` tool and shows plain output
     * ``netperf`` - runs ``netpers`` tool and shows plain output
     * ``shell`` - runs any shell command or process and shows plain output
+    * ``iperf_graph`` - runs ``iperf`` tool and shows chart and statistics (deprecated)
 
 Test classes
 ^^^^^^^^^^^^
