@@ -71,9 +71,12 @@ resources:
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
         sudo pip install -U "pip<7.0"
         sudo pip install pbr netperf-wrapper flent pyshaker-agent
+        sudo apt-add-repository "deb http://ftp.debian.org/debian/ jessie main" && sudo apt-get update
+        sudo apt-get -y --force-yes install iperf3
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s' | sudo tee /etc/init/iperf-tcp.conf
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s --udp' | sudo tee /etc/init/iperf-udp.conf
-        sudo shutdown -P -f now
+        echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf3 -s' | sudo tee /etc/init/iperf3.conf
+        sudo shutdown -P now
 
 outputs:
   server_info:

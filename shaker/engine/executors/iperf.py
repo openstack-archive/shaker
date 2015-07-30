@@ -14,32 +14,37 @@
 # limitations under the License.
 
 import csv
+import json
 
 from shaker.engine.executors import base
+
+
+def add_common_iperf_params(cmd, executor):
+    cmd.add('--client', executor.agent['slave']['ip'])
+    cmd.add('--format', 'm')
+    if executor.test_definition.get('mss'):
+        cmd.add('--mss', executor.test_definition.get('mss'))
+    if executor.test_definition.get('buffer_size'):
+        cmd.add('--len', executor.test_definition.get('buffer_size'))
+    if executor.test_definition.get('udp'):
+        cmd.add('--udp')
+        if executor.test_definition.get('bandwidth'):
+            cmd.add('--bandwidth', executor.test_definition.get('bandwidth'))
+        if executor.test_definition.get('datagram_size'):
+            cmd.add('--len', executor.test_definition.get('datagram_size'))
+    cmd.add('--time', executor.get_expected_duration())
+    cmd.add('--parallel', executor.test_definition.get('threads') or 1)
+    if executor.test_definition.get('interval'):
+        cmd.add('--interval', executor.test_definition.get('interval'))
 
 
 class IperfExecutor(base.BaseExecutor):
     def get_command(self):
         cmd = base.CommandLine('sudo nice -n -20 iperf')
-        cmd.add('--client', self.agent['slave']['ip'])
-        cmd.add('--format', 'm')
+        add_common_iperf_params(cmd, self)
         cmd.add('--nodelay')
-        if self.test_definition.get('mss'):
-            cmd.add('--mss', self.test_definition.get('mss'))
-        if self.test_definition.get('buffer_size'):
-            cmd.add('--len', self.test_definition.get('buffer_size'))
-        if self.test_definition.get('udp'):
-            cmd.add('--udp')
-            if self.test_definition.get('bandwidth'):
-                cmd.add('--bandwidth', self.test_definition.get('bandwidth'))
-            if self.test_definition.get('datagram_size'):
-                cmd.add('--len', self.test_definition.get('datagram_size'))
-        cmd.add('--time', self.get_expected_duration())
-        cmd.add('--parallel', self.test_definition.get('threads') or 1)
         if self.test_definition.get('csv'):
             cmd.add('--reportstyle', 'C')
-        if self.test_definition.get('interval'):
-            cmd.add('--interval', self.test_definition.get('interval'))
         return cmd.make()
 
 
@@ -73,4 +78,46 @@ class IperfGraphExecutor(IperfExecutor):
 
         result['samples'] = samples
         result['meta'] = [['time', 's'], ['bandwidth', 'bit/s']]
+        return result
+
+
+class Iperf3Executor(base.BaseExecutor):
+    def get_command(self):
+        if not self.test_definition.get('interval'):
+            self.test_definition['interval'] = 1
+
+        cmd = base.CommandLine('sudo nice -n -20 iperf3')
+        add_common_iperf_params(cmd, self)
+        cmd.add('--json')
+        return cmd.make()
+
+    def process_reply(self, message):
+        result = super(Iperf3Executor, self).process_reply(message)
+
+        if not result['stdout']:
+            raise base.ExecutorException(result, 'Empty result from iperf')
+
+        data = json.loads(result['stdout'])
+
+        # store verbose data in result
+        result['verbose'] = json.dumps([data['start'], data['end']])
+
+        if 'error' in data:
+            raise base.ExecutorException(result, data['error'])
+
+        if self.test_definition.get('udp'):
+            sampler = lambda p: [round(p['end'], 2), p['bits_per_second'],
+                                 p['packets']]
+            meta = [['time', 's'], ['bandwidth', 'bit/s'], ['packets', 'pps']]
+        else:
+            sampler = lambda p: [round(p['end'], 2), p['bits_per_second'],
+                                 p['retransmits']]
+            meta = [['time', 's'], ['bandwidth', 'bit/s'], ['retransmits', '']]
+
+        samples = []
+        for point in data['intervals']:
+            samples.append(sampler(point['sum']))
+
+        result['samples'] = samples
+        result['meta'] = meta
         return result
