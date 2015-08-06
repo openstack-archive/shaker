@@ -92,8 +92,7 @@ resources:
         make
         make install
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py &&  python get-pip.py
-        pip install -U "pip<7.0"
-        pip install pbr netperf-wrapper flent pyshaker-agent
+        pip install netperf-wrapper flent pyshaker-agent
         service network restart
         cat<<'EOF' >> /etc/systemd/system/iperf.service
         [Unit]

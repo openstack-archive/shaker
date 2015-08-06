@@ -85,7 +85,7 @@ def _poll_for_status(nova_client, server_id, final_ok_states, poll_period=20,
     while True:
         obj = nova_client.servers.get(server_id)
 
-        err_msg = check_server_console(nova_client, server_id, len_limit=25)
+        err_msg = check_server_console(nova_client, server_id)
         if err_msg:
             raise Exception('Critical error in instance %s console: %s' %
                             (server_id, err_msg))
