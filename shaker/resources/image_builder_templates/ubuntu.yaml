@@ -69,8 +69,9 @@ resources:
         sudo apt-get update
         sudo apt-get -y install iperf netperf python-dev libzmq-dev screen
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
-        sudo pip install netperf-wrapper flent pyshaker-agent
-        shaker-agent -h || (echo "[critical] Failed to run pyshaker-agent. Check if it installed into the image"; sleep 20)
+        sudo pip install -U "pip<7.0"
+        sudo pip install netperf-wrapper flent "pyshaker-agent<=0.0.8"
+        shaker-agent -h || (echo "[critical] Failed to run pyshaker-agent. Check if it is installed in the image"; sleep 20)
         sudo apt-add-repository "deb http://ftp.debian.org/debian/ jessie main" && sudo apt-get update
         sudo apt-get -y --force-yes install iperf3
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s' | sudo tee /etc/init/iperf-tcp.conf
