@@ -84,7 +84,7 @@ resources:
       name: {{ agent.id }}
       image: { get_param: image }
       flavor: { get_param: flavor }
-      availability_zone: "nova:{{ agent.node }}"
+      availability_zone: "{{ agent.zone }}:{{ agent.node }}"
       networks:
         - port: { get_resource: {{ agent.id }}_port }
       user_data_format: RAW

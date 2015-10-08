@@ -18,6 +18,13 @@ import testtools
 from shaker.engine import deploy
 
 
+ZONE = 'zone'
+
+
+def nodes_helper(*nodes):
+    return [dict(host=n, zone=ZONE) for n in nodes]
+
+
 class TestDeploy(testtools.TestCase):
 
     def test_generate_agents_alone_single_room(self):
@@ -26,13 +33,15 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'dos'},
         }
-        actual = deploy.generate_agents(['uno', 'dos'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos'),
                                         ['single_room'],
                                         unique)
         self.assertEqual(expected, actual)
@@ -44,14 +53,16 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_master_0',
                 'mode': 'master',
                 'node': 'uno',
+                'zone': ZONE,
                 'slave_id': 'UU1D_slave_0'},
             'UU1D_slave_0': {
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'zone': ZONE,
                 'node': 'dos'},
         }
-        actual = deploy.generate_agents(['uno', 'dos', 'tre'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
                                         ['pair', 'single_room'],
                                         unique)
         self.assertEqual(expected, actual)
@@ -68,34 +79,40 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_master_0',
                 'mode': 'master',
                 'node': 'uno',
+                'zone': ZONE,
                 'slave_id': 'UU1D_slave_0'},
             'UU1D_slave_0': {
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'zone': ZONE,
                 'node': 'uno'},
             'UU1D_master_1': {
                 'id': 'UU1D_master_1',
                 'mode': 'master',
                 'node': 'dos',
+                'zone': ZONE,
                 'slave_id': 'UU1D_slave_1'},
             'UU1D_slave_1': {
                 'id': 'UU1D_slave_1',
                 'master_id': 'UU1D_master_1',
                 'mode': 'slave',
+                'zone': ZONE,
                 'node': 'dos'},
             'UU1D_master_2': {
                 'id': 'UU1D_master_2',
                 'mode': 'master',
                 'node': 'tre',
+                'zone': ZONE,
                 'slave_id': 'UU1D_slave_2'},
             'UU1D_slave_2': {
                 'id': 'UU1D_slave_2',
                 'master_id': 'UU1D_master_2',
                 'mode': 'slave',
+                'zone': ZONE,
                 'node': 'tre'},
         }
-        actual = deploy.generate_agents(['uno', 'dos', 'tre'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
                                         ['pair', 'double_room'],
                                         unique)
         self.assertEqual(expected, actual)
@@ -106,25 +123,29 @@ class TestDeploy(testtools.TestCase):
             'UU1D_master_0': {
                 'id': 'UU1D_master_0',
                 'mode': 'master',
+                'zone': ZONE,
                 'node': 'uno',
                 'slave_id': 'UU1D_slave_0'},
             'UU1D_slave_0': {
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'zone': ZONE,
                 'node': 'dos'},
             'UU1D_master_1': {
                 'id': 'UU1D_master_1',
                 'mode': 'master',
+                'zone': ZONE,
                 'node': 'dos',
                 'slave_id': 'UU1D_slave_1'},
             'UU1D_slave_1': {
                 'id': 'UU1D_slave_1',
                 'master_id': 'UU1D_master_1',
                 'mode': 'slave',
+                'zone': ZONE,
                 'node': 'uno'},
         }
-        actual = deploy.generate_agents(['uno', 'dos'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos'),
                                         ['pair', 'mixed_room'],
                                         unique)
         self.assertEqual(expected, actual)
@@ -135,13 +156,15 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'uno'},
         }
-        actual = deploy.generate_agents(['uno'],
+        actual = deploy.generate_agents(nodes_helper('uno'),
                                         ['single_room', {'density': 2}],
                                         unique)
         self.assertEqual(expected, actual)
@@ -152,13 +175,15 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'duo'},
         }
-        actual = deploy.generate_agents(['uno', 'duo', 'tre'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
                                         ['single_room', {'compute_nodes': 2}],
                                         unique)
         self.assertEqual(expected, actual)
@@ -169,13 +194,15 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'zone': ZONE,
                 'node': 'uno'},
         }
-        actual = deploy.generate_agents(['uno', 'duo', 'tre'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
                                         ['single_room', {'compute_nodes': 1},
                                          {'density': 2}],
                                         unique)
@@ -183,11 +210,38 @@ class TestDeploy(testtools.TestCase):
 
     def test_generate_agents_pair_single_room_density_compute_nodes(self):
         unique = 'UU1D'
-        actual = deploy.generate_agents(['uno', 'duo', 'tre'],
+        actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
                                         ['pair', 'single_room',
                                          {'density': 4}, {'compute_nodes': 2}],
                                         unique)
         self.assertEqual(8, len(actual))
+
+    def test_generate_agents_zones_specified(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'slave_id': 'UU1D_slave_0',
+                'mode': 'master',
+                'zone': ZONE,
+                'node': 'uno'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'zone': ZONE,
+                'node': 'tre'},
+        }
+        nodes = [
+            {'host': 'uno', 'zone': ZONE},
+            {'host': 'duo', 'zone': 'other-zone'},
+            {'host': 'tre', 'zone': ZONE},
+        ]
+        actual = deploy.generate_agents(nodes,
+                                        ['pair', 'single_room',
+                                         {'zones': [ZONE]}],
+                                        unique)
+        self.assertEqual(expected, actual)
 
     def test_filter_agents_all_deployed(self):
         agents = {

@@ -32,14 +32,14 @@ def create_client(keystone_session, os_region_name):
 
 
 def get_available_compute_nodes(nova_client):
-        return [svc.host
+        return [dict(host=svc.host, zone=svc.zone)
                 for svc in nova_client.services.list(binary='nova-compute')
                 if svc.state == 'up' and svc.status == 'enabled']
 
 
 def is_flavor_exists(nova_client, flavor_name):
     for flavor in nova_client.flavors.list():
-        if flavor.to_dict()['name'] == flavor_name:
+        if flavor.name == flavor_name:
             return True
     return False
 
