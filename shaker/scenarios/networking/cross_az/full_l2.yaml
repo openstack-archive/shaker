@@ -1,0 +1,19 @@
+description:
+  This scenario launches pairs of VMs in the same private network. Every VM is
+  hosted on a separate compute node.
+
+deployment:
+  template: l2.hot
+  accommodation: [pair, single_room, zones: [nova, vcenter], cross_az]
+
+execution:
+  progression: quadratic
+  tests:
+  -
+    title: TCP download
+    class: flent
+    method: tcp_download
+  -
+    title: TCP bi-directional
+    class: flent
+    method: tcp_bidirectional

@@ -1,8 +1,8 @@
 heat_template_version: 2013-05-23
 
 description:
-  HOT template creates a pair of networks plugged into the same router. Master VMs
-  and slave VMs are plugged into different networks.
+  HOT template creates a new neutron network, a router to the external
+  network and plugs servers into this new network.
 
 parameters:
   image:
@@ -13,22 +13,22 @@ parameters:
     description: Flavor to use for servers
   external_net:
     type: string
-    description: ID or name of external network for which floating IP addresses will be allocated
+    description: ID or name of external network
   server_endpoint:
     type: string
     description: Server endpoint address
 
 resources:
-  east_private_net:
+  private_net:
     type: OS::Neutron::Net
     properties:
-      name: {{ unique }}_net_east
+      name: {{ unique }}_net
 
-  east_private_subnet:
+  private_subnet:
     type: OS::Neutron::Subnet
     properties:
-      network_id: { get_resource: east_private_net }
-      cidr: 10.1.0.0/16
+      network_id: { get_resource: private_net }
+      cidr: 10.0.0.0/16
       dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
 
   router:
@@ -41,25 +41,7 @@ resources:
     type: OS::Neutron::RouterInterface
     properties:
       router_id: { get_resource: router }
-      subnet_id: { get_resource: east_private_subnet }
-
-  west_private_net:
-    type: OS::Neutron::Net
-    properties:
-      name: {{ unique }}_net_west
-
-  west_private_subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      network_id: { get_resource: west_private_net }
-      cidr: 10.2.0.0/16
-      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
-
-  router_interface_2:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: { get_resource: router }
-      subnet_id: { get_resource: west_private_subnet }
+      subnet_id: { get_resource: private_subnet }
 
   server_security_group:
     type: OS::Neutron::SecurityGroup
@@ -82,7 +64,7 @@ resources:
     type: OS::Nova::Server
     properties:
       name: {{ agent.id }}
-      image: { get_param: image }
+      image: {% if agent.zone == 'nova' %} shaker-image-nova {% else %} shaker-image-vcenter {% endif %}
       flavor: { get_param: flavor }
       availability_zone: "{{ agent.zone }}:{{ agent.node }}"
       networks:
@@ -97,23 +79,13 @@ resources:
             "$SERVER_ENDPOINT": { get_param: server_endpoint }
             "$AGENT_ID": {{ agent.id }}
 
-{% if agent.mode == 'master' %}
   {{ agent.id }}_port:
     type: OS::Neutron::Port
     properties:
-      network_id: { get_resource: east_private_net }
+      network_id: { get_resource: private_net }
       fixed_ips:
-        - subnet_id: { get_resource: east_private_subnet }
+        - subnet_id: { get_resource: private_subnet }
       security_groups: [{ get_resource: server_security_group }]
-{% else %}
-  {{ agent.id }}_port:
-    type: OS::Neutron::Port
-    properties:
-      network_id: { get_resource: west_private_net }
-      fixed_ips:
-        - subnet_id: { get_resource: west_private_subnet }
-      security_groups: [{ get_resource: server_security_group }]
-{% endif %}
 
 {% endfor %}
 
@@ -121,11 +93,6 @@ outputs:
 {% for agent in agents.values() %}
   {{ agent.id }}_instance_name:
     value: { get_attr: [ {{ agent.id }}, instance_name ] }
-{% if agent.mode == 'master' %}
   {{ agent.id }}_ip:
-    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [east_private_net, name] }, 0 ] }
-{% else %}
-  {{ agent.id }}_ip:
-    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [west_private_net, name] }, 0 ] }
-{% endif %}
+    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [private_net, name] }, 0 ] }
 {% endfor %}
