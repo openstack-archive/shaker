@@ -29,6 +29,27 @@ from shaker.openstack.clients import openstack
 LOG = logging.getLogger(__name__)
 
 
+def prepare_for_cross_az(compute_nodes, zones):
+    if len(zones) != 2:
+        LOG.warn('cross_az is specified, but len(zones) is not 2')
+        return compute_nodes
+
+    masters = []
+    slaves = []
+    for node in compute_nodes:
+        if node['zone'] == zones[0]:
+            masters.append(node)
+        else:
+            slaves.append(node)
+
+    res = []
+    for i in range(min(len(masters), len(slaves))):
+        res.append(masters[i])
+        res.append(slaves[i])
+
+    return res
+
+
 def generate_agents(compute_nodes, accommodation, unique):
     density = 1
     for s in accommodation:
@@ -37,6 +58,13 @@ def generate_agents(compute_nodes, accommodation, unique):
                 density = s.get('density')
             if s.get('compute_nodes'):
                 compute_nodes = compute_nodes[:s.get('compute_nodes')]
+            if s.get('zones'):
+                compute_nodes = [c for c in compute_nodes
+                                 if c['zone'] in s.get('zones')]
+                if 'cross_az' in accommodation:
+                    # sort nodes to interleave hosts from different zones
+                    compute_nodes = prepare_for_cross_az(compute_nodes,
+                                                         s.get('zones'))
 
     cn_count = len(compute_nodes)
     iterations = cn_count * density
@@ -55,21 +83,28 @@ def generate_agents(compute_nodes, accommodation, unique):
             slave = dict(id=slave_id, mode='slave', master_id=master_id)
 
             if 'single_room' in accommodation:
-                master['node'] = node_formula(i * 2)
-                slave['node'] = node_formula(i * 2 + 1)
+                master_formula = lambda x: i * 2
+                slave_formula = lambda x: i * 2 + 1
             elif 'double_room' in accommodation:
-                master['node'] = node_formula(i)
-                slave['node'] = node_formula(i)
-            elif 'mixed_room' in accommodation:
-                master['node'] = node_formula(i)
-                slave['node'] = node_formula(i + 1)
+                master_formula = lambda x: i
+                slave_formula = lambda x: i
+            else:  # mixed_room
+                master_formula = lambda x: i
+                slave_formula = lambda x: i + 1
+
+            m = node_formula(master_formula(i))
+            master['node'], master['zone'] = m['host'], m['zone']
+            s = node_formula(slave_formula(i))
+            slave['node'], slave['zone'] = s['host'], s['zone']
 
             agents[master['id']] = master
             agents[slave['id']] = slave
         else:
             if 'single_room' in accommodation:
                 agent_id = '%s_agent_%s' % (unique, i)
-                agents[agent_id] = dict(id=agent_id, node=node_formula(i),
+                agents[agent_id] = dict(id=agent_id,
+                                        node=node_formula(i)['host'],
+                                        zone=node_formula(i)['zone'],
                                         mode='alone')
 
     if not agents:
