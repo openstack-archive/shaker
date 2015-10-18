@@ -13,7 +13,7 @@ Start working
 
 1. Clone the repo::
 
-    $ git clone git://git.openstack.org/stackforge/shaker
+    $ git clone git://git.openstack.org/openstack/shaker
 
 2. From the root of your workspace, check out a new branch to work on::
 
