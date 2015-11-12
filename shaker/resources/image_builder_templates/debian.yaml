@@ -69,7 +69,7 @@ resources:
         sudo apt-get update
         sudo apt-get -y install iperf netperf python-dev libzmq-dev screen
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
-        sudo pip install netperf-wrapper flent pyshaker-agent
+        sudo pip install flent pyshaker-agent
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s' | sudo tee /etc/init/iperf-tcp.conf
         echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s --udp' | sudo tee /etc/init/iperf-udp.conf
         sudo shutdown now

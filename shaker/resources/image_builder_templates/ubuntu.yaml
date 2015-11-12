@@ -69,8 +69,7 @@ resources:
         sudo apt-get update
         sudo apt-get -y install iperf netperf python-dev libzmq-dev screen
         wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
-        sudo pip install -U "pip<7.0"
-        sudo pip install netperf-wrapper flent "pyshaker-agent<=0.0.8"
+        sudo pip install flent pyshaker-agent
         shaker-agent -h || (echo "[critical] Failed to run pyshaker-agent. Check if it is installed in the image"; sleep 20)
         sudo apt-add-repository "deb http://ftp.debian.org/debian/ jessie main" && sudo apt-get update
         sudo apt-get -y --force-yes install iperf3
