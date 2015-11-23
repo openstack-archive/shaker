@@ -161,7 +161,7 @@
         ))
       }
 
-      function showExecutorRecord(contentArea, record) {
+      function showAgentRecord(contentArea, record) {
         var chart_id = "chart_" + Math.round(Math.random() * 10000);
         var ext_options = {
           command_yaml: jsyaml.safeDump(record["command"]),
@@ -174,17 +174,25 @@
         ));
         if (record["chart"]) {
           var meta = record["meta"];
+          var axes = [];
+          axes[meta[1][0]] = 'y';
+          var axis = {
+            x: {label: meta[0][0] + ", " + meta[0][1]},
+            y: {label: meta[1][0] + ", " + meta[1][1], min: 0}
+          };
+          if (meta.length > 2) {
+            axes[meta[2][0]] = 'y2';
+            axis['y2'] = {label: meta[2][0] + ", " + meta[2][1], min: 0, show: true}
+          }
+
           c3.generate({
             bindto: "#" + chart_id,
             data: {
               x: 'time',
               columns: record["chart"],
-              types: {y: 'area'}
+              axes: axes
             },
-            axis: {
-              x: {label: meta[0][0] + ", " + meta[0][1]},
-              y: {label: meta[1][0] + ", " + meta[1][1], min: 0}
-            }
+            axis: axis
           });
         }
       }
@@ -348,7 +356,7 @@
         if (state["scenario"] != "" && state["test"] != "" &&
                 state["concurrency"] != "" &&
                 state["agent"] != "") {
-          showExecutorRecord(contentArea, filteredRecords[0]);
+          showAgentRecord(contentArea, filteredRecords[0]);
         }
         if (state["scenario"] != "" && state["test"] != "" &&
                 state["concurrency"] != "" && state["node"] == "" &&
