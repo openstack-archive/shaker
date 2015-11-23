@@ -275,6 +275,15 @@
         var agents = getAgentsByIds(agent_ids);
         if (agents.length == 0) return;
 
+        // add slave agents
+        var slave_agents = {};
+        $.each(agents, function(_i, agent){
+          if (agent.slave_id) {
+            slave_agents[agent.slave_id] = true;
+          }
+        });
+        agents = $.merge(agents, getAgentsByIds(slave_agents));
+
         contentArea.append(agents_table_template({
           agents: agents,
           table_id: "agents_table"
@@ -282,7 +291,7 @@
         $("#agents_table").dataTable({
           "autoWidth": true,
           "paging": false,
-          "ordering": false,
+          "ordering": true,
           "info": false
         });
       }
@@ -377,11 +386,11 @@
         if (state["test"] != "") {
           showTestSpecification(contentArea, report.tests[state["test"]]);
         }
-        if (state["scenario"] != "") {
-          showScenarioSource(contentArea, report.scenarios[state["scenario"]]);
-        }
         if (state["agent"] == "") {
           showAgentsTable(contentArea, filteredRecords);
+        }
+        if (state["scenario"] != "") {
+          showScenarioSource(contentArea, report.scenarios[state["scenario"]]);
         }
       }
 
@@ -467,6 +476,8 @@
   <div id="content_area" class="row">
     <!-- Container for the screen content -->
   </div>
+
+  <div id="footer" class="row">&nbsp;</div>
 </div>
 
 <!-- TEMPLATES --------------------------------------------------------------->
@@ -599,7 +610,7 @@
       <th>Mode</th>
       <th>IP</th>
       <th>Node</th>
-      <th>Instance Name</th>
+      <th>AZ</th>
     </tr>
     </thead>
     <tbody>
@@ -609,7 +620,7 @@
       <td>{{ mode }}</td>
       <td>{{ ip }}</td>
       <td>{{ node }}</td>
-      <td>{{ instance_name }}</td>
+      <td>{{ zone }}</td>
     </tr>
     {{/agents}}
     </tbody>
