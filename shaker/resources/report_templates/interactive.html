@@ -64,6 +64,7 @@
       var concurrency_summary_template = Handlebars.compile($("#concurrency_summary_template").html());
       var test_summary_template = Handlebars.compile($("#test_summary_template").html());
       var sla_table_template = Handlebars.compile($("#sla_table_template").html());
+      var errors_template = Handlebars.compile($("#errors_template").html());
 
       function initSingleSelector(name, values) {
         var selectorId = "#" + name + "_selector";
@@ -342,15 +343,28 @@
         });
       }
 
+      function showErrors(contentArea, records) {
+        if (records.length == 0) return;
+
+        contentArea.append(errors_template({
+          records: records,
+          table_id: "errors_list"
+        }));
+      }
+
       /* Update cycle */
 
       function update() {
         var filteredRecords = filterRecords(report.records);
         console.log(filteredRecords);
         var slaRecords = [];
+        var errorRecords = [];
         $.each(filterRecords(report.records), function(_i, record) {
           if (record["sla_info"]) {
             slaRecords.push(record);
+          }
+          if (record["is_status_error"]) {
+            errorRecords.push(record);
           }
         });
 
@@ -361,6 +375,7 @@
 
         showRecordsTable(contentArea, filteredRecords);
         showSlaTable(contentArea, slaRecords);
+        showErrors(contentArea, errorRecords);
 
         if (state["scenario"] != "" && state["test"] != "" &&
                 state["concurrency"] != "" &&
@@ -660,6 +675,18 @@
     {{/records}}
     </tbody>
   </table>
+</script>
+
+<!-- Errors -->
+<script id="errors_template" type="text/x-handlebars-template">
+  <h3>Errors</h3>
+  <div class="text-danger">
+    <ul>
+    {{#records}}
+      <li>{{ stderr }}</li>
+    {{/records}}
+    </ul>
+  </div>
 </script>
 
 </body>
