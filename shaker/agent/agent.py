@@ -83,40 +83,57 @@ def run_command(command):
                 start=start, finish=time.time())
 
 
+def time_now():
+    return time.time()
+
+
+def sleep(seconds):
+    time.sleep(seconds)
+
+
+def get_socket(endpoint):
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect('tcp://%s' % endpoint)
+    return socket
+
+
+def work_act(socket, agent_id, polling_interval):
+    task = poll_task(socket, agent_id)
+    start_at = task.get('start_at')
+
+    if start_at:
+        now = time_now()
+        start_at_str = datetime.datetime.fromtimestamp(
+            start_at).isoformat()
+
+        if start_at > now:
+            LOG.debug('Scheduling task at %s', start_at_str)
+            sleep(start_at - now)
+        else:
+            LOG.warning('Scheduling in the past: %s', start_at_str)
+
+    if task.get('operation') == 'execute':
+        result = run_command(task.get('command'))
+        send_reply(socket, agent_id, result)
+
+    elif task.get('operation') == 'configure':
+        if 'polling_interval' in task:
+            polling_interval = task.get('polling_interval')
+            send_reply(socket, agent_id, {})
+
+    sleep(polling_interval)
+
+
 def work(agent_id, endpoint, polling_interval, ignore_sigint=False):
     LOG.info('Agent id is: %s', agent_id)
     LOG.info('Connecting to server: %s', endpoint)
 
-    context = zmq.Context()
-    socket = context.socket(zmq.REQ)
-    socket.connect('tcp://%s' % endpoint)
+    socket = get_socket(endpoint)
 
     while True:
         try:
-            task = poll_task(socket, agent_id)
-
-            start_at = task.get('start_at')
-            if start_at:
-                now = time.time()
-                start_at_str = datetime.datetime.fromtimestamp(
-                    start_at).isoformat()
-
-                if start_at > now:
-                    LOG.debug('Scheduling task at %s', start_at_str)
-                    time.sleep(start_at - now)
-                else:
-                    LOG.warning('Scheduling in the past: %s', start_at_str)
-
-            if task['operation'] == 'execute':
-                result = run_command(task.get('command'))
-                send_reply(socket, agent_id, result)
-
-            elif task['operation'] == 'configure':
-                if 'polling_interval' in task:
-                    polling_interval = task.get('polling_interval')
-                    send_reply(socket, agent_id, {})
-
-            time.sleep(polling_interval)
+            work_act(socket, agent_id, polling_interval)
 
         except BaseException as e:
             if isinstance(e, KeyboardInterrupt):
