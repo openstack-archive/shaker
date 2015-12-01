@@ -1,0 +1,18 @@
+description:
+  This scenario launches pairs of VMs in the same private network. Every VM is
+  hosted on a separate compute node.
+
+deployment:
+  template: l2.hot
+  vm_accommodation: [pair, single_room, zones: [nova, vcenter], cross_az]
+
+execution:
+  progression: quadratic
+  tests:
+  -
+    title: Iperf UDP
+    class: iperf
+    udp: 1
+    threads: 2
+    bandwidth: 1000M
+    buffer_size: 8950

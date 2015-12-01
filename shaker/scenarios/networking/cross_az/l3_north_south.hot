@@ -1,0 +1,145 @@
+heat_template_version: 2013-05-23
+
+description: >
+  HOT template to create a new neutron network plus a north_router to the public
+  network, and for deploying servers into the new network. The template also
+  assigns floating IP addresses to each server so they are routable from the
+  public network.
+
+parameters:
+  image:
+    type: string
+    description: Name of image to use for servers
+  flavor:
+    type: string
+    description: Flavor to use for servers
+  external_net:
+    type: string
+    description: ID or name of external network for which floating IP addresses will be allocated
+  server_endpoint:
+    type: string
+    description: Server endpoint address
+
+resources:
+  north_private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {{ unique }}_net_north
+
+  north_private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: north_private_net }
+      cidr: 10.1.0.0/16
+      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+
+  north_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: north_router }
+      subnet_id: { get_resource: north_private_subnet }
+
+  south_private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {{ unique }}_net_south
+
+  south_private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: south_private_net }
+      cidr: 10.2.0.0/16
+      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+
+  south_router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  router_interface_2:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: south_router }
+      subnet_id: { get_resource: south_private_subnet }
+
+  server_security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      rules: [
+        {remote_ip_prefix: 0.0.0.0/0,
+        protocol: tcp,
+        port_range_min: 1,
+        port_range_max: 65535},
+        {remote_ip_prefix: 0.0.0.0/0,
+        protocol: udp,
+        port_range_min: 1,
+        port_range_max: 65535},
+        {remote_ip_prefix: 0.0.0.0/0,
+        protocol: icmp}]
+
+{% for agent in agents.values() %}
+
+  {{ agent.id }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ agent.id }}
+      image: {% if agent.zone == 'nova' %} shaker-image-nova {% else %} shaker-image-vcenter {% endif %}
+      flavor: { get_param: flavor }
+      availability_zone: "{{ agent.zone }}:{{ agent.node }}"
+      networks:
+        - port: { get_resource: {{ agent.id }}_port }
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/sh
+            screen -dmS shaker-agent-screen shaker-agent --server-endpoint=$SERVER_ENDPOINT --agent-id=$AGENT_ID
+          params:
+            "$SERVER_ENDPOINT": { get_param: server_endpoint }
+            "$AGENT_ID": {{ agent.id }}
+
+{% if agent.mode == 'master' %}
+  {{ agent.id }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: north_private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: north_private_subnet }
+      security_groups: [{ get_resource: server_security_group }]
+{% else %}
+  {{ agent.id }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: south_private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: south_private_subnet }
+      security_groups: [{ get_resource: server_security_group }]
+
+  {{ agent.id }}_floating_ip:
+    type: OS::Neutron::FloatingIP
+    properties:
+      floating_network: { get_param: external_net }
+      port_id: { get_resource: {{ agent.id }}_port }
+{% endif %}
+
+{% endfor %}
+
+outputs:
+{% for agent in agents.values() %}
+  {{ agent.id }}_instance_name:
+    value: { get_attr: [ {{ agent.id }}, instance_name ] }
+{% if agent.mode == 'master' %}
+  {{ agent.id }}_ip:
+    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [north_private_net, name] }, 0 ] }
+{% else %}
+  {{ agent.id }}_ip:
+    value: { get_attr: [ {{ agent.id }}_floating_ip, floating_ip_address ] }
+{% endif %}
+{% endfor %}
