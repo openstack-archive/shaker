@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
 import testtools
 
 from shaker.engine import deploy
@@ -169,7 +170,8 @@ class TestDeploy(testtools.TestCase):
                                         unique)
         self.assertEqual(expected, actual)
 
-    def test_generate_agents_alone_single_room_compute_nodes(self):
+    @mock.patch('random.sample')
+    def test_generate_agents_alone_single_room_compute_nodes(self, mr):
         unique = 'UU1D'
         expected = {
             'UU1D_agent_0': {
@@ -183,12 +185,15 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'duo'},
         }
-        actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
+        compute_nodes = nodes_helper('uno', 'duo', 'tre')
+        mr.return_value = compute_nodes[:2]
+        actual = deploy.generate_agents(compute_nodes,
                                         ['single_room', {'compute_nodes': 2}],
                                         unique)
         self.assertEqual(expected, actual)
 
-    def test_generate_agents_alone_single_room_density_compute_nodes(self):
+    @mock.patch('random.sample')
+    def test_generate_agents_alone_single_room_density_compute_nodes(self, mr):
         unique = 'UU1D'
         expected = {
             'UU1D_agent_0': {
@@ -202,14 +207,19 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'uno'},
         }
-        actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
+        compute_nodes = nodes_helper('uno', 'duo', 'tre')
+        mr.return_value = compute_nodes[:1]
+        actual = deploy.generate_agents(compute_nodes,
                                         ['single_room', {'compute_nodes': 1},
                                          {'density': 2}],
                                         unique)
         self.assertEqual(expected, actual)
 
-    def test_generate_agents_pair_single_room_density_compute_nodes(self):
+    @mock.patch('random.sample')
+    def test_generate_agents_pair_single_room_density_compute_nodes(self, mr):
         unique = 'UU1D'
+        compute_nodes = nodes_helper('uno', 'duo', 'tre')
+        mr.return_value = compute_nodes[:2]
         actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
                                         ['pair', 'single_room',
                                          {'density': 4}, {'compute_nodes': 2}],

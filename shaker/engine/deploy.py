@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import functools
+import random
 
 import jinja2
 from oslo_config import cfg
@@ -57,7 +58,8 @@ def generate_agents(compute_nodes, accommodation, unique):
             if s.get('density'):
                 density = s.get('density')
             if s.get('compute_nodes'):
-                compute_nodes = compute_nodes[:s.get('compute_nodes')]
+                compute_nodes = random.sample(
+                    compute_nodes, s.get('compute_nodes'))
             if s.get('zones'):
                 compute_nodes = [c for c in compute_nodes
                                  if c['zone'] in s.get('zones')]
