@@ -73,6 +73,11 @@ OPENSTACK_OPTS = [
                default=utils.env('OS_CACERT'),
                sample_default='',
                help='Location of CA Certificate, defaults to env[OS_CACERT].'),
+    cfg.BoolOpt('os-insecure',
+                default=(utils.env('OS_INSECURE') or False),
+                help='When using SSL in connections to the registry server, '
+                     'do not require validation via a certifying authority, '
+                     'defaults to env[OS_INSECURE].'),
     cfg.StrOpt('os-region-name', metavar='<auth-region-name>',
                default=utils.env('OS_REGION_NAME') or 'RegionOne',
                help='Authentication region name, defaults to '

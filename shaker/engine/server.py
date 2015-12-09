@@ -122,7 +122,7 @@ def play_scenario(scenario):
                 cfg.CONF.os_tenant_name, cfg.CONF.os_auth_url,
                 cfg.CONF.os_region_name, cfg.CONF.external_net,
                 cfg.CONF.flavor_name, cfg.CONF.image_name,
-                cfg.CONF.os_cacert)
+                cfg.CONF.os_cacert, cfg.CONF.os_insecure)
 
         base_dir = os.path.dirname(scenario['file_name'])
         agents = deployment.deploy(scenario['deployment'], base_dir=base_dir)

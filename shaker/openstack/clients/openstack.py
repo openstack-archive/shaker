@@ -62,18 +62,21 @@ class OpenStackClientProxy(object):
 
 class OpenStackClient(object):
     def __init__(self, username, password, tenant_name, auth_url, region_name,
-                 cacert):
+                 cacert, insecure):
         self.region_name = region_name or 'RegionOne'
         self.cacert = cacert or ''
+        self.insecure = insecure or False
         self._osc_cache = {}
         self.keystone_creator = functools.partial(
             keystone.create_keystone_client,
             username=username, password=password,
-            tenant_name=tenant_name, auth_url=auth_url, cacert=cacert)
+            tenant_name=tenant_name, auth_url=auth_url, cacert=cacert,
+            insecure=insecure)
         self.session_creator = functools.partial(
             keystone.create_keystone_session, cacert,
             username=username, password=password,
-            tenant_name=tenant_name, auth_url=auth_url)
+            tenant_name=tenant_name, auth_url=auth_url,
+            insecure=insecure)
         # ping OpenStack
         self.keystone_creator()
 
@@ -88,7 +91,7 @@ class OpenStackClient(object):
         elif name in OLD_CLIENT_MAKERS:
             client_creator = functools.partial(
                 OLD_CLIENT_MAKERS[name], os_region_name=self.region_name,
-                cacert=self.cacert)
+                cacert=self.cacert, insecure=self.insecure)
             client = OpenStackClientProxy(self.keystone_creator,
                                           client_creator)
 
