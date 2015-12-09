@@ -6,8 +6,9 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
               [--log-file PATH] [--log-format FORMAT] [--no-report-on-error]
               [--nocleanup-on-error] [--nodebug] [--nono-report-on-error]
-              [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
-              [--os-auth-url <auth-url>] [--os-cacert <auth-cacert>]
+              [--noos-insecure] [--nouse-syslog] [--nouse-syslog-rfc-format]
+              [--noverbose] [--nowatch-log-file] [--os-auth-url <auth-url>]
+              [--os-cacert <auth-cacert>] [--os-insecure]
               [--os-password <auth-password>]
               [--os-region-name <auth-region-name>]
               [--os-tenant-name <auth-tenant-name>]
@@ -17,6 +18,7 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--server-endpoint SERVER_ENDPOINT] [--subunit SUBUNIT]
               [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
               [--use-syslog-rfc-format] [--verbose] [--version]
+              [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -53,35 +55,48 @@ optional arguments:
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.
                         For details about logging configuration files, see the
-                        Python logging module documentation.
+                        Python logging module documentation. Note that when
+                        logging configuration files are used then all logging
+                        configuration is set in the configuration file and
+                        other logging configuration options are ignored (for
+                        example, log_format).
   --log-date-format DATE_FORMAT
                         Format string for %(asctime)s in log records. Default:
-                        None .
+                        None . This option is ignored if log_config_append is
+                        set.
   --log-dir LOG_DIR, --logdir LOG_DIR
                         (Optional) The base directory used for relative --log-
-                        file paths.
+                        file paths. This option is ignored if
+                        log_config_append is set.
   --log-file PATH, --logfile PATH
                         (Optional) Name of log file to output to. If no
-                        default is set, logging will go to stdout.
+                        default is set, logging will go to stdout. This option
+                        is ignored if log_config_append is set.
   --log-format FORMAT   DEPRECATED. A logging.Formatter log message format
                         string which may use any of the available
                         logging.LogRecord attributes. This option is
                         deprecated. Please use logging_context_format_string
-                        and logging_default_format_string instead.
+                        and logging_default_format_string instead. This option
+                        is ignored if log_config_append is set.
   --no-report-on-error  Do not generate report for failed scenarios
   --nocleanup-on-error  The inverse of --cleanup-on-error
   --nodebug             The inverse of --debug
   --nono-report-on-error
                         The inverse of --no-report-on-error
+  --noos-insecure       The inverse of --os-insecure
   --nouse-syslog        The inverse of --use-syslog
   --nouse-syslog-rfc-format
                         The inverse of --use-syslog-rfc-format
   --noverbose           The inverse of --verbose
+  --nowatch-log-file    The inverse of --watch-log-file
   --os-auth-url <auth-url>
                         Authentication URL, defaults to env[OS_AUTH_URL].
   --os-cacert <auth-cacert>
                         Location of CA Certificate, defaults to
                         env[OS_CACERT].
+  --os-insecure         When using SSL in connections to the registry server,
+                        do not require validation via a certifying authority,
+                        defaults to env[OS_INSECURE].
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
   --os-region-name <auth-region-name>
@@ -104,7 +119,16 @@ optional arguments:
   --scenario SCENARIO   Scenario to play. Can be a file name or one of
                         aliases: "misc/instance_metadata",
                         "misc/static_agent", "misc/static_agents_pair",
-                        "networking/cross_az/full_l2", "networking/dense_l2",
+                        "networking/cross_az/full_l2",
+                        "networking/cross_az/full_l3_east_west",
+                        "networking/cross_az/full_l3_north_south",
+                        "networking/cross_az/perf_l2",
+                        "networking/cross_az/perf_l3_east_west",
+                        "networking/cross_az/perf_l3_north_south",
+                        "networking/cross_az/udp_full_l2",
+                        "networking/cross_az/udp_l2",
+                        "networking/cross_az/udp_l3_east_west",
+                        "networking/dense_l2",
                         "networking/dense_l3_east_west",
                         "networking/dense_l3_north_south",
                         "networking/full_l2", "networking/full_l3_east_west",
@@ -120,15 +144,24 @@ optional arguments:
   --subunit SUBUNIT     Subunit stream file name, defaults to
                         env[SHAKER_SUBUNIT].
   --syslog-log-facility SYSLOG_LOG_FACILITY
-                        Syslog facility to receive log lines.
+                        Syslog facility to receive log lines. This option is
+                        ignored if log_config_append is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
+                        This option is ignored if log_config_append is set.
   --use-syslog-rfc-format
                         (Optional) Enables or disables syslog rfc5424 format
                         for logging. If enabled, prefixes the MSG part of the
                         syslog message with APP-NAME (RFC5424). The format
-                        without the APP-NAME is deprecated in K, and will be
-                        removed in M, along with this option.
+                        without the APP-NAME is deprecated in Kilo, and will
+                        be removed in Mitaka, along with this option. This
+                        option is ignored if log_config_append is set.
   --verbose, -v         If set to false, will disable INFO logging level,
                         making WARNING the default.
   --version             show program's version number and exit
+  --watch-log-file      (Optional) Uses logging handler designed to watch file
+                        system. When log file is moved or removed this handler
+                        will open a new log file with specified path
+                        instantaneously. It makes sense only if log-file
+                        option is specified and Linux platform is used. This
+                        option is ignored if log_config_append is set.
