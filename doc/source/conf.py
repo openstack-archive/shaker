@@ -40,6 +40,16 @@ master_doc = 'index'
 project = u'Shaker'
 copyright = u'2015, Mirantis'
 
+# The version info for the project you're documenting, acts as replacement for
+# |version| and |release|, also used in various other places throughout the
+# built documents.
+#
+# Version info
+from shaker.version import version_info as shaker_version
+release = shaker_version.release_string()
+# The short X.Y version.
+version = shaker_version.version_string()
+
 # If true, '()' will be appended to :func: etc. cross-reference text.
 add_function_parentheses = True
 
