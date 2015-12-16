@@ -33,7 +33,7 @@ Installation on fresh system requires additional libraries needed by some of dep
 Deployment
 ^^^^^^^^^^
 
-.. image:: images/architecture.svg
+.. image:: images/architecture.*
 
 Requirements:
 
