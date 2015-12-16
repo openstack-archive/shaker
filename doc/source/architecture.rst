@@ -8,7 +8,7 @@ for results processing and report generation. The agent is light-weight and poll
 the server and replies with the results. Agents have connectivity to the server, but the server does not
 (so it is easy to keep agents behind NAT).
 
-.. image:: images/architecture.svg
+.. image:: images/architecture.*
 
 
 Under the Hood

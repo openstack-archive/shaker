@@ -53,9 +53,9 @@ that allow control the scheduling precisely:
 
 Examples:
 
-.. image:: images/accommodation_single_room.svg
+.. image:: images/accommodation_single_room.*
 
-.. image:: images/accommodation_double_room.svg
+.. image:: images/accommodation_double_room.*
 
 As result of deployment the set of agents is produced. For networking testing this set contains
 agents in ``master`` and ``slave`` roles. Master agents are controlled by ``shaker`` tool and execute commands.
