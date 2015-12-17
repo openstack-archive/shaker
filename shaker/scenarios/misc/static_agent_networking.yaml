@@ -1,0 +1,20 @@
+title: Static Networking
+
+description:
+  This scenario runs tests on pre-deployed static agents
+
+deployment:
+  agents:
+  -
+    id: the-agent
+    mode: alone
+
+execution:
+  tests:
+  -
+    title: TCP
+    class: iperf3
+    host: ping.online.net
+    time: 10
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 1000)"

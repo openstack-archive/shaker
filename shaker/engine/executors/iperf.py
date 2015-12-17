@@ -21,7 +21,8 @@ from shaker.engine.executors import base
 
 
 def add_common_iperf_params(cmd, executor):
-    cmd.add('--client', executor.agent['slave']['ip'])
+    cmd.add('--client', executor.test_definition.get('host') or
+            executor.agent['slave']['ip'])
     cmd.add('--format', 'm')
     if executor.test_definition.get('mss'):
         cmd.add('--mss', executor.test_definition.get('mss'))

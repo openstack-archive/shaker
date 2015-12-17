@@ -41,6 +41,14 @@ class TestFlentExecutor(testtools.TestCase):
                     'type': 'script'}
         self.assertEqual(expected, executor.get_command())
 
+    def test_get_command_static_host(self):
+        executor = flent.FlentExecutor({'host': '10.0.0.20'}, {})
+
+        expected = {'data': (flent.FLENT_EXEC % 'flent -H %s -l 60 -s 1 '
+                             'tcp_download') % '10.0.0.20',
+                    'type': 'script'}
+        self.assertEqual(expected, executor.get_command())
+
     def test_get_expected_duration(self):
         executor = flent.FlentExecutor(dict(method='ping', time=10), AGENT)
         expected = 20

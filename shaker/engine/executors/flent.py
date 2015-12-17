@@ -25,7 +25,8 @@ FLENT_EXTRA_TIME = 10  # by default flent adds by 5 secs before and after run
 class FlentExecutor(base.BaseExecutor):
     def get_command(self):
         cmd = base.CommandLine('flent')
-        cmd.add('-H', self.agent['slave']['ip'])
+        cmd.add('-H', self.test_definition.get('host') or
+                self.agent['slave']['ip'])
         cmd.add('-l', self.test_definition.get('time') or 60)
         cmd.add('-s', self.test_definition.get('interval') or 1)
         cmd.add(self.test_definition.get('method') or 'tcp_download')

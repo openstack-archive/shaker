@@ -38,3 +38,11 @@ class TestNetperfExecutor(testtools.TestCase):
         expected = {'data': ('netperf -H %s -l 30 -t UDP_STREAM') % IP,
                     'type': 'program'}
         self.assertEqual(expected, executor.get_command())
+
+    def test_get_command_static_host(self):
+        executor = netperf.NetperfExecutor(
+            {'method': 'UDP_STREAM', 'host': '10.0.0.20', 'time': 30}, {})
+
+        expected = {'data': 'netperf -H 10.0.0.20 -l 30 -t UDP_STREAM',
+                    'type': 'program'}
+        self.assertEqual(expected, executor.get_command())

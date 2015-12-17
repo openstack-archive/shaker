@@ -95,18 +95,21 @@ iperf_graph, iperf:
     * ``interval`` - seconds between periodic bandwidth reports, defaults to `1 s`
     * ``bandwidth`` - for UDP, bandwidth to send at in bits/sec, defaults to `1 Mbit/s`
     * ``threads`` - number of parallel client threads to run
+    * ``host`` - the address of destination host to run the tool against, defaults to IP address of slave agent
 
 flent:
 ~~~~~~
     * ``time`` - time in seconds to transmit for, defaults to `60`
     * ``interval`` - seconds between periodic bandwidth reports, defaults to `1`
     * ``method`` - which flent scenario to use, see https://github.com/tohojo/flent/tree/master/flent/tests for the whole list, defaults to `tcp_download`
+    * ``host`` - the address of destination host to run the tool against, defaults to IP address of slave agent
 
 
 netperf:
 ~~~~~~~~
     * ``time`` - time in seconds to transmit for, defaults to `60`
     * ``method`` - one of built-in test names, see http://linux.die.net/man/1/netperf for the whole list, defaults to `TCP_STREAM`
+    * ``host`` - the address of destination host to run the tool against, defaults to IP address of slave agent
 
 shell:
 ~~~~~~

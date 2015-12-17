@@ -46,6 +46,15 @@ class TestIperfGraphExecutor(testtools.TestCase):
                     'type': 'program'}
         self.assertEqual(expected, executor.get_command())
 
+    def test_get_command_static_host(self):
+        executor = iperf.IperfGraphExecutor({'host': '10.0.0.20'}, {})
+
+        expected = {'data': ('iperf --client %s --format m '
+                             '--time 60 --parallel 1 --interval 1 --nodelay '
+                             '--reportstyle C') % '10.0.0.20',
+                    'type': 'program'}
+        self.assertEqual(expected, executor.get_command())
+
     def test_process_reply(self):
         executor = iperf.IperfGraphExecutor({}, AGENT)
         message = {
