@@ -87,7 +87,18 @@ def verify_sla(records, tests):
     return sla_records
 
 
+def log_sla(sla_records):
+    if sla_records:
+        LOG.info('*' * 80)
+        for item in sla_records:
+            test_id = _get_location(item.record) + ':' + item.expression
+            LOG.info('%-73s %6s' % (test_id,
+                                    '[%s]' % ('OK' if item.state else 'FAIL')))
+        LOG.info('*' * 80)
+
+
 def output_sla(sla_records):
+    log_sla(sla_records)
     return [dict(record=item.record['id'], state=item.state,
                  expression=item.expression) for item in sla_records]
 
@@ -95,7 +106,7 @@ def output_sla(sla_records):
 def _get_location(record):
     return '.'.join([str(record.get(s))
                      for s in ['scenario', 'test', 'concurrency',
-                               'node', 'agent_id']])
+                               'node', 'agent_id'] if record.get(s)])
 
 
 def save_to_subunit(sla_records, subunit_filename):
