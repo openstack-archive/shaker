@@ -28,7 +28,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
     def test_get_command(self):
         executor = iperf.IperfGraphExecutor({}, AGENT)
 
-        expected = {'data': ('sudo nice -n -20 iperf --client %s --format m '
+        expected = {'data': ('iperf --client %s --format m '
                              '--time 60 --parallel 1 --interval 1 --nodelay '
                              '--reportstyle C') % IP,
                     'type': 'program'}
@@ -39,7 +39,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
             {'udp': True, 'bandwidth': '100M', 'time': 30,
              'datagram_size': 1470}, AGENT)
 
-        expected = {'data': ('sudo nice -n -20 iperf --client %s --format m '
+        expected = {'data': ('iperf --client %s --format m '
                              '--udp --bandwidth 100M --len 1470 '
                              '--time 30 --parallel 1 --interval 1 --nodelay '
                              '--reportstyle C') % IP,
@@ -117,7 +117,7 @@ class TestIperf3Executor(testtools.TestCase):
     def test_get_command(self):
         executor = iperf.Iperf3Executor({}, AGENT)
 
-        expected = {'data': ('sudo nice -n -20 iperf3 --client %s --format m '
+        expected = {'data': ('iperf3 --client %s --format m '
                              '--time 60 --parallel 1 --interval 1 '
                              '--json') % IP,
                     'type': 'program'}
@@ -128,7 +128,7 @@ class TestIperf3Executor(testtools.TestCase):
             {'udp': True, 'bandwidth': '100M', 'time': 30,
              'datagram_size': 1470}, AGENT)
 
-        expected = {'data': ('sudo nice -n -20 iperf3 --client %s --format m '
+        expected = {'data': ('iperf3 --client %s --format m '
                              '--udp --bandwidth 100M --len 1470 '
                              '--time 30 --parallel 1 --interval 1 '
                              '--json') % IP,

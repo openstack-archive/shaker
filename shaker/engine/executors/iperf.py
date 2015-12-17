@@ -41,7 +41,7 @@ def add_common_iperf_params(cmd, executor):
 
 class IperfExecutor(base.BaseExecutor):
     def get_command(self):
-        cmd = base.CommandLine('sudo nice -n -20 iperf')
+        cmd = base.CommandLine('iperf')
         add_common_iperf_params(cmd, self)
         cmd.add('--nodelay')
         if self.test_definition.get('csv'):
@@ -87,7 +87,7 @@ class Iperf3Executor(base.BaseExecutor):
         if not self.test_definition.get('interval'):
             self.test_definition['interval'] = 1
 
-        cmd = base.CommandLine('sudo nice -n -20 iperf3')
+        cmd = base.CommandLine('iperf3')
         add_common_iperf_params(cmd, self)
         cmd.add('--json')
         return cmd.make()
