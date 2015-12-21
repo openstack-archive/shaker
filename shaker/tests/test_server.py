@@ -155,7 +155,8 @@ class TestServerPlayScenario(testtools.TestCase):
             output)
 
         deploy_obj.deploy.assert_called_once_with(
-            self.deployment, base_dir='folder')
+            self.deployment, base_dir='folder',
+            server_endpoint='127.0.0.1:5999')
         deploy_obj.cleanup.assert_called_once_with()
 
     @mock.patch('shaker.engine.deploy.Deployment')
@@ -177,7 +178,8 @@ class TestServerPlayScenario(testtools.TestCase):
         self.assertNotContainsSimilarRecord({'status': 'error'}, output)
 
         deploy_obj.deploy.assert_called_once_with(
-            self.deployment, base_dir='folder')
+            self.deployment, base_dir='folder',
+            server_endpoint='127.0.0.1:5999')
         deploy_obj.connect_to_openstack.assert_called_once_with(
             'user', 'password', 'tenant', 'auth-url', 'RegionOne', None,
             'shaker-flavor', 'shaker-image', None, False
@@ -198,7 +200,8 @@ class TestServerPlayScenario(testtools.TestCase):
         self.assertContainsSimilarRecord({'status': 'error'}, output)
 
         deploy_obj.deploy.assert_called_once_with(
-            self.deployment, base_dir='folder')
+            self.deployment, base_dir='folder',
+            server_endpoint='127.0.0.1:5999')
         deploy_obj.cleanup.assert_called_once_with()
 
     @mock.patch('shaker.engine.deploy.Deployment')
@@ -215,5 +218,6 @@ class TestServerPlayScenario(testtools.TestCase):
         self.assertContainsSimilarRecord({'status': 'interrupted'}, output)
 
         deploy_obj.deploy.assert_called_once_with(
-            self.deployment, base_dir='folder')
+            self.deployment, base_dir='folder',
+            server_endpoint='127.0.0.1:5999')
         deploy_obj.cleanup.assert_called_once_with()

@@ -163,8 +163,7 @@ def filter_agents(agents, stack_outputs, override=None):
 
 
 class Deployment(object):
-    def __init__(self, server_endpoint):
-        self.server_endpoint = server_endpoint
+    def __init__(self):
         self.openstack_client = None
         self.stack_created = False
 
@@ -185,7 +184,7 @@ class Deployment(object):
                                  self.openstack_client.neutron))
         self.stack_name = 'shaker_%s' % utils.random_string()
 
-    def _deploy_from_hot(self, specification, base_dir=None):
+    def _deploy_from_hot(self, specification, server_endpoint, base_dir=None):
         agents = generate_agents(
             nova.get_available_compute_nodes(self.openstack_client.nova),
             specification.get('accommodation') or
@@ -205,7 +204,7 @@ class Deployment(object):
 
         # create stack by Heat
         merged_parameters = {
-            'server_endpoint': self.server_endpoint,
+            'server_endpoint': server_endpoint,
             'external_net': self.external_net,
             'image': self.image_name,
             'flavor': self.flavor_name,
@@ -233,7 +232,7 @@ class Deployment(object):
                 return functools.partial(override_ip,
                                          ip_type=override_spec.get('ip'))
 
-    def deploy(self, deployment, base_dir=None):
+    def deploy(self, deployment, base_dir=None, server_endpoint=None):
         agents = {}
 
         if deployment.get('template'):
@@ -243,7 +242,7 @@ class Deployment(object):
             else:
                 # deploy topology specified by HOT
                 agents.update(self._deploy_from_hot(
-                    deployment, base_dir=base_dir))
+                    deployment, server_endpoint, base_dir=base_dir))
 
         if deployment.get('agents'):
             # agents are specified statically

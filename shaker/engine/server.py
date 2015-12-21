@@ -113,7 +113,7 @@ def play_scenario(scenario):
                            for test in scenario['execution']['tests'])
 
     try:
-        deployment = deploy.Deployment(cfg.CONF.server_endpoint)
+        deployment = deploy.Deployment()
 
         if (cfg.CONF.os_username and cfg.CONF.os_password and
                 cfg.CONF.os_tenant_name and cfg.CONF.os_auth_url):
@@ -125,7 +125,8 @@ def play_scenario(scenario):
                 cfg.CONF.os_cacert, cfg.CONF.os_insecure)
 
         base_dir = os.path.dirname(scenario['file_name'])
-        agents = deployment.deploy(scenario['deployment'], base_dir=base_dir)
+        agents = deployment.deploy(scenario['deployment'], base_dir=base_dir,
+                                   server_endpoint=cfg.CONF.server_endpoint)
 
         agents = _extend_agents(agents)
         output['agents'] = agents
