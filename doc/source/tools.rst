@@ -10,6 +10,14 @@ Executes specified scenario in OpenStack cloud, stores results and generates HTM
 .. literalinclude:: tools/shaker.txt
 
 
+shaker-spot
+-----------
+
+Executes specified scenario from the local node, stores results and generates HTML report.
+
+.. literalinclude:: tools/shaker-spot.txt
+
+
 shaker-image-builder
 --------------------
 

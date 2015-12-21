@@ -1,0 +1,16 @@
+title: TCP bandwidth
+
+description:
+  This scenario uses iperf3 to measure TCP bandwidth between local host and
+  ping.online.net (or against hosts provided via CLI). SLA check is verified
+  and expects the speed to be at least 90Mbit.
+
+execution:
+  tests:
+  -
+    title: TCP
+    class: iperf3
+    host: ping.online.net
+    time: 10
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 90)"

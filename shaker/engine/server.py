@@ -106,6 +106,14 @@ def execute(quorum, execution, agents):
     return records
 
 
+def _under_openstack():
+    required = ['os_username', 'os_password', 'os_tenant_name', 'os_auth_url']
+    for param in required:
+        if param not in cfg.CONF or not cfg.CONF[param]:
+            return False
+    return True
+
+
 def play_scenario(scenario):
     deployment = None
     output = dict(scenario=scenario, records={}, agents={})
@@ -115,8 +123,7 @@ def play_scenario(scenario):
     try:
         deployment = deploy.Deployment()
 
-        if (cfg.CONF.os_username and cfg.CONF.os_password and
-                cfg.CONF.os_tenant_name and cfg.CONF.os_auth_url):
+        if _under_openstack():
             deployment.connect_to_openstack(
                 cfg.CONF.os_username, cfg.CONF.os_password,
                 cfg.CONF.os_tenant_name, cfg.CONF.os_auth_url,
@@ -125,8 +132,12 @@ def play_scenario(scenario):
                 cfg.CONF.os_cacert, cfg.CONF.os_insecure)
 
         base_dir = os.path.dirname(scenario['file_name'])
-        agents = deployment.deploy(scenario['deployment'], base_dir=base_dir,
-                                   server_endpoint=cfg.CONF.server_endpoint)
+        scenario_deployment = scenario.get('deployment', {})
+        server_endpoint = (cfg.CONF.server_endpoint
+                           if 'server_endpoint' in cfg.CONF else None)
+
+        agents = deployment.deploy(scenario_deployment, base_dir=base_dir,
+                                   server_endpoint=server_endpoint)
 
         agents = _extend_agents(agents)
         output['agents'] = agents
@@ -135,10 +146,14 @@ def play_scenario(scenario):
         if not agents:
             raise Exception('No agents deployed.')
 
-        quorum = quorum_pkg.make_quorum(
-            agents.keys(), cfg.CONF.server_endpoint,
-            cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
-            cfg.CONF.agent_join_timeout)
+        if scenario_deployment:
+            quorum = quorum_pkg.make_quorum(
+                agents.keys(), server_endpoint,
+                cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
+                cfg.CONF.agent_join_timeout)
+        else:
+            # local
+            quorum = quorum_pkg.make_local_quorum()
 
         output['records'] = execute(quorum, scenario['execution'], agents)
 
@@ -163,12 +178,7 @@ def play_scenario(scenario):
     return output
 
 
-def main():
-    utils.init_config_and_logging(
-        config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
-        config.REPORT_OPTS
-    )
-
+def act():
     output = dict(records={}, agents={}, scenarios={}, tests={})
 
     for scenario_param in [cfg.CONF.scenario]:
@@ -200,6 +210,15 @@ def main():
     else:
         report.generate_report(output, cfg.CONF.report_template,
                                cfg.CONF.report, cfg.CONF.subunit)
+
+
+def main():
+    utils.init_config_and_logging(
+        config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
+        config.REPORT_OPTS
+    )
+
+    act()
 
 
 if __name__ == "__main__":

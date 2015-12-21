@@ -218,6 +218,20 @@ class Quorum(object):
         return self._run(ExecuteOperation(executors))
 
 
+class LocalQuorum(object):
+    def execute(self, executors):
+        operation = ExecuteOperation(executors)
+        agent_ids = operation.get_active_agent_ids()
+        result = {}
+
+        for agent_id in agent_ids:
+            task = operation.get_reply(agent_id, None)
+            command_res = agent_process.run_command(task.get('command'))
+            result[agent_id] = operation.process_reply(agent_id, command_res)
+
+        return result
+
+
 def make_quorum(agent_ids, server_endpoint, polling_interval,
                 agent_loss_timeout, agent_join_timeout):
     message_queue = messaging.MessageQueue(server_endpoint)
@@ -239,3 +253,7 @@ def make_quorum(agent_ids, server_endpoint, polling_interval,
         raise Exception('Agents failed to join: %s' % failed)
 
     return quorum
+
+
+def make_local_quorum():
+    return LocalQuorum()

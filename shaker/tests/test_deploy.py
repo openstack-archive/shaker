@@ -438,3 +438,32 @@ class TestDeploy(testtools.TestCase):
         ]
         observed = deploy.prepare_for_cross_az(source, ['nova', 'vcenter'])
         self.assertEqual(expected, observed)
+
+    # Deployment class unit tests
+
+    def test_deploy_local(self):
+        deployment = deploy.Deployment()
+
+        expected = {
+            'local': {'id': 'local', 'mode': 'alone'}
+        }
+        agents = deployment.deploy({})
+
+        self.assertEqual(expected, agents)
+
+    def test_deploy_static(self):
+        deployment = deploy.Deployment()
+
+        expected = {
+            'agent': {'id': 'agent', 'mode': 'alone'}
+        }
+        agents = deployment.deploy({'agents':
+                                    [{'id': 'agent', 'mode': 'alone'}]})
+
+        self.assertEqual(expected, agents)
+
+    def test_deploy_template_error_when_non_initialized(self):
+        deployment = deploy.Deployment()
+
+        self.assertRaises(deploy.DeploymentException,
+                          deployment.deploy, {'template': 'foo'})

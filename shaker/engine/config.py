@@ -104,7 +104,18 @@ OPENSTACK_OPTS = [
 
 ]
 
-SERVER_OPTS = [
+SERVER_AGENT_OPTS = [
+    cfg.IntOpt('agent-loss-timeout',
+               default=utils.env('SHAKER_AGENT_LOSS_TIMEOUT') or 60,
+               help='Timeout to treat agent as lost in seconds'),
+    cfg.IntOpt('agent-join-timeout',
+               default=utils.env('SHAKER_AGENT_JOIN_TIMEOUT') or 600,
+               help='How long to wait for agents to join in seconds (time '
+                    'between stack deployment and start of scenario '
+                    'execution).'),
+]
+
+SCENARIO_OPTS = [
     cfg.StrOpt('scenario',
                default=utils.env('SHAKER_SCENARIO'),
                required=True,
@@ -117,18 +128,12 @@ SERVER_OPTS = [
                default=utils.env('SHAKER_OUTPUT'),
                help='File for output in JSON format, '
                     'defaults to env[SHAKER_OUTPUT].'),
-    cfg.IntOpt('agent-loss-timeout',
-               default=utils.env('SHAKER_AGENT_LOSS_TIMEOUT') or 60,
-               help='Timeout to treat agent as lost in seconds'),
-    cfg.IntOpt('agent-join-timeout',
-               default=utils.env('SHAKER_AGENT_JOIN_TIMEOUT') or 600,
-               help='How long to wait for agents to join in seconds (time '
-                    'between stack deployment and start of scenario '
-                    'execution).'),
     cfg.BoolOpt('no-report-on-error',
                 default=(utils.env('SHAKER_NO_REPORT_ON_ERROR') or False),
                 help='Do not generate report for failed scenarios'),
 ]
+
+SERVER_OPTS = SCENARIO_OPTS + SERVER_AGENT_OPTS
 
 REPORT_OPTS = [
     cfg.StrOpt('report-template',

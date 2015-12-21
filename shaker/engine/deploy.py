@@ -30,6 +30,10 @@ from shaker.openstack.clients import openstack
 LOG = logging.getLogger(__name__)
 
 
+class DeploymentException(Exception):
+    pass
+
+
 def prepare_for_cross_az(compute_nodes, zones):
     if len(zones) != 2:
         LOG.warn('cross_az is specified, but len(zones) is not 2')
@@ -235,10 +239,15 @@ class Deployment(object):
     def deploy(self, deployment, base_dir=None, server_endpoint=None):
         agents = {}
 
+        if not deployment:
+            # local mode, create fake agent
+            agents.update(dict(local=dict(id='local', mode='alone')))
+
         if deployment.get('template'):
             if not self.openstack_client:
-                LOG.error('OpenStack client is not initialized. Template '
-                          'deployment is ignored.')
+                raise DeploymentException(
+                    'OpenStack client is not initialized. '
+                    'Template-based deployment is ignored.')
             else:
                 # deploy topology specified by HOT
                 agents.update(self._deploy_from_hot(
@@ -254,6 +263,3 @@ class Deployment(object):
         if self.stack_created and cfg.CONF.cleanup_on_error:
             LOG.debug('Cleaning up the stack: %s', self.stack_name)
             self.openstack_client.heat.stacks.delete(self.stack_name)
-        else:
-            LOG.info('No Heat Stack clean-up as no cleanup on error'
-                     'requested or static agents were deployed')
