@@ -1,8 +1,9 @@
 usage: shaker-spot [-h] [--config-dir DIR] [--config-file PATH] [--debug]
                    [--log-config-append PATH] [--log-date-format DATE_FORMAT]
                    [--log-dir LOG_DIR] [--log-file PATH] [--log-format FORMAT]
-                   [--no-report-on-error] [--nodebug] [--nono-report-on-error]
-                   [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
+                   [--matrix MATRIX] [--no-report-on-error] [--nodebug]
+                   [--nono-report-on-error] [--nouse-syslog]
+                   [--nouse-syslog-rfc-format] [--noverbose]
                    [--nowatch-log-file] [--output OUTPUT] [--report REPORT]
                    [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
                    [--subunit SUBUNIT]
@@ -50,6 +51,12 @@ optional arguments:
                         deprecated. Please use logging_context_format_string
                         and logging_default_format_string instead. This option
                         is ignored if log_config_append is set.
+  --matrix MATRIX       Set the matrix of parameters for the scenario. The
+                        value is specified in YAML format. E.g. to override
+                        the scenario duration one may provide: "{time: 10}",
+                        or to override list of hosts: "{host:[ping.online.net,
+                        iperf.eenet.ee]}". When several parameters are
+                        overridden all combinations are tested
   --no-report-on-error  Do not generate report for failed scenarios
   --nodebug             The inverse of --debug
   --nono-report-on-error

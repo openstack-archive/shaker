@@ -4,12 +4,12 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--external-net EXTERNAL_NET] [--flavor-name FLAVOR_NAME]
               [--image-name IMAGE_NAME] [--log-config-append PATH]
               [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
-              [--log-file PATH] [--log-format FORMAT] [--no-report-on-error]
-              [--nocleanup-on-error] [--nodebug] [--nono-report-on-error]
-              [--noos-insecure] [--nouse-syslog] [--nouse-syslog-rfc-format]
-              [--noverbose] [--nowatch-log-file] [--os-auth-url <auth-url>]
-              [--os-cacert <auth-cacert>] [--os-insecure]
-              [--os-password <auth-password>]
+              [--log-file PATH] [--log-format FORMAT] [--matrix MATRIX]
+              [--no-report-on-error] [--nocleanup-on-error] [--nodebug]
+              [--nono-report-on-error] [--noos-insecure] [--nouse-syslog]
+              [--nouse-syslog-rfc-format] [--noverbose] [--nowatch-log-file]
+              [--os-auth-url <auth-url>] [--os-cacert <auth-cacert>]
+              [--os-insecure] [--os-password <auth-password>]
               [--os-region-name <auth-region-name>]
               [--os-tenant-name <auth-tenant-name>]
               [--os-username <auth-username>] [--output OUTPUT]
@@ -78,6 +78,12 @@ optional arguments:
                         deprecated. Please use logging_context_format_string
                         and logging_default_format_string instead. This option
                         is ignored if log_config_append is set.
+  --matrix MATRIX       Set the matrix of parameters for the scenario. The
+                        value is specified in YAML format. E.g. to override
+                        the scenario duration one may provide: "{time: 10}",
+                        or to override list of hosts: "{host:[ping.online.net,
+                        iperf.eenet.ee]}". When several parameters are
+                        overridden all combinations are tested
   --no-report-on-error  Do not generate report for failed scenarios
   --nocleanup-on-error  The inverse of --cleanup-on-error
   --nodebug             The inverse of --debug

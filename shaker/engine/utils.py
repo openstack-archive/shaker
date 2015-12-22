@@ -185,3 +185,25 @@ def make_help_options(message, base, type_filter=None):
     rel_files = map(functools.partial(os.path.relpath, start=path), files)
     return message % ', '.join('"%s"' % f.partition('.')[0]
                                for f in sorted(rel_files))
+
+
+def algebraic_product(**kwargs):
+    position_to_key = {}
+    values = []
+    total = 1
+
+    for key, item in six.iteritems(kwargs):
+        position_to_key[len(values)] = key
+        if type(item) != list:
+            item = [item]  # enclose single item into the list
+
+        values.append(item)
+        total *= len(item)
+
+    LOG.debug('Total number of permutations is: %s', total)
+
+    for chain in itertools.product(*values):
+        result = {}
+        for position, key in six.iteritems(position_to_key):
+            result[key] = chain[position]
+        yield result

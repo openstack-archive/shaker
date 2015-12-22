@@ -241,7 +241,8 @@ class Deployment(object):
 
         if not deployment:
             # local mode, create fake agent
-            agents.update(dict(local=dict(id='local', mode='alone')))
+            agents.update(dict(local=dict(id='local', mode='alone',
+                                          node='localhost')))
 
         if deployment.get('template'):
             if not self.openstack_client:

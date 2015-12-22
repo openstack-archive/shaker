@@ -445,7 +445,7 @@ class TestDeploy(testtools.TestCase):
         deployment = deploy.Deployment()
 
         expected = {
-            'local': {'id': 'local', 'mode': 'alone'}
+            'local': {'id': 'local', 'mode': 'alone', 'node': 'localhost'}
         }
         agents = deployment.deploy({})
 

@@ -16,6 +16,8 @@
 import copy
 import re
 
+import yaml
+
 from oslo_config import cfg
 from oslo_config import types
 from shaker.engine import utils
@@ -37,6 +39,20 @@ class Endpoint(types.String):
 
     def __repr__(self):
         return "Endpoint <host:port>"
+
+
+class Yaml(types.String):
+
+    def __call__(self, value):
+        value = str(value)
+        try:
+            value = yaml.safe_load(value)
+        except Exception:
+            raise ValueError('YAML value is expected, but got: %s' % value)
+        return value
+
+    def __repr__(self):
+        return "YAML data"
 
 
 COMMON_OPTS = [
@@ -123,7 +139,15 @@ SCENARIO_OPTS = [
                    'Scenario to play. Can be a file name or one of aliases: '
                    '%s. Defaults to env[SHAKER_SCENARIO].', SCENARIOS,
                    type_filter=lambda x: x.endswith('.yaml'))),
-
+    cfg.Opt('matrix',
+            default=utils.env('SHAKER_MATRIX'),
+            type=Yaml(),
+            help='Set the matrix of parameters for the scenario. The value '
+                 'is specified in YAML format. E.g. to override the scenario '
+                 'duration one may provide: "{time: 10}", or to override list '
+                 'of hosts: "{host:[ping.online.net, iperf.eenet.ee]}". When '
+                 'several parameters are overridden all combinations are '
+                 'tested'),
     cfg.StrOpt('output',
                default=utils.env('SHAKER_OUTPUT'),
                help='File for output in JSON format, '

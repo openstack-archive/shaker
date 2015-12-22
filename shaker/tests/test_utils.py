@@ -84,3 +84,24 @@ class TestUtils(testtools.TestCase):
         observed = utils.make_help_options(
             'List: %s', base_dir, type_filter=lambda x: x.endswith('.yaml'))
         self.assertEqual(expected, observed)
+
+    def test_algebraic_product_empty(self):
+        expected = [{}]
+
+        observed = list(utils.algebraic_product())
+
+        self.assertEqual(expected, observed)
+
+    def test_algebraic_product_string(self):
+        expected = [{'a': 1, 'b': 'zebra'}, {'a': 2, 'b': 'zebra'}]
+
+        observed = list(utils.algebraic_product(a=[1, 2], b='zebra'))
+
+        self.assertEqual(expected, observed)
+
+    def test_algebraic_product_number(self):
+        expected = [{'a': 'x', 'b': 4}, {'a': 2, 'b': 4}]
+
+        observed = list(utils.algebraic_product(a=['x', 2], b=4))
+
+        self.assertEqual(expected, observed)

@@ -44,9 +44,11 @@ def _extend_agents(agents_map):
     return extended_agents
 
 
-def _make_test_title(test):
+def _make_test_title(test, params=None):
     s = test.get('title') or test.get('class')
-    return re.sub(r'[^\x21-\x7e\x80-\xff]+', '_', s).lower()
+    if params:
+        s += ' ' + ','.join(['%s=%s' % (k, v) for k, v in params.items()])
+    return re.sub(r'[^\x20-\x7e\x80-\xff]+', '_', s)
 
 
 def _pick_agents(agents, progression):
@@ -72,7 +74,7 @@ def _pick_agents(agents, progression):
 def run_test(records, quorum, test, agents, progression):
 
     LOG.debug('Running test %s on all agents', test)
-    test_title = _make_test_title(test)
+    test_title = test['title']
 
     for selected_agents in _pick_agents(agents, progression):
         executors = dict((a['id'], executors_classes.get_executor(test, a))
@@ -102,11 +104,22 @@ def run_test(records, quorum, test, agents, progression):
     return True
 
 
-def execute(output, quorum, execution, agents):
+def _pick_tests(tests, matrix):
+    matrix = matrix or {}
+    for test in tests:
+        for params in utils.algebraic_product(**matrix):
+            parametrized_test = copy.deepcopy(test)
+            parametrized_test.update(params)
+            parametrized_test['title'] = _make_test_title(test, params)
+
+            yield parametrized_test
+
+
+def execute(output, quorum, execution, agents, matrix=None):
     progression = execution.get('progression', execution.get('size'))
 
-    for test in execution['tests']:
-        output['tests'][_make_test_title(test)] = test
+    for test in _pick_tests(execution['tests'], matrix):
+        output['tests'][test['title']] = test
         proceed = run_test(output['records'],
                            quorum, test, agents, progression)
         if not proceed:
@@ -162,7 +175,11 @@ def play_scenario(scenario):
             # local
             quorum = quorum_pkg.make_local_quorum()
 
-        execute(output, quorum, scenario['execution'], agents)
+        matrix = cfg.CONF.matrix if 'matrix' in cfg.CONF else None
+        if matrix:
+            scenario['matrix'] = matrix
+
+        execute(output, quorum, scenario['execution'], agents, matrix)
 
     except BaseException as e:
         if isinstance(e, KeyboardInterrupt):

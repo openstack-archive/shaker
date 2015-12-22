@@ -415,7 +415,7 @@
         $.each(hashUrl.split(":"), function (_i, pair) {
           var kv = pair.split("=");
           if (kv.length == 2) {
-            state[kv[0]] = kv[1];
+            state[kv[0]] = decodeURIComponent(kv[1]);
           }
         });
       }
@@ -479,7 +479,7 @@
       <select id="concurrency_selector" class="form-control" data-placeholder="- Any concurrency -"></select>
     </div>
     <div class="col-md-2">
-      <label for="node_selector" title="Compute node">Compute Node</label>
+      <label for="node_selector" title="Host / Compute node">Host</label>
       <select id="node_selector" class="form-control" data-placeholder="- Any node -"></select>
     </div>
     <div class="col-md-2">

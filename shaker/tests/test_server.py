@@ -141,7 +141,7 @@ class TestServerPlayScenario(testtools.TestCase):
         deploy_obj = mock.Mock()
         deploy_clz_mock.return_value = deploy_obj
 
-        def _execute(output, quorum, execution, agents):
+        def _execute(output, quorum, execution, agents, matrix=None):
             output['records'].update({'UUID': {'id': 'UUID', 'status': 'ok'}})
 
         execute_mock.side_effect = _execute
