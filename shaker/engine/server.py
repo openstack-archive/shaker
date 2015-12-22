@@ -69,41 +69,50 @@ def _pick_agents(agents, progression):
             yield agents[:i]
 
 
-def execute(quorum, execution, agents):
-    records = {}
+def run_test(records, quorum, test, agents, progression):
+
+    LOG.debug('Running test %s on all agents', test)
+    test_title = _make_test_title(test)
+
+    for selected_agents in _pick_agents(agents, progression):
+        executors = dict((a['id'], executors_classes.get_executor(test, a))
+                         for a in selected_agents)
+
+        execution_result = quorum.execute(executors)
+
+        has_interrupted = False
+        for agent_id, record in execution_result.items():
+            record_id = utils.make_record_id()
+            record.update(dict(
+                id=record_id,
+                agent=agent_id,
+                node=agents[agent_id].get('node'),
+                concurrency=len(selected_agents),
+                test=test_title,
+                executor=test.get('class'),
+                type='agent',
+            ))
+            records[record_id] = record
+            has_interrupted |= record['status'] == 'interrupted'
+
+        if has_interrupted:
+            LOG.info('Execution is interrupted')
+            return False
+
+    return True
+
+
+def execute(output, quorum, execution, agents):
+    progression = execution.get('progression', execution.get('size'))
 
     for test in execution['tests']:
-        LOG.debug('Running test %s on all agents', test)
-        test_title = _make_test_title(test)
-        progression = execution.get('progression', execution.get('size'))
-
-        for selected_agents in _pick_agents(agents, progression):
-            executors = dict((a['id'], executors_classes.get_executor(test, a))
-                             for a in selected_agents)
-
-            execution_result = quorum.execute(executors)
-
-            has_interrupted = False
-            for agent_id, record in execution_result.items():
-                record_id = utils.make_record_id()
-                record.update(dict(
-                    id=record_id,
-                    agent=agent_id,
-                    node=agents[agent_id].get('node'),
-                    concurrency=len(selected_agents),
-                    test=test_title,
-                    executor=test.get('class'),
-                    type='agent',
-                ))
-                records[record_id] = record
-                has_interrupted |= record['status'] == 'interrupted'
-
-            if has_interrupted:
-                LOG.info('Execution is interrupted')
-                return records
+        output['tests'][_make_test_title(test)] = test
+        proceed = run_test(output['records'],
+                           quorum, test, agents, progression)
+        if not proceed:
+            break  # propagate interruption signal
 
     LOG.info('Execution is done')
-    return records
 
 
 def _under_openstack():
@@ -116,9 +125,7 @@ def _under_openstack():
 
 def play_scenario(scenario):
     deployment = None
-    output = dict(scenario=scenario, records={}, agents={})
-    output['tests'] = dict((_make_test_title(test), test)
-                           for test in scenario['execution']['tests'])
+    output = dict(scenario=scenario, records={}, agents={}, tests={})
 
     try:
         deployment = deploy.Deployment()
@@ -155,7 +162,7 @@ def play_scenario(scenario):
             # local
             quorum = quorum_pkg.make_local_quorum()
 
-        output['records'] = execute(quorum, scenario['execution'], agents)
+        execute(output, quorum, scenario['execution'], agents)
 
     except BaseException as e:
         if isinstance(e, KeyboardInterrupt):

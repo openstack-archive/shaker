@@ -140,7 +140,11 @@ class TestServerPlayScenario(testtools.TestCase):
     def test_play_scenario(self, deploy_clz_mock, execute_mock):
         deploy_obj = mock.Mock()
         deploy_clz_mock.return_value = deploy_obj
-        execute_mock.return_value = {'UUID': {'id': 'UUID', 'status': 'ok'}}
+
+        def _execute(output, quorum, execution, agents):
+            output['records'].update({'UUID': {'id': 'UUID', 'status': 'ok'}})
+
+        execute_mock.side_effect = _execute
 
         deploy_obj.deploy.return_value = {
             'ID': {'id': 'ID', 'mode': 'alone'}
@@ -221,3 +225,55 @@ class TestServerPlayScenario(testtools.TestCase):
             self.deployment, base_dir='folder',
             server_endpoint='127.0.0.1:5999')
         deploy_obj.cleanup.assert_called_once_with()
+
+
+class TestServerExecute(testtools.TestCase):
+
+    @mock.patch('shaker.engine.utils.make_record_id', return_value='UUID')
+    def test_execute(self, mri_mock):
+        output = dict(records={}, tests={})
+        quorum = mock.Mock()
+        quorum.execute.return_value = {'the-agent': {'status': 'ok'}}
+        execution = {'tests': [{'title': 'tcp', 'class': 'iperf'}]}
+        agents = {'the-agent': {'id': 'the-agent', 'mode': 'alone'}}
+
+        server.execute(output, quorum, execution, agents)
+
+        expected_records = {
+            'UUID': {
+                'agent': 'the-agent', 'concurrency': 1, 'executor': 'iperf',
+                'id': 'UUID', 'node': None, 'status': 'ok', 'test': 'tcp',
+                'type': 'agent'
+            }
+        }
+        expected_tests = {
+            'tcp': {'title': 'tcp', 'class': 'iperf'}
+        }
+
+        self.assertEqual(expected_records, output['records'])
+        self.assertEqual(expected_tests, output['tests'])
+
+    @mock.patch('shaker.engine.utils.make_record_id', return_value='UUID')
+    def test_execute_interrupted(self, mri_mock):
+        output = dict(records={}, tests={})
+        quorum = mock.Mock()
+        quorum.execute.return_value = {'the-agent': {'status': 'interrupted'}}
+        execution = {'tests': [{'title': 'tcp', 'class': 'iperf'},
+                               {'title': 'udp', 'class': 'netperf'}]}
+        agents = {'the-agent': {'id': 'the-agent', 'mode': 'alone'}}
+
+        server.execute(output, quorum, execution, agents)
+
+        expected_records = {
+            'UUID': {
+                'agent': 'the-agent', 'concurrency': 1, 'executor': 'iperf',
+                'id': 'UUID', 'node': None, 'status': 'interrupted',
+                'test': 'tcp', 'type': 'agent'
+            }
+        }
+        expected_tests = {
+            'tcp': {'title': 'tcp', 'class': 'iperf'}
+        }
+
+        self.assertEqual(expected_records, output['records'])
+        self.assertEqual(expected_tests, output['tests'])

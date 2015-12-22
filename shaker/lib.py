@@ -54,9 +54,10 @@ class Shaker(object):
         test.update(item)
 
         execution = {'tests': [test]}
-        execution_result = server.execute(self.quorum, execution, agents)
+        output = dict(records={}, agents={}, tests={})
+        server.execute(output, self.quorum, execution, agents)
 
-        return list(execution_result.values())[0]
+        return list(output['records'].values())[0]
 
     def run_program(self, agent_id, program):
         return self._run(agent_id, {'program': program})
