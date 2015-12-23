@@ -109,13 +109,21 @@ class Iperf3Executor(base.BaseExecutor):
         if 'error' in data:
             raise base.ExecutorException(result, data['error'])
 
+        has_retransmits = False
+        if (len(data['intervals']) > 0 and
+                'retransmits' in data['intervals'][0]['sum']):
+            has_retransmits = True
+
         if self.test_definition.get('udp'):
             sampler = lambda p: [round(p['end'], 2), p['packets']]
             meta = [['time', 's'], ['packets', 'pps']]
-        else:
+        elif has_retransmits:
             sampler = lambda p: [round(p['end'], 2), p['bits_per_second'],
                                  p['retransmits']]
             meta = [['time', 's'], ['bandwidth', 'bit/s'], ['retransmits', '']]
+        else:
+            sampler = lambda p: [round(p['end'], 2), p['bits_per_second']]
+            meta = [['time', 's'], ['bandwidth', 'bit/s']]
 
         samples = []
         for point in data['intervals']:

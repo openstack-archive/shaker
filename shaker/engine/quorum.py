@@ -101,6 +101,7 @@ class ExecuteOperation(BaseOperation):
             r = super(ExecuteOperation, self).process_error(agent_id, e)
             r.update(e.record)
         except Exception as e:
+            LOG.error('Error while processing reply: %s', e)
             r = super(ExecuteOperation, self).process_error(agent_id, e)
 
         return r
