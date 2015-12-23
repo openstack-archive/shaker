@@ -47,7 +47,8 @@ def _extend_agents(agents_map):
 def _make_test_title(test, params=None):
     s = test.get('title') or test.get('class')
     if params:
-        s += ' ' + ','.join(['%s=%s' % (k, v) for k, v in params.items()])
+        s += ' '.join([','.join(['%s=%s' % (k, v) for k, v in params.items()
+                                if k != 'host'])])
     return re.sub(r'[^\x20-\x7e\x80-\xff]+', '_', s)
 
 
@@ -85,10 +86,14 @@ def run_test(records, quorum, test, agents, progression):
         has_interrupted = False
         for agent_id, record in execution_result.items():
             record_id = utils.make_record_id()
+            node = agents[agent_id].get('node')
+            if node == 'localhost':
+                node = test.get('host')
+
             record.update(dict(
                 id=record_id,
                 agent=agent_id,
-                node=agents[agent_id].get('node'),
+                node=node,
                 concurrency=len(selected_agents),
                 test=test_title,
                 executor=test.get('class'),
