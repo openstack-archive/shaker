@@ -106,7 +106,7 @@ class TestFlentExecutor(testtools.TestCase):
                 [0.8, 0.07994293923635702, None]
             ],
             'meta': [
-                ['time', 's'], ['Ping ICMP', 'ms'], ['TCP upload', 'Mbit/s'],
+                ['time', 's'], ['ping_icmp', 'ms'], ['tcp_upload', 'Mbit/s'],
             ]
         }
         reply = executor.process_reply(message)

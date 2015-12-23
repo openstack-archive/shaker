@@ -22,6 +22,7 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
+import re
 import six
 import yaml
 
@@ -207,3 +208,7 @@ def algebraic_product(**kwargs):
         for position, key in six.iteritems(position_to_key):
             result[key] = chain[position]
         yield result
+
+
+def strict(s):
+    return re.sub(r'[^\w\d]+', '_', re.sub(r'\(.+\)', '', s)).lower()

@@ -16,9 +16,10 @@
 import json
 
 from shaker.engine.executors import base
+from shaker.engine import utils
 
 
-FLENT_EXEC = 'zcat `%s 2>&1 | grep "se with" | grep -Po \'/\\S+\'`'
+FLENT_EXEC = 'zcat `%s 2>&1 | grep "se with" | grep -Po \'\\./\\S+\'`'
 FLENT_EXTRA_TIME = 10  # by default flent adds by 5 secs before and after run
 
 
@@ -42,14 +43,16 @@ class FlentExecutor(base.BaseExecutor):
 
         stdout = result['stdout']
         if not stdout:
-            raise base.ExecutorException(result, 'Empty result from flent')
+            raise base.ExecutorException(
+                result,
+                'Flent returned no data, stderr: %s' % result['stderr'])
 
         data = json.loads(stdout)
 
         series_meta = data['metadata']['SERIES_META']
         columns = sorted(series_meta.keys())
         meta = ([['time', 's']] +
-                [[k, series_meta[k]['UNITS']] for k in columns])
+                [[utils.strict(k), series_meta[k]['UNITS']] for k in columns])
         samples = []
 
         for i in range(int(data['metadata']['TOTAL_LENGTH'])):

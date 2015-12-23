@@ -105,3 +105,7 @@ class TestUtils(testtools.TestCase):
         observed = list(utils.algebraic_product(a=['x', 2], b=4))
 
         self.assertEqual(expected, observed)
+
+    def test_strict(self):
+        self.assertEqual('some_01_string_a',
+                         utils.strict('Some 01-string (brr!) + %% A'))
