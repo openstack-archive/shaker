@@ -31,7 +31,13 @@ class TestSla(testtools.TestCase):
         self.assertEqual(True, sla.eval_expr('"some text" & "\w+\s+\w+"'))
         self.assertEqual(False, sla.eval_expr('"some text" & "\d+"'))
 
-        self.assertEqual(False, sla.eval_expr('a & "\d+"', {}))  # a == None
+        self.assertEqual(False, sla.eval_expr('a & "\d+"', {'a': ''}))
+
+    def test_eval_non_existent_ref(self):
+        self.assertRaises(sla.SLAException, sla.eval_expr,
+                          '2 + a.c', {'a': {'b': 40}})
+        self.assertRaises(sla.SLAException, sla.eval_expr,
+                          '2 + e.b', {'a': {'b': 40}})
 
     def test_eval_sla(self):
         records = [{'type': 'agent', 'test': 'iperf_tcp',
@@ -45,16 +51,20 @@ class TestSla(testtools.TestCase):
         sla_records = sla.eval_expr('[type == "agent"] >> (%s)' % expr,
                                     records)
         self.assertEqual([
-            sla.SLAItem(record=records[0], state=False, expression=expr),
-            sla.SLAItem(record=records[1], state=True, expression=expr)],
+            sla.SLAItem(record=records[0], state=sla.STATE_FALSE,
+                        expression=expr),
+            sla.SLAItem(record=records[1], state=sla.STATE_TRUE,
+                        expression=expr)],
             sla_records)
 
         expr = 'stats.bandwidth.mean > 900'
         sla_records = sla.eval_expr('[test == "iperf_udp", type == "node"] >> '
                                     '(%s)' % expr, records)
         self.assertEqual([
-            sla.SLAItem(record=records[1], state=True, expression=expr),
-            sla.SLAItem(record=records[2], state=False, expression=expr)],
+            sla.SLAItem(record=records[1], state=sla.STATE_TRUE,
+                        expression=expr),
+            sla.SLAItem(record=records[2], state=sla.STATE_FALSE,
+                        expression=expr)],
             sla_records)
 
     def test_dump_ast_node(self):
@@ -71,3 +81,16 @@ class TestSla(testtools.TestCase):
                 'stats.ping.mean < 0.35)')
         self.assertEqual(expr,
                          sla.dump_ast_node(ast.parse(expr, mode='eval')))
+
+    def test_eval_sla_undefined_ref(self):
+        records = [{'type': 'agent', 'test': 'iperf_tcp',
+                    'stats': {'bandwidth': {'mean': 850}}}]
+        expr = 'stats.nonexistent.mean > 800'
+        sla_records = sla.eval_expr('[type == "agent"] >> (%s)' % expr,
+                                    records)
+
+        self.assertEqual([
+            sla.SLAItem(record=records[0],
+                        state='Value "stats.nonexistent" is not found',
+                        expression=expr)],
+            sla_records)

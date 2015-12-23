@@ -92,8 +92,7 @@ def log_sla(sla_records):
         LOG.info('*' * 80)
         for item in sla_records:
             test_id = _get_location(item.record) + ':' + item.expression
-            LOG.info('%-73s %6s' % (test_id,
-                                    '[%s]' % ('OK' if item.state else 'FAIL')))
+            LOG.info('%-73s %7s' % (test_id, '[%s]' % item.state))
         LOG.info('*' * 80)
 
 
@@ -112,6 +111,8 @@ def _get_location(record):
 def save_to_subunit(sla_records, subunit_filename):
     LOG.debug('Writing subunit stream to: %s', subunit_filename)
     fd = None
+    state2subunit = {sla.STATE_TRUE: 'success',
+                     sla.STATE_FALSE: 'fail'}
     try:
         fd = open(subunit_filename, 'w')
         output = subunit_v2.StreamResultToBytes(fd)
@@ -120,14 +121,14 @@ def save_to_subunit(sla_records, subunit_filename):
             output.startTestRun()
             test_id = _get_location(item.record) + ':' + item.expression
 
-            if not item.state:
+            if item.state != sla.STATE_TRUE:
                 output.status(test_id=test_id, file_name='results',
                               mime_type='text/plain; charset="utf8"', eof=True,
                               file_bytes=yaml.safe_dump(
                                   item.record, default_flow_style=False))
 
             output.status(test_id=test_id,
-                          test_status='success' if item.state else 'fail')
+                          test_status=state2subunit.get(item.state, 'skip'))
             output.stopTestRun()
 
         LOG.info('Subunit stream saved to: %s', subunit_filename)

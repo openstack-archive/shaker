@@ -45,15 +45,15 @@ class TestReport(testtools.TestCase):
 
         sla_records = report.verify_sla(records, tests)
 
-        self.assertIn(sla.SLAItem(records[0], False,
+        self.assertIn(sla.SLAItem(records[0], sla.STATE_FALSE,
                                   'stats.bandwidth.mean > 800'), sla_records)
-        self.assertIn(sla.SLAItem(records[0], False,
+        self.assertIn(sla.SLAItem(records[0], sla.STATE_FALSE,
                                   'stats.bandwidth.min > 500'), sla_records)
 
-        self.assertIn(sla.SLAItem(records[1], True,
+        self.assertIn(sla.SLAItem(records[1], sla.STATE_TRUE,
                                   'stats.bandwidth.mean > 900'), sla_records)
 
-        self.assertIn(sla.SLAItem(records[2], True,
+        self.assertIn(sla.SLAItem(records[2], sla.STATE_TRUE,
                                   'stats.bandwidth.mean > 800'), sla_records)
-        self.assertIn(sla.SLAItem(records[2], True,
+        self.assertIn(sla.SLAItem(records[2], sla.STATE_TRUE,
                                   'stats.bandwidth.min > 500'), sla_records)

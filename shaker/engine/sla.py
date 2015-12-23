@@ -19,7 +19,13 @@ import operator as op
 import re
 
 
+class SLAException(Exception):
+    pass
+
+
 SLAItem = collections.namedtuple('SLAItem', ['record', 'state', 'expression'])
+STATE_TRUE = 'OK'
+STATE_FALSE = 'FAIL'
 
 # supported operators
 operators = {ast.Add: op.add, ast.Sub: op.sub, ast.Mult: op.mul,
@@ -51,19 +57,15 @@ def _eval(node, ctx):
     if isinstance(node, ast.Num):
         return node.n
     elif isinstance(node, ast.Name):
-        return ctx.get(node.id)
+        r = ctx.get(node.id)
+        if r is None:
+            raise SLAException('Value "%s" is not found' % dump_ast_node(node))
+        return r
     elif isinstance(node, ast.Str):
         return node.s
     elif isinstance(node, ast.BinOp):
         if isinstance(node.op, ast.RShift):
-            # left -- array, right -- condition
-            filtered = _eval(node.left, ctx)
-            result = []
-            for record in filtered:
-                state = _eval(node.right, record)
-                result.append(SLAItem(record=record, state=state,
-                                      expression=dump_ast_node(node.right)))
-            return result
+            return _eval_top(ctx, node)  # the top expression
         elif isinstance(node.op, ast.BitAnd):
             s = _eval(node.left, ctx)
             return ((s is not None) and
@@ -87,7 +89,10 @@ def _eval(node, ctx):
             r = operators[type(node.op)](r, _eval(node.values[i], ctx))
         return r
     elif isinstance(node, ast.Attribute):
-        return _eval(node.value, ctx).get(node.attr)
+        r = _eval(node.value, ctx).get(node.attr)
+        if r is None:
+            raise SLAException('Value "%s" is not found' % dump_ast_node(node))
+        return r
     elif isinstance(node, ast.List):
         records = ctx
         filtered = []
@@ -98,6 +103,21 @@ def _eval(node, ctx):
         return filtered
     else:
         raise TypeError(node)
+
+
+def _eval_top(ctx, node):
+    result = []
+    # left -- array, right -- condition
+    filtered = _eval(node.left, ctx)
+    for record in filtered:
+        try:
+            right = _eval(node.right, record)
+            state = (STATE_TRUE if right else STATE_FALSE)
+        except (SLAException, TypeError) as e:
+            state = str(e)
+        result.append(SLAItem(record=record, state=state,
+                              expression=dump_ast_node(node.right)))
+    return result
 
 
 def dump_ast_node(node):
