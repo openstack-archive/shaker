@@ -1,6 +1,6 @@
-========
-Examples
-========
+===================
+OpenStack Scenarios
+===================
 
 L2 Same Domain
 --------------
@@ -15,7 +15,7 @@ How To Run
 ^^^^^^^^^^
 .. code::
 
-    shaker --server-endpoint <host:port> --scenario <full_l2.yaml> --report <full_l2.html>
+    shaker --server-endpoint <host:port> --scenario networking/full_l2 --report <full_l2.html>
 
 Scenario
 ^^^^^^^^
@@ -36,7 +36,7 @@ How To Run
 ^^^^^^^^^^
 .. code::
 
-    shaker --server-endpoint <host:port> --scenario <full_l3_east_west.yaml> --report <full_l3_east_west.html>
+    shaker --server-endpoint <host:port> --scenario networking/full_l3_east_west --report <full_l3_east_west.html>
 
 Scenario
 ^^^^^^^^
@@ -59,7 +59,7 @@ How To Run
 ^^^^^^^^^^
 .. code::
 
-    shaker --server-endpoint <host:port> --scenario <full_l3_north_south.yaml> --report <full_l3_north_south.html>
+    shaker --server-endpoint <host:port> --scenario networkingfull_l3_north_south --report <full_l3_north_south.html>
 
 Scenario
 ^^^^^^^^

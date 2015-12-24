@@ -5,12 +5,43 @@ Usage
 Configuration
 -------------
 
-The connection to OpenStack is configured using standard ``openrc`` file. (Refer to
-http://docs.openstack.org/cli-reference/content/cli_openrc.html on how to retrieve it)
-
+For OpenStack scenarios the connection is configured using standard ``openrc`` file. (Refer to
+http://docs.openstack.org/cli-reference/content/cli_openrc.html on how to retrieve it).
 The config can be passed to Shaker rather by sourcing into system env ``source openrc``
 or via set of CLI parameters ``--os-tenant-name``, ``--os-username``, ``--os-password``,
 ``--os-auth-url`` and ``--os-region-name``. Note that Shaker requires a user with admin privileges.
+Connection to SSL endpoints is configuredby parameters ``--os-cacert`` and ``--os-insecure``
+(to disable strict verifications of certificates).
+
+
+Common Parameters
+-----------------
+
+The following parameters are applicable for both OpenStack mode (`shaker`) and spot mode (`shaker-spot`).
+
+1. Run the scenario with defaults and generate interactive report into file `report.html`::
+
+  .. code::
+
+      shaker --scenario <scenario> --report report.html
+
+2. Run the scenario and store raw result::
+
+  .. code::
+
+      shaker --scenario <scenario> --output output.json
+
+3. Run the scenario and store SLA verification results in `subunit <https://launchpad.net/subunit>`_ stream file::
+
+  .. code::
+
+      shaker --scenario <scenario> --subunit report.subunit
+
+4. Generate report from the raw data::
+
+  .. code::
+
+      shaker-report --input output.json --output report.html
 
 
 Scenario Explained
@@ -88,14 +119,16 @@ Test classes
 Tools are configured via key-value attributes in test definition. For all networking tools Shaker offers unified parameters, that are translated
 automatically.
 
-iperf_graph, iperf:
-~~~~~~~~~~~~~~~~~~~
+iperf3, iperf, iperf_graph:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
     * ``time`` - time in seconds to transmit for, defaults to `60`
     * ``udp`` - use UDP instead of TCP, defaults to `TCP`
     * ``interval`` - seconds between periodic bandwidth reports, defaults to `1 s`
     * ``bandwidth`` - for UDP, bandwidth to send at in bits/sec, defaults to `1 Mbit/s`
     * ``threads`` - number of parallel client threads to run
     * ``host`` - the address of destination host to run the tool against, defaults to IP address of slave agent
+    * ``datagram_size`` - the size of UDP datagrams
+    * ``mss`` - set TCP maximum segment size
 
 flent:
 ~~~~~~
@@ -115,3 +148,19 @@ shell:
 ~~~~~~
     * ``program`` - run single program
     * ``script`` - run bash script
+
+
+SLA validation
+^^^^^^^^^^^^^^
+
+Test case can contain SLA rules that are calculated upon test completion.
+Every rule has 2 parts: record selector and condition. The record selector allows
+to filter only subset of all records, e.g. of type `agent` to filter records produced
+by a single agent. The condition applies to particular statistics.
+
+SLA examples:
+ * ``[type == 'agent'] >> (stats.bandwidth.min > 1000)`` - require min bandwidth on every agent be at least 1000 Mbit
+ * ``[type == 'agent'] >> (stderr == '')`` - require stderr to be empty
+
+Results of SLA validation can be obtained by generating output in subunit format.
+To do this a file name should be provided via `--subunit` parameter.

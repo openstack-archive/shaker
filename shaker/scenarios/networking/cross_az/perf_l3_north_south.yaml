@@ -10,16 +10,16 @@ deployment:
 execution:
   tests:
   -
-    title: Iperf TCP
-    class: iperf_graph
+    title: TCP
+    class: iperf3
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 900)"
+    - "[type == 'agent'] >> (stats.retransmits.max < 50)"
   -
-    title: Iperf UDP
-    class: iperf_graph
-    udp: 1
+    title: UDP
+    class: iperf3
+    udp: on
     bandwidth: 1000M
+    datagram_size: 32
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.min > 1000)"
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 2000)"
+    - "[type == 'agent'] >> (stats.packets.mean > 20000)"

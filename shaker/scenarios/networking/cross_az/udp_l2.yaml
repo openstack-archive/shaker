@@ -10,7 +10,7 @@ execution:
   progression: quadratic
   tests:
   -
-    title: Iperf UDP
+    title: UDP
     class: iperf3
     udp: on
     bandwidth: 1000M

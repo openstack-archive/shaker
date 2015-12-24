@@ -10,10 +10,6 @@ execution:
   progression: linear
   tests:
   -
-    title: Iperf TCP
-    class: iperf_graph
-    time: 60
-  -
     title: TCP download
     class: flent
     method: tcp_download
@@ -21,8 +17,3 @@ execution:
     title: TCP bi-directional
     class: flent
     method: tcp_bidirectional
-  -
-    title: Iperf UDP
-    class: iperf
-    udp: 1
-    bandwidth: 1000M

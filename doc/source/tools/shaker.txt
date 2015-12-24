@@ -124,16 +124,15 @@ optional arguments:
                         "interactive".
   --scenario SCENARIO   Scenario to play. Can be a file name or one of
                         aliases: "misc/instance_metadata",
-                        "misc/static_agent", "misc/static_agent_networking",
-                        "misc/static_agents_pair",
+                        "misc/static_agent", "misc/static_agents_pair",
                         "networking/cross_az/full_l2",
                         "networking/cross_az/full_l3_east_west",
                         "networking/cross_az/full_l3_north_south",
                         "networking/cross_az/perf_l2",
                         "networking/cross_az/perf_l3_east_west",
                         "networking/cross_az/perf_l3_north_south",
-                        "networking/cross_az/udp_full_l2",
                         "networking/cross_az/udp_l2",
+                        "networking/cross_az/udp_l2_mss8950",
                         "networking/cross_az/udp_l3_east_west",
                         "networking/dense_l2",
                         "networking/dense_l3_east_west",
@@ -144,8 +143,7 @@ optional arguments:
                         "networking/perf_l3_north_south", "networking/udp_l2",
                         "networking/udp_l3_east_west",
                         "networking/udp_l3_north_south", "spot/tcp",
-                        "spot/tcp_bandwidth". Defaults to
-                        env[SHAKER_SCENARIO].
+                        "spot/udp". Defaults to env[SHAKER_SCENARIO].
   --server-endpoint SERVER_ENDPOINT
                         Address for server connections (host:port), defaults
                         to env[SHAKER_SERVER_ENDPOINT].

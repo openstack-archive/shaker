@@ -10,19 +10,20 @@ execution:
   progression: quadratic
   tests:
   -
-    title: Iperf TCP
-    class: iperf_graph
-    time: 60
-  -
-    title: TCP download
+    title: Download
     class: flent
     method: tcp_download
+    sla:
+    - "[type == 'agent'] >> (stats.tcp_download.mean > 900)"
+    - "[type == 'agent'] >> (stats.ping_icmp.max < 0.5)"
   -
-    title: TCP bi-directional
+    title: Upload
+    class: flent
+    method: tcp_upload
+    sla:
+    - "[type == 'agent'] >> (stats.tcp_upload.mean > 900)"
+    - "[type == 'agent'] >> (stats.ping_icmp.max < 0.5)"
+  -
+    title: Bi-directional
     class: flent
     method: tcp_bidirectional
-  -
-    title: Iperf UDP
-    class: iperf
-    udp: 1
-    bandwidth: 1000M

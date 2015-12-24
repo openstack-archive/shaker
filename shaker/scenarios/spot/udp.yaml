@@ -1,0 +1,18 @@
+title: UDP bandwidth
+
+description:
+  This scenario uses iperf3 to measure UDP bandwidth between local host and
+  ping.online.net (or against hosts provided via CLI). SLA check is verified
+  and requires at least 10 000 packets per second.
+
+execution:
+  tests:
+  -
+    title: UDP
+    class: iperf3
+    host: ping.online.net
+    udp: on
+    time: 20
+    bandwidth: 1000M
+    sla:
+    - "[type == 'agent'] >> (stats.packets.mean > 10000)"

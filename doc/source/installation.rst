@@ -33,6 +33,11 @@ Installation on fresh system requires additional libraries needed by some of dep
 Deployment
 ^^^^^^^^^^
 
+Shaker may be used to run scenarios against OpenStack or hardware nodes.
+
+OpenStack Deployment
+~~~~~~~~~~~~~~~~~~~~
+
 .. image:: images/architecture.*
 
 Requirements:
@@ -43,7 +48,7 @@ Requirements:
 
 
 First Run
-^^^^^^^^^
+~~~~~~~~~
 
 Build the master image. The process downloads Ubuntu cloud image, installs all necessary packages and stores
 snapshot into Glance. This snapshot is used by ``shaker`` as base of instances.
@@ -52,3 +57,9 @@ snapshot into Glance. This snapshot is used by ``shaker`` as base of instances.
 
     $ shaker-image-builder
 
+
+Non-OpenStack Deployment (aka Spot mode)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To run scenarios against remote nodes (``shaker-spot`` command) install shaker on the local host.
+Make sure all necessary system tools are installed too.

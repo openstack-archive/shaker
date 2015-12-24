@@ -10,7 +10,7 @@ execution:
   progression: quadratic
   tests:
   -
-    title: Iperf UDP
+    title: UDP
     class: iperf
     udp: 1
     threads: 2
