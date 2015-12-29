@@ -115,3 +115,9 @@ def wait_server_snapshot(nova_client, server_id):
     if hasattr(server, task_state_field):
         _poll_for_status(nova_client, server.id, [None, '-', ''],
                          status_field=task_state_field)
+
+def get_flavor(nova_client, flavor_name):
+    for flavor in nova_client.flavors.list():
+        if flavor.name == flavor_name:
+            return flavor
+    return None

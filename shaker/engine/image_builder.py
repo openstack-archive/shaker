@@ -127,9 +127,9 @@ def cleanup():
     if image:
         openstack_client.glance.images.delete(image)
 
-    if nova.is_flavor_exists(openstack_client.nova, flavor_name):
-        openstack_client.nova.flavors.delete(name=flavor_name)
-
+    flavor = nova.get_flavor(openstack_client.nova, flavor_name)
+    if flavor:
+        openstack_client.nova.flavors.delete(flavor)
 
 if __name__ == "__main__":
     build_image()
