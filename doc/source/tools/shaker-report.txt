@@ -1,5 +1,6 @@
-usage: shaker-report [-h] [--config-dir DIR] [--config-file PATH] [--debug]
-                     [--input INPUT] [--log-config-append PATH]
+usage: shaker-report [-h] [--book BOOK] [--config-dir DIR]
+                     [--config-file PATH] [--debug] [--input INPUT]
+                     [--log-config-append PATH]
                      [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
                      [--log-file PATH] [--log-format FORMAT] [--nodebug]
                      [--nouse-syslog] [--nouse-syslog-rfc-format]
@@ -11,6 +12,8 @@ usage: shaker-report [-h] [--config-dir DIR] [--config-file PATH] [--debug]
 
 optional arguments:
   -h, --help            show this help message and exit
+  --book BOOK           Generate report in ReST format and store it into the
+                        specified folder, defaults to env[SHAKER_BOOK].
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
                         predictable parse order if individual options are
