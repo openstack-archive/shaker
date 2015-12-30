@@ -18,6 +18,7 @@ to execute. Additionally tests may be tuned dynamically in command-line.
     tools
     examples
     examples_spot
+    reports/index
     architecture
     contributing
 
