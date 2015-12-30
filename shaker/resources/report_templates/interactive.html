@@ -66,6 +66,20 @@
       var sla_table_template = Handlebars.compile($("#sla_table_template").html());
       var errors_template = Handlebars.compile($("#errors_template").html());
 
+      function concatenate(strings) {
+        // returns strings concatenated via comma (like join() but omits empty strings)
+        var f = false;
+        var result = "";
+        $.each(strings, function (_i, string) {
+          if (string.length > 0) {
+            if (f) result += ", ";
+            result += string;
+            f = true;
+          }
+        });
+        return result;
+      }
+
       function initSingleSelector(name, values) {
         var selectorId = "#" + name + "_selector";
 
@@ -178,12 +192,12 @@
           var axes = [];
           axes[meta[1][0]] = 'y';
           var axis = {
-            x: {label: meta[0][0] + ", " + meta[0][1]},
-            y: {label: meta[1][0] + ", " + meta[1][1], min: 0}
+            x: {label: concatenate(meta[0])},
+            y: {label: concatenate(meta[1]), min: 0}
           };
           if (meta.length > 2) {
             axes[meta[2][0]] = 'y2';
-            axis['y2'] = {label: meta[2][0] + ", " + meta[2][1], min: 0, show: true}
+            axis['y2'] = {label: concatenate(meta[2]), min: 0, show: true}
           }
 
           c3.generate({
@@ -209,20 +223,6 @@
         contentArea.append(concurrency_summary_template(
             {record: $.extend({}, record, ext_options)}
         ));
-        if (record["chart"]) {
-          c3.generate({
-            bindto: "#" + chart_id,
-            data: {
-              x: 'time',
-              columns: record["chart"],
-              types: {bandwidth: 'area'}
-            },
-            axis: {
-              x: {label: 'time, s'},
-              y: {label: 'Bandwidth, Mbit/s', min: 0}
-            }
-          });
-        }
         if (record["node_chart"]) {
           c3.generate({
             bindto: "#" + node_chart_id,
@@ -250,17 +250,26 @@
             {record: $.extend({}, record, ext_options)}
         ));
         if (record["chart"]) {
+          var meta = record["meta"];
+          var axes = [];
+          axes[meta[1][0]] = 'y';
+          var axis = {
+            x: {label: concatenate(meta[0])},
+            y: {label: concatenate(meta[1]), min: 0}
+          };
+          if (meta.length > 2) {
+            axes[meta[2][0]] = 'y2';
+            axis['y2'] = {label: concatenate(meta[2]), min: 0, show: true}
+          }
+
           c3.generate({
             bindto: "#" + chart_id,
             data: {
-              x: 'x',
+              x: 'concurrency',
               columns: record["chart"],
-              type: "area"
+              axes: axes
             },
-            axis: {
-              x: {label: 'concurrency'},
-              y: {label: 'Bandwidth, Mbit/s', min: 0}
-            }
+            axis: axis
           });
         }
       }

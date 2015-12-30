@@ -50,18 +50,24 @@ class TrafficAggregator(base.BaseAggregator):
         chart = []
         xs = []
         mean_v = collections.defaultdict(list)
+        units = {}
 
         for record in records:
             xs.append(record['concurrency'])
             for k, v in record['stats'].items():
                 mean_v[k].append(v['mean'])
+                units[k] = v['unit']
+
+        chart.append(['concurrency'] + xs)
+        meta = [('concurrency', '')]
 
         for k in mean_v.keys():
-            chart.append(['Mean %s' % k] + mean_v[k])
+            chart.append([k] + mean_v[k])
+            meta.append((k, units[k]))
 
-        chart.append(['x'] + xs)
         return {
             'chart': chart,
+            'meta': meta,
         }
 
     def concurrency_summary(self, records):
@@ -69,12 +75,10 @@ class TrafficAggregator(base.BaseAggregator):
         min_v = collections.defaultdict(list)
         mean_v = collections.defaultdict(list)
         unit_v = dict()
-        chart = []
 
         nodes = []
         for record in records:
             nodes.append(record['node'])
-            chart += record['chart']
 
             for k, v in record['stats'].items():
                 max_v[k].append(v['max'])
@@ -90,13 +94,13 @@ class TrafficAggregator(base.BaseAggregator):
                             min=min(min_v[k]),
                             mean=mean(mean_v[k]),
                             unit=unit_v[k])
-            node_chart.append(['Mean %s' % k] + mean_v[k])
-            node_chart.append(['Max %s' % k] + max_v[k])
-            node_chart.append(['Min %s' % k] + min_v[k])
+            s = '%s, %s' % (k, unit_v[k]) if unit_v[k] else k
+            node_chart.append(['Mean %s' % s] + mean_v[k])
+            node_chart.append(['Max %s' % s] + max_v[k])
+            node_chart.append(['Min %s' % s] + min_v[k])
 
         return {
             'stats': stats,
-            'x-chart': chart,
             'node_chart': node_chart,
         }
 
