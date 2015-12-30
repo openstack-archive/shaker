@@ -238,7 +238,8 @@ def act():
                  'no_report_on_error=True')
     else:
         report.generate_report(output, cfg.CONF.report_template,
-                               cfg.CONF.report, cfg.CONF.subunit)
+                               cfg.CONF.report, cfg.CONF.subunit,
+                               cfg.CONF.book)
 
 
 def main():
