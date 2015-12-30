@@ -43,6 +43,7 @@ Scenario
 
 .. literalinclude:: ../../shaker/scenarios/networking/full_l3_east_west.yaml
 
+The example of execution report: :ref:`networking/full_l3_east_west`.
 
 
 L3 North-South
