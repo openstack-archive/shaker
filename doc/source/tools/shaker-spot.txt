@@ -1,9 +1,9 @@
-usage: shaker-spot [-h] [--config-dir DIR] [--config-file PATH] [--debug]
-                   [--log-config-append PATH] [--log-date-format DATE_FORMAT]
-                   [--log-dir LOG_DIR] [--log-file PATH] [--log-format FORMAT]
-                   [--matrix MATRIX] [--no-report-on-error] [--nodebug]
-                   [--nono-report-on-error] [--nouse-syslog]
-                   [--nouse-syslog-rfc-format] [--noverbose]
+usage: shaker-spot [-h] [--book BOOK] [--config-dir DIR] [--config-file PATH]
+                   [--debug] [--log-config-append PATH]
+                   [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
+                   [--log-file PATH] [--log-format FORMAT] [--matrix MATRIX]
+                   [--no-report-on-error] [--nodebug] [--nono-report-on-error]
+                   [--nouse-syslog] [--nouse-syslog-rfc-format] [--noverbose]
                    [--nowatch-log-file] [--output OUTPUT] [--report REPORT]
                    [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
                    [--subunit SUBUNIT]
@@ -13,6 +13,8 @@ usage: shaker-spot [-h] [--config-dir DIR] [--config-file PATH] [--debug]
 
 optional arguments:
   -h, --help            show this help message and exit
+  --book BOOK           Generate report in ReST format and store it into the
+                        specified folder, defaults to env[SHAKER_BOOK].
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
                         predictable parse order if individual options are
