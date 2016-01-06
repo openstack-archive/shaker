@@ -1,3 +1,5 @@
+title: OpenStack L3 North-South Cross-AZ
+
 description:
   This scenario launches pairs of VMs on different compute nodes. VMs are in
   the different networks connected via different routers, master accesses slave
@@ -14,16 +16,10 @@ execution:
     title: Download
     class: flent
     method: tcp_download
-    sla:
-    - "[type == 'agent'] >> (stats.tcp_download.mean > 900)"
-    - "[type == 'agent'] >> (stats.ping_icmp.max < 0.5)"
   -
     title: Upload
     class: flent
     method: tcp_upload
-    sla:
-    - "[type == 'agent'] >> (stats.tcp_upload.mean > 900)"
-    - "[type == 'agent'] >> (stats.ping_icmp.max < 0.5)"
   -
     title: Bi-directional
     class: flent
