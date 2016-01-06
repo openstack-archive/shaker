@@ -1,3 +1,5 @@
+title: OpenStack L3 North-South Performance
+
 description:
   This scenario launches 1 pair of VMs on different compute nodes. VMs are in
   the different networks connected via different routers, master accesses slave
@@ -13,8 +15,8 @@ execution:
     title: TCP
     class: iperf3
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 900)"
-    - "[type == 'agent'] >> (stats.retransmits.max < 50)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 5000)"
+    - "[type == 'agent'] >> (stats.retransmits.max < 10)"
   -
     title: UDP
     class: iperf3
@@ -22,4 +24,4 @@ execution:
     bandwidth: 1000M
     datagram_size: 32
     sla:
-    - "[type == 'agent'] >> (stats.packets.mean > 20000)"
+    - "[type == 'agent'] >> (stats.packets.mean > 100000)"
