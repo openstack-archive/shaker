@@ -1,3 +1,5 @@
+title: OpenStack L2 Cross-AZ Performance
+
 description:
   This scenario launches 1 pair of VMs in the same private network on different
   compute nodes.
@@ -9,16 +11,23 @@ deployment:
 execution:
   tests:
   -
+    title: Ping
+    class: flent
+    method: ping
+    time: 10
+    sla:
+    - "[type == 'agent'] >> (stats.ping_icmp.mean < 2.0)"
+  -
     title: TCP
     class: iperf3
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 900)"
-    - "[type == 'agent'] >> (stats.retransmits.max < 50)"
+    - "[type == 'agent'] >> (stats.bandwidth.mean > 5000)"
+    - "[type == 'agent'] >> (stats.retransmits.max < 10)"
   -
     title: UDP
     class: iperf3
     udp: on
-    bandwidth: 1000M
+    bandwidth: 0
     datagram_size: 32
     sla:
-    - "[type == 'agent'] >> (stats.packets.mean > 20000)"
+    - "[type == 'agent'] >> (stats.packets.mean > 100000)"
