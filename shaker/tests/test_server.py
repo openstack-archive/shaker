@@ -126,14 +126,14 @@ class TestServerPlayScenario(testtools.TestCase):
         for actual in output['records'].values():
             has |= all(item in actual.items() for item in expected.items())
         s = 'Output should contain record similar to: %s' % expected
-        self.assertEqual(True, has, message=s)
+        self.assertTrue(has, msg=s)
 
     def assertNotContainsSimilarRecord(self, expected, output):
         has = False
         for actual in output['records'].values():
             has |= all(item in actual.items() for item in expected.items())
         s = 'Output should not contain record similar to: %s' % expected
-        self.assertEqual(False, has, message=s)
+        self.assertFalse(has, msg=s)
 
     @mock.patch('shaker.engine.server.execute')
     @mock.patch('shaker.engine.deploy.Deployment')
