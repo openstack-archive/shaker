@@ -24,7 +24,7 @@ LOG = logging.getLogger(__name__)
 
 
 def _filter_none(array):
-    return [x for x in array if x]
+    return [x for x in array if x is not None]
 
 
 def mean(array):
