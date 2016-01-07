@@ -22,16 +22,16 @@ from shaker.engine import sla
 class TestSla(testtools.TestCase):
     def test_eval(self):
         self.assertEqual(2 ** 6, sla.eval_expr('2**6'))
-        self.assertEqual(True, sla.eval_expr('11 > a > 5', {'a': 7}))
+        self.assertTrue(sla.eval_expr('11 > a > 5', {'a': 7}))
         self.assertEqual(42, sla.eval_expr('2 + a.b', {'a': {'b': 40}}))
-        self.assertEqual(True, sla.eval_expr('11 > 7 and 5 < 6'))
-        self.assertEqual(False, sla.eval_expr('(not 11 > 7) or (not 5 < 6)'))
+        self.assertTrue(sla.eval_expr('11 > 7 and 5 < 6'))
+        self.assertFalse(sla.eval_expr('(not 11 > 7) or (not 5 < 6)'))
 
     def test_eval_regex(self):
-        self.assertEqual(True, sla.eval_expr('"some text" & "\w+\s+\w+"'))
-        self.assertEqual(False, sla.eval_expr('"some text" & "\d+"'))
+        self.assertTrue(sla.eval_expr('"some text" & "\w+\s+\w+"'))
+        self.assertFalse(sla.eval_expr('"some text" & "\d+"'))
 
-        self.assertEqual(False, sla.eval_expr('a & "\d+"', {'a': ''}))
+        self.assertFalse(sla.eval_expr('a & "\d+"', {'a': ''}))
 
     def test_eval_non_existent_ref(self):
         self.assertRaises(sla.SLAException, sla.eval_expr,
