@@ -199,7 +199,11 @@ def play_scenario(scenario):
         output['records'][record['id']] = record
     finally:
         if deployment:
-            deployment.cleanup()
+            try:
+                deployment.cleanup()
+            except Exception as e:
+                LOG.error('Failed to cleanup the deployment: %s', e,
+                          exc_info=True)
 
     # extend every record with reference to scenario
     for record in output['records'].values():
