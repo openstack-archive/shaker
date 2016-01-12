@@ -25,7 +25,7 @@ class CommandLine(object):
 
     def add(self, param_name, param_value=None):
         self.tokens.append('%s' % param_name)
-        if param_value:
+        if param_value is not None:
             self.tokens.append(str(param_value))
 
     def make(self):
