@@ -16,15 +16,8 @@ to execute. Additionally tests may be tuned dynamically in command-line.
     installation
     usage
     tools
-    examples
-    examples_spot
     architecture
+    examples/index
+    examples_spot
+    reports/index
     contributing
-
-.. Indices and tables
-.. ==================
-
-.. * :ref:`genindex`
-.. * :ref:`modindex`
-.. * :ref:`search`
-
