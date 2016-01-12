@@ -30,7 +30,7 @@ def add_common_iperf_params(cmd, executor):
         cmd.add('--len', executor.test_definition.get('buffer_size'))
     if executor.test_definition.get('udp'):
         cmd.add('--udp')
-        if executor.test_definition.get('bandwidth'):
+        if executor.test_definition.get('bandwidth') is not None:
             cmd.add('--bandwidth', executor.test_definition.get('bandwidth'))
         if executor.test_definition.get('datagram_size'):
             cmd.add('--len', executor.test_definition.get('datagram_size'))
