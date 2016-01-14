@@ -52,7 +52,7 @@ class TrafficAggregator(base.BaseAggregator):
         mean_v = collections.defaultdict(list)
         units = {}
 
-        for record in records:
+        for record in sorted(records, key=lambda x: x['concurrency']):
             xs.append(record['concurrency'])
             for k, v in record['stats'].items():
                 mean_v[k].append(v['mean'])

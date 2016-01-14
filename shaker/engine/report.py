@@ -27,6 +27,7 @@ from shaker.engine import aggregators
 from shaker.engine import config
 from shaker.engine import sla
 from shaker.engine import utils
+from shaker.engine import writer
 
 
 LOG = logging.getLogger(__name__)
@@ -139,7 +140,8 @@ def save_to_subunit(sla_records, subunit_filename):
             fd.close()
 
 
-def generate_report(data, report_template, report_filename, subunit_filename):
+def generate_report(data, report_template, report_filename, subunit_filename,
+                    book_folder=None):
     LOG.debug('Generating report, template: %s, output: %s',
               report_template, report_filename or '<dummy>')
 
@@ -173,6 +175,9 @@ def generate_report(data, report_template, report_filename, subunit_filename):
         except IOError as e:
             LOG.error('Failed to write report file: %s', e)
 
+    if book_folder:
+        writer.write_book(book_folder, data)
+
 
 def main():
     utils.init_config_and_logging(config.REPORT_OPTS + config.INPUT_OPTS)
@@ -181,7 +186,7 @@ def main():
     report_data = json.loads(utils.read_file(cfg.CONF.input))
 
     generate_report(report_data, cfg.CONF.report_template, cfg.CONF.report,
-                    cfg.CONF.subunit)
+                    cfg.CONF.subunit, cfg.CONF.book)
 
 
 if __name__ == "__main__":

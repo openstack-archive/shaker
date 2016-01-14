@@ -173,6 +173,10 @@ REPORT_OPTS = [
                default=utils.env('SHAKER_SUBUNIT'),
                help='Subunit stream file name, defaults to '
                     'env[SHAKER_SUBUNIT].'),
+    cfg.StrOpt('book',
+               default=utils.env('SHAKER_BOOK'),
+               help='Generate report in ReST format and store it into the '
+                    'specified folder, defaults to env[SHAKER_BOOK]. '),
 ]
 
 INPUT_OPTS = [
