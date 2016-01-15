@@ -1,3 +1,3 @@
-#!/bin/bash
+#!/bin/bash -xe
 
-for f in doc/source/images/*svg; do cairosvg ${f} -o ${f/\.svg/\.png} ; done
+find doc/source/ -name *svg | sed "s/\.svg$//" | xargs -I% cairosvg "%.svg" -o "%.png"
