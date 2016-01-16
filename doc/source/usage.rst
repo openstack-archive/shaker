@@ -5,8 +5,10 @@ Usage
 Configuration
 -------------
 
-For OpenStack scenarios the connection is configured using standard ``openrc`` file. (Refer to
-http://docs.openstack.org/cli-reference/content/cli_openrc.html on how to retrieve it).
+For OpenStack scenarios the connection is configured using standard
+``openrc`` file. (Refer to
+http://docs.openstack.org/cli-reference/common/cli_set_environment_variables_using_openstack_rc.html
+on how to retrieve it).
 The config can be passed to Shaker rather by sourcing into system env ``source openrc``
 or via set of CLI parameters ``--os-tenant-name``, ``--os-username``, ``--os-password``,
 ``--os-auth-url`` and ``--os-region-name``. Note that Shaker requires a user with admin privileges.
