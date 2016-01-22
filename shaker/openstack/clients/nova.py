@@ -26,15 +26,23 @@ LOG = logging.getLogger(__name__)
 NOVA_VERSION = '2'
 
 
+class ForbiddenException(nova_client_pkg.exceptions.Forbidden):
+    pass
+
+
 def create_client(keystone_session, os_region_name):
     return nova_client_pkg.Client(NOVA_VERSION, session=keystone_session,
                                   region_name=os_region_name)
 
 
 def get_available_compute_nodes(nova_client):
+    try:
         return [dict(host=svc.host, zone=svc.zone)
                 for svc in nova_client.services.list(binary='nova-compute')
                 if svc.state == 'up' and svc.status == 'enabled']
+    except nova_client_pkg.exceptions.Forbidden:
+        msg = 'Forbidden to get list of compute nodes'
+        raise ForbiddenException(msg)
 
 
 def is_flavor_exists(nova_client, flavor_name):

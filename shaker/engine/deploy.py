@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import functools
 import random
 
@@ -166,6 +167,18 @@ def filter_agents(agents, stack_outputs, override=None):
     return result
 
 
+def normalize_accommodation(accommodation):
+    result = collections.OrderedDict()
+
+    for s in accommodation:
+        if isinstance(s, dict):
+            result.update(s)
+        else:
+            result[s] = True
+
+    return result
+
+
 class Deployment(object):
     def __init__(self):
         self.openstack_client = None
@@ -188,12 +201,28 @@ class Deployment(object):
                                  self.openstack_client.neutron))
         self.stack_name = 'shaker_%s' % utils.random_string()
 
+    def _get_compute_nodes(self, accommodation):
+        try:
+            return nova.get_available_compute_nodes(self.openstack_client.nova)
+        except nova.ForbiddenException:
+            # user has no permissions to list compute nodes
+            count = accommodation.get('compute_nodes')
+            if not count:
+                raise DeploymentException(
+                    'When run with non-admin user the scenario must specify '
+                    'number of compute nodes to use')
+
+            zones = accommodation.get('zones') or ['nova']
+            return [dict(host=None, zone=zones[n % len(zones)])
+                    for n in range(count)]
+
     def _deploy_from_hot(self, specification, server_endpoint, base_dir=None):
+        accommodation = (specification.get('accommodation') or
+                         specification.get('vm_accommodation'))
+
         agents = generate_agents(
-            nova.get_available_compute_nodes(self.openstack_client.nova),
-            specification.get('accommodation') or
-            specification.get('vm_accommodation'),
-            self.stack_name)
+            self._get_compute_nodes(normalize_accommodation(accommodation)),
+            accommodation, self.stack_name)
 
         # render template by jinja
         vars_values = {

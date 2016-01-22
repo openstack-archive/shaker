@@ -12,12 +12,13 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import collections
+import itertools
 import mock
 import testtools
 
 from shaker.engine import deploy
-
+from shaker.openstack.clients import nova
 
 ZONE = 'zone'
 
@@ -467,3 +468,50 @@ class TestDeploy(testtools.TestCase):
 
         self.assertRaises(deploy.DeploymentException,
                           deployment.deploy, {'template': 'foo'})
+
+    @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
+    def test_get_compute_nodes_non_admin(self, nova_nodes_mock):
+        deployment = deploy.Deployment()
+        deployment.openstack_client = mock.Mock()
+
+        def raise_error(arg):
+            raise nova.ForbiddenException('err')
+
+        nova_nodes_mock.side_effect = raise_error
+        accommodation = {'compute_nodes': 4}
+        expected = list(itertools.repeat({'host': None, 'zone': 'nova'}, 4))
+
+        observed = deployment._get_compute_nodes(accommodation)
+
+        self.assertEqual(expected, observed)
+
+    @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
+    def test_get_compute_nodes_non_admin_zones(self, nova_nodes_mock):
+        deployment = deploy.Deployment()
+        deployment.openstack_client = mock.Mock()
+
+        def raise_error(arg):
+            raise nova.ForbiddenException('err')
+
+        nova_nodes_mock.side_effect = raise_error
+        accommodation = {'compute_nodes': 4, 'zones': ['nova', 'nsx']}
+        expected = [
+            {'host': None, 'zone': 'nova'},
+            {'host': None, 'zone': 'nsx'},
+            {'host': None, 'zone': 'nova'},
+            {'host': None, 'zone': 'nsx'},
+        ]
+
+        observed = deployment._get_compute_nodes(accommodation)
+
+        self.assertEqual(expected, observed)
+
+    def test_normalize_accommodation(self):
+        origin = ['pair', 'single_room', {'compute_nodes': 2}]
+
+        expected = collections.OrderedDict()
+        expected['pair'] = True
+        expected['single_room'] = True
+        expected['compute_nodes'] = 2
+
+        self.assertEqual(expected, deploy.normalize_accommodation(origin))
