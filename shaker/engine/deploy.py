@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
 import functools
 import random
 
@@ -118,6 +119,13 @@ def generate_agents(compute_nodes, accommodation, unique):
                         'instance accommodation %(acc)s' %
                         dict(cn=compute_nodes, acc=accommodation))
 
+    # inject availability zone
+    for agent in agents.values():
+        az = agent['zone']
+        if agent['node']:
+            az += ':' + agent['node']
+        agent['availability_zone'] = az
+
     return agents
 
 
@@ -166,10 +174,54 @@ def filter_agents(agents, stack_outputs, override=None):
     return result
 
 
+def distribute_agents(agents, get_host_fn):
+    result = {}
+
+    hosts = set()
+    buckets = collections.defaultdict(list)
+    for agent in agents.values():
+        agent_id = agent['id']
+        # we assume that server name equals to agent_id
+        host_id = get_host_fn(agent_id)
+
+        if host_id not in hosts:
+            hosts.add(host_id)
+            agent['node'] = host_id
+            buckets[agent['mode']].append(agent)
+        else:
+            LOG.info('Filter out agent %s, host %s is already occupied',
+                     agent_id, host_id)
+
+    if buckets['alone']:
+        result = dict((a['id'], a) for a in buckets['alone'])
+    else:
+        for master, slave in zip(buckets['master'], buckets['slave']):
+            master['slave_id'] = slave['id']
+            slave['master_id'] = master['id']
+
+            result[master['id']] = master
+            result[slave['id']] = slave
+
+    return result
+
+
+def normalize_accommodation(accommodation):
+    result = collections.OrderedDict()
+
+    for s in accommodation:
+        if isinstance(s, dict):
+            result.update(s)
+        else:
+            result[s] = True
+
+    return result
+
+
 class Deployment(object):
     def __init__(self):
         self.openstack_client = None
         self.stack_created = False
+        self.privileged_mode = True
 
     def connect_to_openstack(self, os_username, os_password, os_tenant_name,
                              os_auth_url, os_region_name, external_net,
@@ -188,12 +240,29 @@ class Deployment(object):
                                  self.openstack_client.neutron))
         self.stack_name = 'shaker_%s' % utils.random_string()
 
+    def _get_compute_nodes(self, accommodation):
+        try:
+            return nova.get_available_compute_nodes(self.openstack_client.nova)
+        except nova.ForbiddenException:
+            # user has no permissions to list compute nodes
+            self.privileged_mode = False
+            count = accommodation.get('compute_nodes')
+            if not count:
+                raise DeploymentException(
+                    'When run with non-admin user the scenario must specify '
+                    'number of compute nodes to use')
+
+            zones = accommodation.get('zones') or ['nova']
+            return [dict(host=None, zone=zones[n % len(zones)])
+                    for n in range(count)]
+
     def _deploy_from_hot(self, specification, server_endpoint, base_dir=None):
+        accommodation = (specification.get('accommodation') or
+                         specification.get('vm_accommodation'))
+
         agents = generate_agents(
-            nova.get_available_compute_nodes(self.openstack_client.nova),
-            specification.get('accommodation') or
-            specification.get('vm_accommodation'),
-            self.stack_name)
+            self._get_compute_nodes(normalize_accommodation(accommodation)),
+            accommodation, self.stack_name)
 
         # render template by jinja
         vars_values = {
@@ -224,7 +293,14 @@ class Deployment(object):
         outputs = heat.get_stack_outputs(self.openstack_client.heat, stack_id)
         override = self._get_override(specification.get('override'))
 
-        return filter_agents(agents, outputs, override)
+        agents = filter_agents(agents, outputs, override)
+
+        if not self.privileged_mode:
+            get_host_fn = functools.partial(nova.get_server_host_id,
+                                            self.openstack_client.nova)
+            agents = distribute_agents(agents, get_host_fn)
+
+        return agents
 
     def _get_override(self, override_spec):
         def override_ip(agent, ip_type):

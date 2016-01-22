@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
+import copy
+import itertools
 import mock
 import testtools
 
 from shaker.engine import deploy
-
+from shaker.openstack.clients import nova
 
 ZONE = 'zone'
 
@@ -34,11 +37,13 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'availability_zone': '%s:dos' % ZONE,
                 'zone': ZONE,
                 'node': 'dos'},
         }
@@ -53,6 +58,7 @@ class TestDeploy(testtools.TestCase):
             'UU1D_master_0': {
                 'id': 'UU1D_master_0',
                 'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
                 'node': 'uno',
                 'zone': ZONE,
                 'slave_id': 'UU1D_slave_0'},
@@ -60,6 +66,7 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'availability_zone': '%s:dos' % ZONE,
                 'zone': ZONE,
                 'node': 'dos'},
         }
@@ -79,6 +86,7 @@ class TestDeploy(testtools.TestCase):
             'UU1D_master_0': {
                 'id': 'UU1D_master_0',
                 'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
                 'node': 'uno',
                 'zone': ZONE,
                 'slave_id': 'UU1D_slave_0'},
@@ -86,11 +94,13 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
             'UU1D_master_1': {
                 'id': 'UU1D_master_1',
                 'mode': 'master',
+                'availability_zone': '%s:dos' % ZONE,
                 'node': 'dos',
                 'zone': ZONE,
                 'slave_id': 'UU1D_slave_1'},
@@ -98,11 +108,13 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_slave_1',
                 'master_id': 'UU1D_master_1',
                 'mode': 'slave',
+                'availability_zone': '%s:dos' % ZONE,
                 'zone': ZONE,
                 'node': 'dos'},
             'UU1D_master_2': {
                 'id': 'UU1D_master_2',
                 'mode': 'master',
+                'availability_zone': '%s:tre' % ZONE,
                 'node': 'tre',
                 'zone': ZONE,
                 'slave_id': 'UU1D_slave_2'},
@@ -110,6 +122,7 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_slave_2',
                 'master_id': 'UU1D_master_2',
                 'mode': 'slave',
+                'availability_zone': '%s:tre' % ZONE,
                 'zone': ZONE,
                 'node': 'tre'},
         }
@@ -124,6 +137,7 @@ class TestDeploy(testtools.TestCase):
             'UU1D_master_0': {
                 'id': 'UU1D_master_0',
                 'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno',
                 'slave_id': 'UU1D_slave_0'},
@@ -131,11 +145,13 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'availability_zone': '%s:dos' % ZONE,
                 'zone': ZONE,
                 'node': 'dos'},
             'UU1D_master_1': {
                 'id': 'UU1D_master_1',
                 'mode': 'master',
+                'availability_zone': '%s:dos' % ZONE,
                 'zone': ZONE,
                 'node': 'dos',
                 'slave_id': 'UU1D_slave_1'},
@@ -143,6 +159,7 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_slave_1',
                 'master_id': 'UU1D_master_1',
                 'mode': 'slave',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
         }
@@ -157,11 +174,13 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
         }
@@ -177,11 +196,13 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'availability_zone': '%s:duo' % ZONE,
                 'zone': ZONE,
                 'node': 'duo'},
         }
@@ -199,11 +220,13 @@ class TestDeploy(testtools.TestCase):
             'UU1D_agent_0': {
                 'id': 'UU1D_agent_0',
                 'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
             'UU1D_agent_1': {
                 'id': 'UU1D_agent_1',
                 'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
         }
@@ -233,12 +256,14 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_master_0',
                 'slave_id': 'UU1D_slave_0',
                 'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
                 'zone': ZONE,
                 'node': 'uno'},
             'UU1D_slave_0': {
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'availability_zone': '%s:tre' % ZONE,
                 'zone': ZONE,
                 'node': 'tre'},
         }
@@ -260,24 +285,28 @@ class TestDeploy(testtools.TestCase):
                 'id': 'UU1D_master_0',
                 'slave_id': 'UU1D_slave_0',
                 'mode': 'master',
+                'availability_zone': 'nova:uno',
                 'zone': 'nova',
                 'node': 'uno'},
             'UU1D_slave_0': {
                 'id': 'UU1D_slave_0',
                 'master_id': 'UU1D_master_0',
                 'mode': 'slave',
+                'availability_zone': 'vcenter:tre',
                 'zone': 'vcenter',
                 'node': 'tre'},
             'UU1D_master_1': {
                 'id': 'UU1D_master_1',
                 'slave_id': 'UU1D_slave_1',
                 'mode': 'master',
+                'availability_zone': 'nova:duo',
                 'zone': 'nova',
                 'node': 'duo'},
             'UU1D_slave_1': {
                 'id': 'UU1D_slave_1',
                 'master_id': 'UU1D_master_1',
                 'mode': 'slave',
+                'availability_zone': 'vcenter:cinco',
                 'zone': 'vcenter',
                 'node': 'cinco'},
         }
@@ -467,3 +496,153 @@ class TestDeploy(testtools.TestCase):
 
         self.assertRaises(deploy.DeploymentException,
                           deployment.deploy, {'template': 'foo'})
+
+    @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
+    def test_get_compute_nodes_non_admin(self, nova_nodes_mock):
+        deployment = deploy.Deployment()
+        deployment.openstack_client = mock.Mock()
+
+        def raise_error(arg):
+            raise nova.ForbiddenException('err')
+
+        nova_nodes_mock.side_effect = raise_error
+        accommodation = {'compute_nodes': 4}
+        expected = list(itertools.repeat({'host': None, 'zone': 'nova'}, 4))
+
+        observed = deployment._get_compute_nodes(accommodation)
+
+        self.assertEqual(expected, observed)
+
+    @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
+    def test_get_compute_nodes_non_admin_zones(self, nova_nodes_mock):
+        deployment = deploy.Deployment()
+        deployment.openstack_client = mock.Mock()
+
+        def raise_error(arg):
+            raise nova.ForbiddenException('err')
+
+        nova_nodes_mock.side_effect = raise_error
+        accommodation = {'compute_nodes': 4, 'zones': ['nova', 'nsx']}
+        expected = [
+            {'host': None, 'zone': 'nova'},
+            {'host': None, 'zone': 'nsx'},
+            {'host': None, 'zone': 'nova'},
+            {'host': None, 'zone': 'nsx'},
+        ]
+
+        observed = deployment._get_compute_nodes(accommodation)
+
+        self.assertEqual(expected, observed)
+
+    @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
+    def test_get_compute_nodes_non_admin_not_configured(self, nova_nodes_mock):
+        deployment = deploy.Deployment()
+        deployment.openstack_client = mock.Mock()
+
+        def raise_error(arg):
+            raise nova.ForbiddenException('err')
+
+        nova_nodes_mock.side_effect = raise_error
+        accommodation = {}
+
+        self.assertRaises(deploy.DeploymentException,
+                          deployment._get_compute_nodes, accommodation)
+
+    def test_normalize_accommodation(self):
+        origin = ['pair', 'single_room', {'compute_nodes': 2}]
+
+        expected = collections.OrderedDict()
+        expected['pair'] = True
+        expected['single_room'] = True
+        expected['compute_nodes'] = 2
+
+        self.assertEqual(expected, deploy.normalize_accommodation(origin))
+
+    def test_distribute_agents(self):
+        agents = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'ip': '10.0.0.3',
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'ip': '10.0.0.4',
+                'mode': 'slave'},
+            'UU1D_master_1': {
+                'id': 'UU1D_master_1',
+                'mode': 'master',
+                'ip': '10.0.0.5',
+                'slave_id': 'UU1D_slave_1'},
+            'UU1D_slave_1': {
+                'id': 'UU1D_slave_1',
+                'master_id': 'UU1D_master_1',
+                'ip': '10.0.0.6',
+                'mode': 'slave'},
+        }
+        hosts = {
+            'UU1D_master_0': '001',
+            'UU1D_slave_0': '002',
+            'UU1D_master_1': '003',
+            'UU1D_slave_1': '004',
+        }
+
+        expected = copy.deepcopy(agents)
+        for k, v in hosts.items():
+            expected[k]['node'] = v
+
+        observed = deploy.distribute_agents(agents, lambda x: hosts[x])
+
+        # expected no changes
+        self.assertEqual(agents, observed)
+
+    # todo refactor code to use lists instead of dicts
+    def _test_distribute_agents_collision(self):
+        agents = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'ip': '10.0.0.3',
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'ip': '10.0.0.4',
+                'mode': 'slave'},
+            'UU1D_master_1': {
+                'id': 'UU1D_master_1',
+                'mode': 'master',
+                'ip': '10.0.0.5',
+                'slave_id': 'UU1D_slave_1'},
+            'UU1D_slave_1': {
+                'id': 'UU1D_slave_1',
+                'master_id': 'UU1D_master_1',
+                'ip': '10.0.0.6',
+                'mode': 'slave'},
+        }
+        hosts = {
+            'UU1D_master_0': '001',
+            'UU1D_slave_0': '001',  # collides with master_0
+            'UU1D_master_1': '003',
+            'UU1D_slave_1': '004',
+        }
+
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'ip': '10.0.0.3',
+                'node': '001',
+                'slave_id': 'UU1D_slave_1'},
+            'UU1D_slave_1': {
+                'id': 'UU1D_slave_1',
+                'master_id': 'UU1D_master_0',
+                'ip': '10.0.0.6',
+                'node': '004',
+                'mode': 'slave'},
+        }
+
+        observed = deploy.distribute_agents(agents, lambda x: hosts[x])
+
+        self.assertEqual(expected, observed)
