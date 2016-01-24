@@ -37,7 +37,7 @@ class DeploymentException(Exception):
 
 def prepare_for_cross_az(compute_nodes, zones):
     if len(zones) != 2:
-        LOG.warn('cross_az is specified, but len(zones) is not 2')
+        LOG.warning('cross_az is specified, but len(zones) is not 2')
         return compute_nodes
 
     masters = []
