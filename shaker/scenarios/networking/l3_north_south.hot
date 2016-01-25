@@ -69,6 +69,12 @@ resources:
       router_id: { get_resource: south_router }
       subnet_id: { get_resource: south_private_subnet }
 
+  server_group:
+    type: OS::Nova::ServerGroup
+    properties:
+      name: {{ unique }}_server_group
+      policies: [ 'anti-affinity' ]
+
   server_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
@@ -93,6 +99,8 @@ resources:
       image: { get_param: image }
       flavor: { get_param: flavor }
       availability_zone: "{{ agent.availability_zone }}"
+      scheduler_hints:
+        group: { get_resource: server_group }
       networks:
         - port: { get_resource: {{ agent.id }}_port }
       user_data_format: RAW
