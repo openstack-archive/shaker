@@ -47,8 +47,9 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'dos'},
         }
+        accommodation = deploy.normalize_accommodation(['single_room'])
         actual = deploy.generate_agents(nodes_helper('uno', 'dos'),
-                                        ['single_room'],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -70,15 +71,17 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'dos'},
         }
+        accommodation = deploy.normalize_accommodation(['pair', 'single_room'])
         actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
-                                        ['pair', 'single_room'],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
     def test_generate_agents_pair_single_room_not_enough(self):
         unique = 'UU1D'
-        self.assertRaises(Exception, deploy.generate_agents, ['uno'],
-                          ['pair', 'single_room'], unique)  # NOQA
+        accommodation = deploy.normalize_accommodation(['pair', 'single_room'])
+        self.assertRaises(deploy.DeploymentException, deploy.generate_agents,
+                          ['uno'], accommodation, unique)
 
     def test_generate_agents_pair_double_room(self):
         unique = 'UU1D'
@@ -126,8 +129,9 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'tre'},
         }
+        accommodation = deploy.normalize_accommodation(['pair', 'double_room'])
         actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
-                                        ['pair', 'double_room'],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -163,8 +167,9 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'uno'},
         }
+        accommodation = deploy.normalize_accommodation(['pair', 'mixed_room'])
         actual = deploy.generate_agents(nodes_helper('uno', 'dos'),
-                                        ['pair', 'mixed_room'],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -184,8 +189,10 @@ class TestDeploy(testtools.TestCase):
                 'zone': ZONE,
                 'node': 'uno'},
         }
+        accommodation = deploy.normalize_accommodation(
+            ['single_room', {'density': 2}])
         actual = deploy.generate_agents(nodes_helper('uno'),
-                                        ['single_room', {'density': 2}],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -208,8 +215,10 @@ class TestDeploy(testtools.TestCase):
         }
         compute_nodes = nodes_helper('uno', 'duo', 'tre')
         mr.return_value = compute_nodes[:2]
+        accommodation = deploy.normalize_accommodation(
+            ['single_room', {'compute_nodes': 2}])
         actual = deploy.generate_agents(compute_nodes,
-                                        ['single_room', {'compute_nodes': 2}],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -232,9 +241,10 @@ class TestDeploy(testtools.TestCase):
         }
         compute_nodes = nodes_helper('uno', 'duo', 'tre')
         mr.return_value = compute_nodes[:1]
+        accommodation = deploy.normalize_accommodation(
+            ['single_room', {'compute_nodes': 1}, {'density': 2}])
         actual = deploy.generate_agents(compute_nodes,
-                                        ['single_room', {'compute_nodes': 1},
-                                         {'density': 2}],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -243,9 +253,10 @@ class TestDeploy(testtools.TestCase):
         unique = 'UU1D'
         compute_nodes = nodes_helper('uno', 'duo', 'tre')
         mr.return_value = compute_nodes[:2]
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', {'density': 4}, {'compute_nodes': 2}])
         actual = deploy.generate_agents(nodes_helper('uno', 'duo', 'tre'),
-                                        ['pair', 'single_room',
-                                         {'density': 4}, {'compute_nodes': 2}],
+                                        accommodation,
                                         unique)
         self.assertEqual(8, len(actual))
 
@@ -272,9 +283,10 @@ class TestDeploy(testtools.TestCase):
             {'host': 'duo', 'zone': 'other-zone'},
             {'host': 'tre', 'zone': ZONE},
         ]
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', {'zones': [ZONE]}])
         actual = deploy.generate_agents(nodes,
-                                        ['pair', 'single_room',
-                                         {'zones': [ZONE]}],
+                                        accommodation,
                                         unique)
         self.assertEqual(expected, actual)
 
@@ -317,11 +329,10 @@ class TestDeploy(testtools.TestCase):
             {'host': 'quattro', 'zone': 'nova'},
             {'host': 'cinco', 'zone': 'vcenter'},
         ]
-        actual = deploy.generate_agents(
-            nodes,
+        accommodation = deploy.normalize_accommodation(
             ['pair', 'single_room', {'zones': ['nova', 'vcenter']},
-             'cross_az'],
-            unique)
+             'cross_az'])
+        actual = deploy.generate_agents(nodes, accommodation, unique)
         self.assertEqual(expected, actual)
 
     def test_filter_agents_all_deployed(self):

@@ -57,21 +57,18 @@ def prepare_for_cross_az(compute_nodes, zones):
 
 
 def generate_agents(compute_nodes, accommodation, unique):
-    density = 1
-    for s in accommodation:
-        if isinstance(s, dict):
-            if s.get('density'):
-                density = s.get('density')
-            if s.get('compute_nodes'):
-                compute_nodes = random.sample(
-                    compute_nodes, s.get('compute_nodes'))
-            if s.get('zones'):
-                compute_nodes = [c for c in compute_nodes
-                                 if c['zone'] in s.get('zones')]
-                if 'cross_az' in accommodation:
-                    # sort nodes to interleave hosts from different zones
-                    compute_nodes = prepare_for_cross_az(compute_nodes,
-                                                         s.get('zones'))
+    density = accommodation.get('density') or 1
+
+    if accommodation.get('compute_nodes'):
+        compute_nodes = random.sample(
+            compute_nodes, accommodation.get('compute_nodes'))
+
+    zones = accommodation.get('zones')
+    if zones:
+        compute_nodes = [c for c in compute_nodes if c['zone'] in zones]
+        if 'cross_az' in accommodation:
+            # sort nodes to interleave hosts from different zones
+            compute_nodes = prepare_for_cross_az(compute_nodes, zones)
 
     cn_count = len(compute_nodes)
     iterations = cn_count * density
@@ -115,9 +112,9 @@ def generate_agents(compute_nodes, accommodation, unique):
                                         mode='alone')
 
     if not agents:
-        raise Exception('Not enough compute nodes %(cn)s for requested '
-                        'instance accommodation %(acc)s' %
-                        dict(cn=compute_nodes, acc=accommodation))
+        raise DeploymentException('Not enough compute nodes %(cn)s for '
+                                  'requested instance accommodation %(acc)s' %
+                                  dict(cn=compute_nodes, acc=accommodation))
 
     # inject availability zone
     for agent in agents.values():
@@ -245,6 +242,8 @@ class Deployment(object):
             return nova.get_available_compute_nodes(self.openstack_client.nova)
         except nova.ForbiddenException:
             # user has no permissions to list compute nodes
+            LOG.info('OpenStack user does not have permission to list compute '
+                     'nodes - treat him as non-admin')
             self.privileged_mode = False
             count = accommodation.get('compute_nodes')
             if not count:
@@ -257,12 +256,12 @@ class Deployment(object):
                     for n in range(count)]
 
     def _deploy_from_hot(self, specification, server_endpoint, base_dir=None):
-        accommodation = (specification.get('accommodation') or
-                         specification.get('vm_accommodation'))
+        accommodation = normalize_accommodation(
+            specification.get('accommodation') or
+            specification.get('vm_accommodation'))
 
-        agents = generate_agents(
-            self._get_compute_nodes(normalize_accommodation(accommodation)),
-            accommodation, self.stack_name)
+        agents = generate_agents(self._get_compute_nodes(accommodation),
+                                 accommodation, self.stack_name)
 
         # render template by jinja
         vars_values = {
