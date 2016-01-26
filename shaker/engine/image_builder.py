@@ -57,12 +57,18 @@ def build_image():
     flavor_name = cfg.CONF.flavor_name
     image_name = cfg.CONF.image_name
 
-    if nova.is_flavor_exists(openstack_client.nova, flavor_name):
+    if nova.does_flavor_exist(openstack_client.nova, flavor_name):
         LOG.info('Using existing flavor: %s', flavor_name)
     else:
-        openstack_client.nova.flavors.create(name=flavor_name,
-                                             ram=512, vcpus=1, disk=3)
-        LOG.info('Created flavor %s', flavor_name)
+        try:
+            nova.create_flavor(openstack_client.nova, name=flavor_name,
+                               ram=512, vcpus=1, disk=3)
+            LOG.info('Created flavor %s', flavor_name)
+        except nova.ForbiddenException:
+            LOG.error('User does not have permissions to create the flavor. '
+                      'Specify user with admin privileges or specify existing '
+                      'flavor via --flavor-name parameter.')
+            exit(1)
 
     if glance.get_image(openstack_client.glance, image_name):
         LOG.info('Using existing image: %s', image_name)

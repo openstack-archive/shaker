@@ -45,11 +45,19 @@ def get_available_compute_nodes(nova_client):
         raise ForbiddenException(msg)
 
 
-def is_flavor_exists(nova_client, flavor_name):
+def does_flavor_exist(nova_client, flavor_name):
     for flavor in nova_client.flavors.list():
         if flavor.name == flavor_name:
             return True
     return False
+
+
+def create_flavor(nova_client, **kwargs):
+    try:
+        nova_client.flavors.create(**kwargs)
+    except nova_client_pkg.exceptions.Forbidden:
+        msg = 'Forbidden to create flavor'
+        raise ForbiddenException(msg)
 
 
 def get_server_ip(nova_client, server_name, ip_type):
@@ -85,7 +93,7 @@ def check_server_console(nova_client, server_id, len_limit=100):
             LOG.error('Error message in instance %(id)s console: %(msg)s',
                       dict(id=server_id, msg=line))
         elif re.search(r'warn', line, flags=re.IGNORECASE):
-            LOG.warn('Warn message in instance %(id)s console: %(msg)s',
+            LOG.info('Warning message in instance %(id)s console: %(msg)s',
                      dict(id=server_id, msg=line))
 
     return None
