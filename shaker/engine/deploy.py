@@ -294,7 +294,7 @@ class Deployment(object):
 
         agents = filter_agents(agents, outputs, override)
 
-        if not self.privileged_mode:
+        if (not self.privileged_mode) and accommodation.get('density', 1) == 1:
             get_host_fn = functools.partial(nova.get_server_host_id,
                                             self.openstack_client.nova)
             agents = distribute_agents(agents, get_host_fn)
