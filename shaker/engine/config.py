@@ -26,6 +26,7 @@ from shaker.engine import utils
 IMAGE_BUILDER_TEMPLATES = 'shaker/resources/image_builder_templates/'
 REPORT_TEMPLATES = 'shaker/resources/report_templates/'
 SCENARIOS = 'shaker/scenarios/'
+SCHEMAS = 'shaker/resources/schemas/'
 
 
 class Endpoint(types.String):

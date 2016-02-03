@@ -6,7 +6,7 @@ description:
 
 deployment:
   template: l2.hot
-  vm_accommodation: [pair, single_room, zones: [nova, vcenter], cross_az]
+  accommodation: [pair, single_room, zones: [nova, vcenter], cross_az]
 
 execution:
   progression: quadratic

@@ -18,11 +18,13 @@ import itertools
 import logging as std_logging
 import os
 import random
+import re
 import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import re
+from pykwalify import core as pykwalify_core
+from pykwalify import errors as pykwalify_errors
 import six
 import yaml
 
@@ -131,6 +133,7 @@ def read_yaml_file(file_name):
     except Exception as e:
         LOG.error('Failed to parse file %(file)s in YAML format: %(err)s',
                   dict(file=file_name, err=e))
+        raise
 
 
 def split_address(address):
@@ -212,3 +215,11 @@ def algebraic_product(**kwargs):
 
 def strict(s):
     return re.sub(r'[^\w\d]+', '_', re.sub(r'\(.+\)', '', s)).lower()
+
+
+def validate_yaml(data, schema):
+    c = pykwalify_core.Core(source_data=data, schema_data=schema)
+    try:
+        c.validate(raise_exception=True)
+    except pykwalify_errors.SchemaError as e:
+        raise Exception('File does not conform to schema: %s' % e)

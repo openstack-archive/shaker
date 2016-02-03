@@ -20,6 +20,8 @@ import six
 import testtools
 import yaml
 
+from shaker.engine import utils
+
 
 class TestReport(testtools.TestCase):
 
@@ -31,15 +33,30 @@ class TestReport(testtools.TestCase):
         with opener(file_name, 'r') as content_file:
             return content_file.read()
 
-    def test_yaml_valid(self):
-        for dir_data in os.walk('shaker/scenarios'):
+    def _iterate_files(self, root_path):
+        for dir_data in os.walk(root_path):
             dir_path, dir_names, file_names = dir_data
             for file_name in file_names:
-                if not file_name.endswith('.yaml'):
-                    continue
+                if file_name.endswith('.yaml'):
+                    yield os.path.join(dir_path, file_name)
 
-                cnt = self._read_raw_file(os.path.join(dir_path, file_name))
-                try:
-                    yaml.safe_load(cnt)
-                except Exception as e:
-                    self.fail('File %s is invalid: %s' % (file_name, e))
+    def test_yaml_valid(self):
+        for file_name in self._iterate_files('shaker/scenarios'):
+            cnt = self._read_raw_file(file_name)
+            try:
+                yaml.safe_load(cnt)
+            except Exception as e:
+                self.fail('File %s is invalid: %s' % (file_name, e))
+
+    def test_scenario_schema_conformance(self):
+        scenario_schema_file = 'shaker/resources/schemas/scenario.yaml'
+
+        for file_name in self._iterate_files('shaker/scenarios/'):
+            source_data = utils.read_yaml_file(file_name)
+            schema_data = utils.read_yaml_file(scenario_schema_file)
+
+            try:
+                utils.validate_yaml(source_data, schema_data)
+            except Exception as e:
+                self.fail('Scenario %s does not conform to schema: %s' %
+                          (file_name, e))

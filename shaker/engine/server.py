@@ -224,6 +224,11 @@ def act():
 
         LOG.info('Play scenario: %s', scenario_file_name)
         scenario = utils.read_yaml_file(scenario_file_name)
+
+        schema = utils.read_yaml_file(utils.resolve_relative_path(
+            '%s%s.yaml' % (config.SCHEMAS, 'scenario')))
+        utils.validate_yaml(scenario, schema)
+
         scenario['title'] = scenario.get('title') or scenario_file_name
         scenario['file_name'] = scenario_file_name
 
