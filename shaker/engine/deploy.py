@@ -217,7 +217,7 @@ def normalize_accommodation(accommodation):
 class Deployment(object):
     def __init__(self):
         self.openstack_client = None
-        self.stack_created = False
+        self.has_stack = False
         self.privileged_mode = True
 
     def connect_to_openstack(self, os_username, os_password, os_tenant_name,
@@ -283,10 +283,10 @@ class Deployment(object):
         }
         merged_parameters.update(specification.get('template_parameters', {}))
 
+        self.has_stack = True
         stack_id = heat.create_stack(
             self.openstack_client.heat, self.stack_name, rendered_template,
             merged_parameters)
-        self.stack_created = True
 
         # get info about deployed objects
         outputs = heat.get_stack_outputs(self.openstack_client.heat, stack_id)
@@ -336,6 +336,6 @@ class Deployment(object):
         return agents
 
     def cleanup(self):
-        if self.stack_created and cfg.CONF.cleanup_on_error:
+        if self.has_stack and cfg.CONF.cleanup_on_error:
             LOG.debug('Cleaning up the stack: %s', self.stack_name)
             self.openstack_client.heat.stacks.delete(self.stack_name)
