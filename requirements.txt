@@ -21,5 +21,5 @@ python-novaclient!=2.33.0,>=2.29.0
 python-heatclient>=0.6.0
 python-subunit>=0.0.18
 PyYAML>=3.1.0
-pyzmq<15.0.0,>=14.3.1 # LGPL+BSD
+pyzmq>=15.2.0
 six>=1.9.0
