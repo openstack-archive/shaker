@@ -14,6 +14,7 @@ oslo.serialization>=1.10.0 # Apache-2.0
 oslo.utils!=2.6.0,>=2.4.0 # Apache-2.0
 psutil<2.0.0,>=1.1.1
 pygal
+pykwalify
 python-glanceclient>=0.18.0
 python-keystoneclient!=1.8.0,>=1.6.0
 python-neutronclient>=2.6.0

@@ -1,0 +1,59 @@
+name: Shaker scenario schema
+type: map
+allowempty: True
+mapping:
+  title:
+    type: str
+  description:
+    type: str
+  deployment:
+    type: map
+    mapping:
+      template:
+        type: str
+      agents:
+        type: any
+      accommodation:
+        type: seq
+        matching: any
+        sequence:
+        - type: str
+          enum: [pair, alone, double_room, single_room, mixed_room, cross_az]
+        - type: map
+          mapping:
+            density:
+              type: number
+            compute_nodes:
+              type: number
+            zones:
+              type: seq
+              sequence:
+              - type: str
+  execution:
+    type: map
+    mapping:
+      progression:
+        type: str
+        enum: [linear, arithmetic, quadratic, geometric]
+      tests:
+        type: seq
+        required: True
+        sequence:
+        - type: map
+          allowempty: True
+          mapping:
+            title:
+              type: str
+            class:
+              type: str
+              required: True
+            method:
+              type: str
+            time:
+              type: int
+              range:
+                min: 1
+            sla:
+              type: seq
+              sequence:
+              - type: str
