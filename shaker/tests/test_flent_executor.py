@@ -69,7 +69,7 @@ class TestFlentExecutor(testtools.TestCase):
         "UNITS": "Mbit/s"
       }
     },
-    "TOTAL_LENGTH": 5
+    "TOTAL_LENGTH": 6
   },
   "results": {
     "Ping ICMP": [

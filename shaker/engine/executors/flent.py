@@ -55,7 +55,7 @@ class FlentExecutor(base.BaseExecutor):
                 [[utils.strict(k), series_meta[k]['UNITS']] for k in columns])
         samples = []
 
-        for i in range(int(data['metadata']['TOTAL_LENGTH'])):
+        for i in range(len(data['x_values'])):
             line = [data['x_values'][i]]
             for el in columns:
                 line.append(data['results'][el][i])
