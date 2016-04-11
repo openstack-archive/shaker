@@ -74,16 +74,16 @@ one that satisfies instance template requirements. For Ubuntu-based image
 the requirement is 512 Mb RAM, 3 Gb disk and 1 CPU
 
 
-Shaker limitations
-------------------
+Execution limitations
+---------------------
 
 Non-admin user has no permissions to list compute nodes and to deploy instances
 to particular compute nodes.
 
 When instances need to be deployed on low number of compute nodes it is possible
-to use server groups and specify anti-affinity policy within them. Note that
-server group size is limited by quota_server_group_members parameter in `nova.conf`.
-The following is part of Heat template that adds server groups.
+to use server groups and specify anti-affinity policy within them. Note however that
+server group size is limited by `quota_server_group_members` parameter in `nova.conf`.
+The following is part of Heat template adds server groups.
 
 Add to resources section::
 
@@ -113,4 +113,4 @@ Non-OpenStack Deployment (aka Spot mode)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To run scenarios against remote nodes (``shaker-spot`` command) install shaker on the local host.
-Make sure all necessary system tools are installed too.
+Make sure all necessary system tools are installed too. See :ref:`spot_scenarios` for more details.

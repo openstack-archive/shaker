@@ -1,3 +1,5 @@
+.. _spot_scenarios:
+
 ==============
 Spot Scenarios
 ==============
