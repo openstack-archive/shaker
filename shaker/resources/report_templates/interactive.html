@@ -187,7 +187,7 @@
         contentArea.append(executor_template(
             {record: $.extend({}, record, ext_options)}
         ));
-        if (record["chart"]) {
+        if (record["samples"]) {
           var meta = record["meta"];
           var axes = [];
           axes[meta[1][0]] = 'y';
@@ -200,11 +200,23 @@
             axis['y2'] = {label: concatenate(meta[2]), min: 0, show: true}
           }
 
+          var chart = [];
+          $.each(meta, function(_i, meta_item){  // row titles
+            chart.push([meta_item[0]]);
+          });
+          var samples = record["samples"];
+          for (var i=0; i < samples.length; i++) {
+            var point = samples[i];
+            for (var j=0; j < point.length; j++) {
+              chart[j].push(point[j]);
+            }
+          }
+
           c3.generate({
             bindto: "#" + chart_id,
             data: {
               x: 'time',
-              columns: record["chart"],
+              columns: chart,
               axes: axes
             },
             axis: axis
@@ -692,7 +704,7 @@
   <div class="text-danger">
     <ul>
     {{#records}}
-      <li>{{ info }}{{ stderr }}{{ traceback }}</li>
+      <li>{{ info }}<br/>{{ stderr }}{{ traceback }}</li>
     {{/records}}
     </ul>
   </div>
