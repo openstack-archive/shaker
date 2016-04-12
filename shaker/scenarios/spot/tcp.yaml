@@ -13,5 +13,5 @@ execution:
     host: ping.online.net
     time: 20
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 90)"
+    - "[type == 'agent'] >> (stats.bandwidth.avg > 90)"
     - "[type == 'agent'] >> (stats.retransmits.max < 20)"

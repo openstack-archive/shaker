@@ -27,7 +27,7 @@ def _filter_none(array):
     return [x for x in array if x is not None]
 
 
-def mean(array):
+def avg(array):
     s = _filter_none(array)
     return sum(s) / len(s) if s else 0
 
@@ -49,20 +49,20 @@ class TrafficAggregator(base.BaseAggregator):
     def test_summary(self, records):
         chart = []
         xs = []
-        mean_v = collections.defaultdict(list)
+        avg_v = collections.defaultdict(list)
         units = {}
 
         for record in sorted(records, key=lambda x: x['concurrency']):
             xs.append(record['concurrency'])
             for k, v in record['stats'].items():
-                mean_v[k].append(v['mean'])
+                avg_v[k].append(v['avg'])
                 units[k] = v['unit']
 
         chart.append(['concurrency'] + xs)
         meta = [('concurrency', '')]
 
-        for k in mean_v.keys():
-            chart.append([k] + mean_v[k])
+        for k in avg_v.keys():
+            chart.append([k] + avg_v[k])
             meta.append((k, units[k]))
 
         return {
@@ -73,7 +73,7 @@ class TrafficAggregator(base.BaseAggregator):
     def concurrency_summary(self, records):
         max_v = collections.defaultdict(list)
         min_v = collections.defaultdict(list)
-        mean_v = collections.defaultdict(list)
+        avg_v = collections.defaultdict(list)
         unit_v = dict()
 
         nodes = []
@@ -83,7 +83,7 @@ class TrafficAggregator(base.BaseAggregator):
             for k, v in record['stats'].items():
                 max_v[k].append(v['max'])
                 min_v[k].append(v['min'])
-                mean_v[k].append(v['mean'])
+                avg_v[k].append(v['avg'])
                 unit_v[k] = v['unit']
 
         stats = {}
@@ -92,10 +92,10 @@ class TrafficAggregator(base.BaseAggregator):
         for k in max_v.keys():
             stats[k] = dict(max=max(max_v[k]),
                             min=min(min_v[k]),
-                            mean=mean(mean_v[k]),
+                            avg=avg(avg_v[k]),
                             unit=unit_v[k])
             s = '%s, %s' % (k, unit_v[k]) if unit_v[k] else k
-            node_chart.append(['Mean %s' % s] + mean_v[k])
+            node_chart.append(['Avg %s' % s] + avg_v[k])
             node_chart.append(['Max %s' % s] + max_v[k])
             node_chart.append(['Min %s' % s] + min_v[k])
 
@@ -124,7 +124,7 @@ class TrafficAggregator(base.BaseAggregator):
                 record['stats'][item_title] = {
                     'max': safe_max(column),
                     'min': safe_min(column),
-                    'mean': mean(column),
+                    'avg': avg(column),
                     'unit': item_meta[1],
                 }
 

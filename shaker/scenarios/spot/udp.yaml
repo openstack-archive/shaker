@@ -15,4 +15,4 @@ execution:
     time: 20
     bandwidth: 1000M
     sla:
-    - "[type == 'agent'] >> (stats.packets.mean > 10000)"
+    - "[type == 'agent'] >> (stats.packets.avg > 10000)"

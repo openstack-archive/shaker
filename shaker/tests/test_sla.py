@@ -41,13 +41,13 @@ class TestSla(testtools.TestCase):
 
     def test_eval_sla(self):
         records = [{'type': 'agent', 'test': 'iperf_tcp',
-                    'stats': {'bandwidth': {'mean': 700}}},
+                    'stats': {'bandwidth': {'avg': 700}}},
                    {'type': 'agent', 'test': 'iperf_udp',
-                    'stats': {'bandwidth': {'mean': 1000}}},
+                    'stats': {'bandwidth': {'avg': 1000}}},
                    {'type': 'node', 'test': 'iperf_tcp',
-                    'stats': {'bandwidth': {'mean': 850}}}]
+                    'stats': {'bandwidth': {'avg': 850}}}]
 
-        expr = 'stats.bandwidth.mean > 800'
+        expr = 'stats.bandwidth.avg > 800'
         sla_records = sla.eval_expr('[type == "agent"] >> (%s)' % expr,
                                     records)
         self.assertEqual([
@@ -57,7 +57,7 @@ class TestSla(testtools.TestCase):
                         expression=expr)],
             sla_records)
 
-        expr = 'stats.bandwidth.mean > 900'
+        expr = 'stats.bandwidth.avg > 900'
         sla_records = sla.eval_expr('[test == "iperf_udp", type == "node"] >> '
                                     '(%s)' % expr, records)
         self.assertEqual([
@@ -74,18 +74,18 @@ class TestSla(testtools.TestCase):
         self.assertEqual('(stderr & ".*")', sla.dump_ast_node(
             ast.parse('stderr & ".*"', mode='eval')))
 
-        self.assertEqual('(stats.bandwidth.mean > 900)', sla.dump_ast_node(
-            ast.parse('stats.bandwidth.mean > 900', mode='eval')))
+        self.assertEqual('(stats.bandwidth.avg > 900)', sla.dump_ast_node(
+            ast.parse('stats.bandwidth.avg > 900', mode='eval')))
 
-        expr = ('(stats.bandwidth.mean > 900 and not stats.ping.max < 0.5 and '
-                'stats.ping.mean < 0.35)')
+        expr = ('(stats.bandwidth.avg > 900 and not stats.ping.max < 0.5 and '
+                'stats.ping.avg < 0.35)')
         self.assertEqual(expr,
                          sla.dump_ast_node(ast.parse(expr, mode='eval')))
 
     def test_eval_sla_undefined_ref(self):
         records = [{'type': 'agent', 'test': 'iperf_tcp',
-                    'stats': {'bandwidth': {'mean': 850}}}]
-        expr = 'stats.nonexistent.mean > 800'
+                    'stats': {'bandwidth': {'avg': 850}}}]
+        expr = 'stats.nonexistent.avg > 800'
         sla_records = sla.eval_expr('[type == "agent"] >> (%s)' % expr,
                                     records)
 
