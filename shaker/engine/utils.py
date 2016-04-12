@@ -57,7 +57,8 @@ def init_config_and_logging(opts):
     conf.register_cli_opts(opts)
     conf.register_opts(opts)
     logging.register_options(conf)
-    logging.set_defaults()
+    logging.set_defaults(
+        default_log_levels=conf.default_log_levels + ['pykwalify=INFO'])
 
     try:
         conf(project='shaker')
