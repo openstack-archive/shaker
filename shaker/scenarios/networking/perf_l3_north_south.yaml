@@ -17,12 +17,12 @@ execution:
     method: ping
     time: 10
     sla:
-    - "[type == 'agent'] >> (stats.ping_icmp.mean < 2.0)"
+    - "[type == 'agent'] >> (stats.ping_icmp.avg < 2.0)"
   -
     title: TCP
     class: iperf3
     sla:
-    - "[type == 'agent'] >> (stats.bandwidth.mean > 5000)"
+    - "[type == 'agent'] >> (stats.bandwidth.avg > 5000)"
     - "[type == 'agent'] >> (stats.retransmits.max < 10)"
   -
     title: UDP
@@ -31,4 +31,4 @@ execution:
     bandwidth: 0
     datagram_size: 32
     sla:
-    - "[type == 'agent'] >> (stats.packets.mean > 100000)"
+    - "[type == 'agent'] >> (stats.packets.avg > 100000)"

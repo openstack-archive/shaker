@@ -44,13 +44,13 @@ class TestTrafficAggregator(testtools.TestCase):
             'Ping ICMP': {
                 'max': 2.6,
                 'min': 1.9,
-                'mean': 2.2,
+                'avg': 2.2,
                 'unit': 'ms',
             },
             'TCP download': {
                 'max': 65.0,
                 'min': 60.0,
-                'mean': 62.0,
+                'avg': 62.0,
                 'unit': 'Mbit/s',
             }
         }
@@ -67,13 +67,13 @@ class TestTrafficAggregator(testtools.TestCase):
                     'Ping ICMP': {
                         'max': 2.6,
                         'min': 1.9,
-                        'mean': 2.2,
+                        'avg': 2.2,
                         'unit': 'ms',
                     },
                     'TCP download': {
                         'max': 65.0,
                         'min': 60.0,
-                        'mean': 62.0,
+                        'avg': 62.0,
                         'unit': 'Mbit/s',
                     }
                 },
@@ -89,13 +89,13 @@ class TestTrafficAggregator(testtools.TestCase):
                     'Ping ICMP': {
                         'max': 3.6,
                         'min': 2.9,
-                        'mean': 3.2,
+                        'avg': 3.2,
                         'unit': 'ms',
                     },
                     'TCP download': {
                         'max': 75.0,
                         'min': 70.0,
-                        'mean': 72.0,
+                        'avg': 72.0,
                         'unit': 'Mbit/s',
                     }
                 },
@@ -111,13 +111,13 @@ class TestTrafficAggregator(testtools.TestCase):
             'Ping ICMP': {
                 'max': 3.6,
                 'min': 1.9,
-                'mean': 2.7,
+                'avg': 2.7,
                 'unit': 'ms',
             },
             'TCP download': {
                 'max': 75.0,
                 'min': 60.0,
-                'mean': 67.0,
+                'avg': 67.0,
                 'unit': 'Mbit/s',
             }
         }

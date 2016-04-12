@@ -25,19 +25,19 @@ floating ip
       - class: flent
         method: ping
         sla:
-        - '[type == ''agent''] >> (stats.ping_icmp.mean < 2.0)'
+        - '[type == ''agent''] >> (stats.ping_icmp.avg < 2.0)'
         time: 10
         title: Ping
       - class: iperf3
         sla:
-        - '[type == ''agent''] >> (stats.bandwidth.mean > 5000)'
+        - '[type == ''agent''] >> (stats.bandwidth.avg > 5000)'
         - '[type == ''agent''] >> (stats.retransmits.max < 10)'
         title: TCP
       - bandwidth: 0
         class: iperf3
         datagram_size: 32
         sla:
-        - '[type == ''agent''] >> (stats.packets.mean > 100000)'
+        - '[type == ''agent''] >> (stats.packets.avg > 100000)'
         title: UDP
         udp: true
     file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/perf_l3_north_south.yaml
@@ -53,7 +53,7 @@ Ping
     class: flent
     method: ping
     sla:
-    - '[type == ''agent''] >> (stats.ping_icmp.mean < 2.0)'
+    - '[type == ''agent''] >> (stats.ping_icmp.avg < 2.0)'
     time: 10
     title: Ping
 
@@ -65,7 +65,7 @@ Ping
 
     ping_icmp:
       max: 3.4270406725254006
-      mean: 1.6479111172469332
+      avg: 1.6479111172469332
       min: 0.9622029103967339
       unit: ms
 
@@ -74,7 +74,7 @@ Ping
 ==========================  ===========  ==================  ======
 Expression                  Concurrency  Node                Result
 ==========================  ===========  ==================  ======
-stats.ping_icmp.mean < 2.0            1  node-11.domain.tld  OK
+stats.ping_icmp.avg < 2.0             1  node-11.domain.tld  OK
 ==========================  ===========  ==================  ======
 
 TCP
@@ -87,7 +87,7 @@ TCP
     class: iperf3
     interval: 1
     sla:
-    - '[type == ''agent''] >> (stats.bandwidth.mean > 5000)'
+    - '[type == ''agent''] >> (stats.bandwidth.avg > 5000)'
     - '[type == ''agent''] >> (stats.retransmits.max < 10)'
     title: TCP
 
@@ -99,12 +99,12 @@ TCP
 
     bandwidth:
       max: 904.4981002807617
-      mean: 868.6801114400228
+      avg: 868.6801114400228
       min: 508.1815719604492
       unit: Mbit/s
     retransmits:
       max: 470
-      mean: 135.0
+      avg: 135.0
       min: 1
       unit: ''
 
@@ -113,7 +113,7 @@ TCP
 ===========================  ===========  ==================  ======
 Expression                   Concurrency  Node                Result
 ===========================  ===========  ==================  ======
-stats.bandwidth.mean > 5000            1  node-11.domain.tld  FAIL
+stats.bandwidth.avg > 5000             1  node-11.domain.tld  FAIL
 stats.retransmits.max < 10             1  node-11.domain.tld  FAIL
 ===========================  ===========  ==================  ======
 
@@ -129,7 +129,7 @@ UDP
     datagram_size: 32
     interval: 1
     sla:
-    - '[type == ''agent''] >> (stats.packets.mean > 100000)'
+    - '[type == ''agent''] >> (stats.packets.avg > 100000)'
     title: UDP
     udp: true
 
@@ -141,7 +141,7 @@ UDP
 
     packets:
       max: 140930
-      mean: 137099.0
+      avg: 137099.0
       min: 135620
       unit: pps
 
@@ -150,6 +150,6 @@ UDP
 ===========================  ===========  ==================  ======
 Expression                   Concurrency  Node                Result
 ===========================  ===========  ==================  ======
-stats.packets.mean > 100000            1  node-11.domain.tld  OK
+stats.packets.avg > 100000             1  node-11.domain.tld  OK
 ===========================  ===========  ==================  ======
 

@@ -248,9 +248,9 @@ def write_stats(publisher, records, row_header, show_all=False):
     records.sort(key=lambda x: x[row_header])
 
     if show_all:
-        keys = ['min', 'mean', 'max']
+        keys = ['min', 'avg', 'max']
     else:
-        keys = ['mean']
+        keys = ['avg']
     meta = []
     headers = []
 
