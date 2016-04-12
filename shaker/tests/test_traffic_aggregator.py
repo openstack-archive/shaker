@@ -56,11 +56,6 @@ class TestTrafficAggregator(testtools.TestCase):
         }
         self.assertEqual(expected_stats, processed['stats'])
 
-        expected_chart = [['time', 0, 1, 2, 3, 4, 5],
-                          ['Ping ICMP', 1.9, 2.4, 2.6, 2.2, 2.2, 1.9],
-                          ['TCP download', None, None, 60.0, 65.0, 61.0, None]]
-        self.assertEqual(expected_chart, processed['chart'])
-
     def test_concurrency_summary(self):
         aggregator = traffic.TrafficAggregator(None)
 
