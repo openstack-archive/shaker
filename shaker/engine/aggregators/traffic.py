@@ -115,7 +115,6 @@ class TrafficAggregator(base.BaseAggregator):
 
         # calculate stats
         record['stats'] = dict()
-        record['chart'] = []
 
         for idx, item_meta in enumerate(record.get('meta', [])):
             column = [row[idx] for row in record.get('samples')]
@@ -128,7 +127,6 @@ class TrafficAggregator(base.BaseAggregator):
                     'mean': mean(column),
                     'unit': item_meta[1],
                 }
-            record['chart'].append([item_title] + column)
 
         # drop stdout
         if 'stdout' in record:
