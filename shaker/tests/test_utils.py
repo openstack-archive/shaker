@@ -109,3 +109,35 @@ class TestUtils(testtools.TestCase):
     def test_strict(self):
         self.assertEqual('some_01_string_a',
                          utils.strict('Some 01-string (brr!) + %% A'))
+
+    def test_set_value_by_path(self):
+        data = {}
+        utils.set_value_by_path(data, 'jitter.avg', 10)
+        self.assertEqual({'jitter': {'avg': 10}}, data)
+
+    def test_set_value_by_path_with_update(self):
+        data = {'jitter': {'min': 5}}
+        utils.set_value_by_path(data, 'jitter.avg', 10)
+        self.assertEqual({'jitter': {'avg': 10, 'min': 5}}, data)
+
+    def test_get_value_by_path(self):
+        data = {'jitter': {'min': 5}}
+        self.assertEqual(5, utils.get_value_by_path(data, 'jitter.min'))
+
+    def test_get_value_by_path_none(self):
+        data = {'jitter': {'min': 5}}
+        self.assertEqual(None, utils.get_value_by_path(data, 'jitter.avg'))
+
+    def test_copy_value_by_path(self):
+        src = {'sum': {'jitter_ms': 7}}
+        dst = {}
+        res = utils.copy_value_by_path(src, 'sum.jitter_ms', dst, 'jitter.avg')
+        self.assertEqual({'jitter': {'avg': 7}}, dst)
+        self.assertTrue(res)
+
+    def test_copy_value_by_path_src_not_found(self):
+        src = {}
+        dst = {}
+        res = utils.copy_value_by_path(src, 'sum.jitter_ms', dst, 'jitter.avg')
+        self.assertEqual({}, dst)
+        self.assertFalse(res)
