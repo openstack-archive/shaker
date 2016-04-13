@@ -81,23 +81,33 @@ class TrafficAggregator(base.BaseAggregator):
             nodes.append(record['node'])
 
             for k, v in record['stats'].items():
-                max_v[k].append(v['max'])
-                min_v[k].append(v['min'])
-                avg_v[k].append(v['avg'])
-                unit_v[k] = v['unit']
+                if 'max' in v:
+                    max_v[k].append(v['max'])
+                if 'min' in v:
+                    min_v[k].append(v['min'])
+                if 'avg' in v:
+                    avg_v[k].append(v['avg'])
+                if 'unit' in v:
+                    unit_v[k] = v['unit']
 
         stats = {}
         node_chart = [['x'] + nodes]
 
-        for k in max_v.keys():
-            stats[k] = dict(max=max(max_v[k]),
-                            min=min(min_v[k]),
-                            avg=avg(avg_v[k]),
-                            unit=unit_v[k])
-            s = '%s, %s' % (k, unit_v[k]) if unit_v[k] else k
-            node_chart.append(['Avg %s' % s] + avg_v[k])
-            node_chart.append(['Max %s' % s] + max_v[k])
-            node_chart.append(['Min %s' % s] + min_v[k])
+        for k in unit_v.keys():
+            stats[k] = dict()
+            title = k
+            if k in unit_v:
+                stats[k]['unit'] = unit_v[k]
+                title += ', ' + unit_v[k]
+            if avg_v[k]:
+                stats[k]['avg'] = avg(avg_v[k])
+                node_chart.append(['Avg %s' % title] + avg_v[k])
+            if max_v[k]:
+                stats[k]['max'] = max(max_v[k])
+                node_chart.append(['Max %s' % title] + max_v[k])
+            if min_v[k]:
+                stats[k]['min'] = min(min_v[k])
+                node_chart.append(['Min %s' % title] + min_v[k])
 
         return {
             'stats': stats,
@@ -114,7 +124,7 @@ class TrafficAggregator(base.BaseAggregator):
                 item_meta[1] = 'Mbit/s'
 
         # calculate stats
-        record['stats'] = dict()
+        record['stats'] = record.get('stats') or dict()
 
         for idx, item_meta in enumerate(record.get('meta', [])):
             column = [row[idx] for row in record.get('samples')]

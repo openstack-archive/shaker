@@ -18,6 +18,7 @@ import json
 import yaml
 
 from shaker.engine.executors import base
+from shaker.engine import utils
 
 
 def add_common_iperf_params(cmd, executor):
@@ -131,4 +132,14 @@ class Iperf3Executor(base.BaseExecutor):
 
         result['samples'] = samples
         result['meta'] = meta
+
+        stats = result['stats'] = {}
+        if utils.copy_value_by_path(data, 'end.sum.jitter_ms',
+                                    stats, 'jitter.avg'):
+            utils.set_value_by_path(stats, 'jitter.unit', 'ms')
+
+        if utils.copy_value_by_path(data, 'end.sum.lost_percent',
+                                    stats, 'loss.avg'):
+            utils.set_value_by_path(stats, 'loss.unit', '%')
+
         return result

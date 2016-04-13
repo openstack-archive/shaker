@@ -223,3 +223,29 @@ def validate_yaml(data, schema):
         c.validate(raise_exception=True)
     except pykwalify_errors.SchemaError as e:
         raise Exception('File does not conform to schema: %s' % e)
+
+
+def get_value_by_path(src, param):
+    tokens = param.split('.')
+    for token in tokens:
+        if token not in src:
+            return None
+        src = src[token]
+    return src
+
+
+def set_value_by_path(dst, param, value):
+    tokens = param.split('.')
+    for token in tokens[:-1]:
+        if token not in dst:
+            dst[token] = {}
+        dst = dst[token]
+    dst[tokens[-1]] = value
+
+
+def copy_value_by_path(src, src_param, dst, dst_param):
+    v = get_value_by_path(src, src_param)
+    if v:
+        set_value_by_path(dst, dst_param, v)
+        return True
+    return False
