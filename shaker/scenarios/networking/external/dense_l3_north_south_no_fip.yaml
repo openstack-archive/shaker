@@ -1,9 +1,9 @@
 title: OpenStack L3 North-South dense performance to external target
 
 description: >
-  This scenario launches instances on one compute node in a tenant network
-  connected to external network. The traffic is sent to and from external host.
-  The host name needs to be provided as command-line parameter,
+  In this scenario Shaker launches instances on one compute node in a tenant
+  network connected to external network. The traffic is sent to and from
+  external host. The host name needs to be provided as command-line parameter,
   e.g. `--matrix "{host: 172.10.1.2}"`
 
 deployment:

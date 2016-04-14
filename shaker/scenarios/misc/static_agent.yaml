@@ -1,7 +1,8 @@
-title: Static Agents
+title: Static agents
 
 description:
-  This scenario runs tests on pre-deployed static agents
+  In this scenario Shaker runs tests on pre-deployed static agents.
+  The scenario can be used for Shaker integration testing.
 
 deployment:
   agents:
