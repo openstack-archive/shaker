@@ -26,7 +26,7 @@ def add_common_iperf_params(cmd, executor):
             executor.agent['slave']['ip'])
     cmd.add('--format', 'm')
     if executor.test_definition.get('mss'):
-        cmd.add('--mss', executor.test_definition.get('mss'))
+        cmd.add('--set-mss', executor.test_definition.get('mss')) #For iperf3. --mss works only for iperf
     if executor.test_definition.get('buffer_size'):
         cmd.add('--len', executor.test_definition.get('buffer_size'))
     if executor.test_definition.get('udp'):
