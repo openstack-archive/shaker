@@ -1,6 +1,9 @@
 OpenStack Scenarios
 ===================
 
+This section contains details for the most popular OpenStack scenarios.
+For the full list of Shaker scenarios please refer to :ref:`catalog`.
+
 .. toctree::
     :maxdepth: 2
 

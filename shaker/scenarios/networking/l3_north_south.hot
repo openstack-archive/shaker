@@ -1,10 +1,9 @@
 heat_template_version: 2013-05-23
 
 description: >
-  HOT template to create a new neutron network plus a north_router to the public
-  network, and for deploying servers into the new network. The template also
-  assigns floating IP addresses to each server so they are routable from the
-  public network.
+  This Heat template creates a new Neutron network plus a north_router to the
+  external network. The template also assigns floating IP addresses to each
+  instance so they are routable from the external network.
 
 parameters:
   image:

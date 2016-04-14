@@ -1,8 +1,9 @@
 heat_template_version: 2013-05-23
 
 description:
-  HOT template creates a new neutron network, a router to the external
-  network and plugs servers into this new network.
+  This Heat template creates a new Neutron network, a router to the external
+  network and plugs instances into this new network. All instances are located
+  in the same L2 domain.
 
 parameters:
   image:
