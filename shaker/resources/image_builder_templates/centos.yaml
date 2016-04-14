@@ -85,9 +85,9 @@ resources:
         yum install -y  iperf  gcc gcc-c++ python-devel  screen
         yum install -y zeromq
         yum install -y zeromq-devel
-        wget ftp://ftp.netperf.org/netperf/netperf-2.6.0.tar.gz
-        tar xvzf netperf-2.6.0.tar.gz
-        cd  netperf-2.6.0
+        wget ftp://ftp.netperf.org/netperf/netperf-2.7.0.tar.gz
+        tar xvzf netperf-2.7.0.tar.gz
+        cd  netperf-2.7.0
         ./configure --enable-demo=yes
         make
         make install
