@@ -1,9 +1,9 @@
 title: OpenStack L2 Dense
 
 description:
-  This scenario launches several pairs of VMs on the same compute node.
-  VM are plugged into the same private network. Useful for testing performance
-  degradation when the number of VMs grows.
+  In this scenario Shaker launches several pairs of instances on a single
+  compute node. Instances are plugged into the same tenant network.
+  The traffic goes within the tenant network (L2 domain).
 
 deployment:
   template: l2.hot

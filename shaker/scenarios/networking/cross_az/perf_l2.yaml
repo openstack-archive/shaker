@@ -1,8 +1,10 @@
 title: OpenStack L2 Cross-AZ Performance
 
 description:
-  This scenario launches 1 pair of VMs in the same private network on different
-  compute nodes.
+  In this scenario Shaker launches 1 pair of instances in the same tenant
+  network. Each instance is hosted on a separate compute node.
+  The master and slave instances are in different availability zones.
+  The scenario is used to test throughput between `nova` and `vcenter` zones.
 
 deployment:
   template: l2.hot

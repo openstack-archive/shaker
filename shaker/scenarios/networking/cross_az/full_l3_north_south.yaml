@@ -1,9 +1,13 @@
 title: OpenStack L3 North-South Cross-AZ
 
 description:
-  This scenario launches pairs of VMs on different compute nodes. VMs are in
-  the different networks connected via different routers, master accesses slave
-  by floating ip
+  In this scenario Shaker launches pairs of instances on different compute
+  nodes. All available compute nodes are utilized. Instances are in different
+  networks connected to different routers, master accesses slave by
+  floating ip. The traffic goes from one network via external network to the
+  other network. The master and slave instances are in different availability
+  zones. The scenario is used to test throughput between `nova` and `vcenter`
+  zones.
 
 deployment:
   template: l3_north_south.hot

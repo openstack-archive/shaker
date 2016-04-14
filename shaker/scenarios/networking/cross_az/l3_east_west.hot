@@ -1,8 +1,8 @@
 heat_template_version: 2013-05-23
 
 description:
-  HOT template creates a pair of networks plugged into the same router. Master VMs
-  and slave VMs are plugged into different networks.
+  This Heat template creates a pair of networks plugged into the same router.
+  Master instances and slave instances are connected into different networks.
 
 parameters:
   image:

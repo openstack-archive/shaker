@@ -1,9 +1,10 @@
 title: OpenStack L3 North-South Dense
 
 description:
-  This scenario launches pairs of VMs on one compute node. VMs are in
-  the different networks connected via different routers, master accesses slave
-  by floating ip
+  In this scenario Shaker launches pairs of instances on the same compute node.
+  Instances are connected to different tenant networks, each connected to own
+  router. Instances in one of networks have floating IPs.
+  The traffic goes from one network via external network to the other network.
 
 deployment:
   template: l3_north_south.hot

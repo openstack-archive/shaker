@@ -1,10 +1,10 @@
-title: OpenStack L3 North-South dense performance to external target with floating IP
+title: OpenStack L3 North-South Dense to external target with floating IP
 
 description: >
-  This scenario launches instances on one compute node in a tenant network
-  connected to external network. All instances have floating IPs. The traffic
-  is sent to and from external host. The host name needs to be provided as
-  command-line parameter, e.g. `--matrix "{host: 172.10.1.2}"`
+  In this scenario Shaker launches instances on one compute node in a tenant
+  network connected to external network. All instances have floating IPs.
+  The traffic is sent to and from external host. The host name needs to be
+  provided as command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 
 deployment:
   template: l3_north_south_with_fip.hot
