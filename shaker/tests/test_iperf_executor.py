@@ -153,6 +153,15 @@ class TestIperf3Executor(testtools.TestCase):
                     'type': 'program'}
         self.assertEqual(expected, executor.get_command())
 
+    def test_get_command_reverse(self):
+        executor = iperf.Iperf3Executor({'reverse': 'yes'}, AGENT)
+
+        expected = {'data': ('iperf3 --client %s --format m '
+                             '--time 60 --parallel 1 --interval 1 '
+                             '--json --reverse') % IP,
+                    'type': 'program'}
+        self.assertEqual(expected, executor.get_command())
+
     def test_process_reply_tcp(self):
         executor = iperf.Iperf3Executor({}, AGENT)
         message = {

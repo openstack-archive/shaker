@@ -92,6 +92,8 @@ class Iperf3Executor(base.BaseExecutor):
         cmd = base.CommandLine('iperf3')
         add_common_iperf_params(cmd, self)
         cmd.add('--json')
+        if self.test_definition.get('reverse'):
+            cmd.add('--reverse')
         return cmd.make()
 
     def process_reply(self, message):

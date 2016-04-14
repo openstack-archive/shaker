@@ -1,0 +1,27 @@
+title: OpenStack L3 North-South dense performance to external target
+
+description: >
+  This scenario launches instances on one compute node in a tenant network
+  connected to external network. The traffic is sent to and from external host.
+  The host name needs to be provided as command-line parameter,
+  e.g. `--matrix "{host: 172.10.1.2}"`
+
+deployment:
+  template: l3_north_south_no_fip.hot
+  accommodation: [double_room, density: 8, compute_nodes: 1]
+
+execution:
+  progression: linear
+  tests:
+  -
+    title: Download
+    class: flent
+    method: tcp_download
+  -
+    title: Upload
+    class: flent
+    method: tcp_upload
+  -
+    title: Bi-directional
+    class: flent
+    method: tcp_bidirectional
