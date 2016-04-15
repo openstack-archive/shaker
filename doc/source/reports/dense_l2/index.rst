@@ -33,7 +33,7 @@ degradation when the number of VMs grows.
       - class: flent
         method: tcp_bidirectional
         title: Bi-directional
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/dense_l2.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/dense_l2.yaml
     title: OpenStack L2 Dense
 
 Bi-directional
