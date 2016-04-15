@@ -38,7 +38,7 @@ compute nodes.
         - '[type == ''agent''] >> (stats.packets.avg > 100000)'
         title: UDP
         udp: true
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/perf_l2.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/perf_l2.yaml
     title: OpenStack L2 Performance
 
 Ping

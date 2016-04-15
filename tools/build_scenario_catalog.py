@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from __future__ import print_function
-import functools
 import re
 import os
 import sys
@@ -73,7 +72,7 @@ def make(src, dest):
         print('', file=out)
 
         for info in scenarios:
-            print_info(out, info)
+            print_info(out, info, prefix='scenario')
             print('To use this scenario specify parameter ``--scenario %s``.\n'
                   'Scenario source is available at: '
                   'https://github.com/openstack/shaker/blob/master/%s' %
@@ -85,15 +84,16 @@ def make(src, dest):
         print('', file=out)
 
         for info in templates:
-            print_info(out, info)
+            print_info(out, info, prefix='template')
             print('Template source is available at: '
                   'https://github.com/openstack/shaker/blob/master/%s' %
                   info['path'], file=out)
+            print('', file=out)
 
 
-def print_info(out, info):
+def print_info(out, info, prefix):
     block_id = re.sub(r'[^\w\d]+', '_', info['title']).lower()
-    print('.. _%s:\n' % block_id, file=out)
+    print('.. _%s_%s:\n' % (prefix, block_id), file=out)
     print(info['title'], file=out)
     print('^' * len(info['title']), file=out)
     print('\n'.join(textwrap.wrap(info['description'], width=79)), file=out)

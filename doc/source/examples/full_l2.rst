@@ -11,12 +11,12 @@ How To Run
 ^^^^^^^^^^
 .. code::
 
-    shaker --server-endpoint <host:port> --scenario networking/full_l2 --report <full_l2.html>
+    shaker --server-endpoint <host:port> --scenario openstack/full_l2 --report <full_l2.html>
 
 Scenario
 ^^^^^^^^
 
-.. literalinclude:: ../../../shaker/scenarios/networking/full_l2.yaml
+.. literalinclude:: ../../../shaker/scenarios/openstack/full_l2.yaml
 
 Report
 ^^^^^^

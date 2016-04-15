@@ -38,7 +38,7 @@ router (L3 east-west). VMs are hosted on different compute nodes
         - '[type == ''agent''] >> (stats.packets.avg > 100000)'
         title: UDP
         udp: true
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/perf_l3_east_west.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/perf_l3_east_west.yaml
     title: OpenStack L3 East-West Performance
 
 Ping

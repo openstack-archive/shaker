@@ -6,7 +6,7 @@ Scenario Catalog
 Scenarios
 ---------
 
-.. _openstack_instances_metadata_query:
+.. _scenario_openstack_instances_metadata_query:
 
 OpenStack instances metadata query
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -17,7 +17,7 @@ processes.
 To use this scenario specify parameter ``--scenario misc/instance_metadata``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/instance_metadata.yaml
 
-.. _static_agents:
+.. _scenario_static_agents:
 
 Static agents
 ^^^^^^^^^^^^^
@@ -27,7 +27,7 @@ can be used for Shaker integration testing.
 To use this scenario specify parameter ``--scenario misc/static_agent``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/static_agent.yaml
 
-.. _paired_static_agents:
+.. _scenario_paired_static_agents:
 
 Paired static agents
 ^^^^^^^^^^^^^^^^^^^^
@@ -37,7 +37,7 @@ scenario can be used for Shaker integration testing.
 To use this scenario specify parameter ``--scenario misc/static_agents_pair``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/static_agents_pair.yaml
 
-.. _openstack_l2_cross_az:
+.. _scenario_openstack_l2_cross_az:
 
 OpenStack L2 Cross-AZ
 ^^^^^^^^^^^^^^^^^^^^^
@@ -47,10 +47,10 @@ nodes are utilized. The master and slave instances are in different
 availability zones. The scenario is used to test throughput between `nova` and
 `vcenter` zones. The traffic goes within the tenant network (L2 domain).
 
-To use this scenario specify parameter ``--scenario networking/cross_az/full_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/full_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/full_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/full_l2.yaml
 
-.. _openstack_l3_east_west_cross_az:
+.. _scenario_openstack_l3_east_west_cross_az:
 
 OpenStack L3 East-West Cross-AZ
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -61,10 +61,10 @@ from one network to the other (L3 east-west). The master and slave instances
 are in different availability zones. The scenario is used to test throughput
 between `nova` and `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/full_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/full_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/full_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/full_l3_east_west.yaml
 
-.. _openstack_l3_north_south_cross_az:
+.. _scenario_openstack_l3_north_south_cross_az:
 
 OpenStack L3 North-South Cross-AZ
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -75,10 +75,10 @@ traffic goes from one network via external network to the other network. The
 master and slave instances are in different availability zones. The scenario is
 used to test throughput between `nova` and `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/full_l3_north_south``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/full_l3_north_south.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/full_l3_north_south``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/full_l3_north_south.yaml
 
-.. _openstack_l2_cross_az_performance:
+.. _scenario_openstack_l2_cross_az_performance:
 
 OpenStack L2 Cross-AZ Performance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -87,10 +87,10 @@ network. Each instance is hosted on a separate compute node. The master and
 slave instances are in different availability zones. The scenario is used to
 test throughput between `nova` and `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/perf_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/perf_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/perf_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/perf_l2.yaml
 
-.. _openstack_l3_east_west_cross_az_performance:
+.. _scenario_openstack_l3_east_west_cross_az_performance:
 
 OpenStack L3 East-West Cross-AZ Performance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -100,10 +100,10 @@ plugged into single router. The traffic goes from one network to the other (L3
 east-west). The master and slave instances are in different availability zones.
 The scenario is used to test throughput between `nova` and `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/perf_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/perf_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/perf_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/perf_l3_east_west.yaml
 
-.. _openstack_l3_north_south_cross_az_performance:
+.. _scenario_openstack_l3_north_south_cross_az_performance:
 
 OpenStack L3 North-South Cross-AZ Performance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -114,10 +114,10 @@ external network to the other network. The master and slave instances are in
 different availability zones. The scenario is used to test throughput between
 `nova` and `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/perf_l3_north_south``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/perf_l3_north_south.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/perf_l3_north_south``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/perf_l3_north_south.yaml
 
-.. _openstack_l2_cross_az_udp:
+.. _scenario_openstack_l2_cross_az_udp:
 
 OpenStack L2 Cross-AZ UDP
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -127,10 +127,10 @@ UDP traffic. The master and slave instances are in different availability
 zones. The scenario is used to test throughput between `nova` and `vcenter`
 zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/udp_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/udp_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/udp_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/udp_l2.yaml
 
-.. _openstack_l2_cross_az_udp_jumbo:
+.. _scenario_openstack_l2_cross_az_udp_jumbo:
 
 OpenStack L2 Cross-AZ UDP Jumbo
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -140,10 +140,10 @@ UDP traffic and jumbo packets. The master and slave instances are in different
 availability zones. The scenario is used to test throughput between `nova` and
 `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/udp_l2_mss8950``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/udp_l2_mss8950.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/udp_l2_mss8950``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/udp_l2_mss8950.yaml
 
-.. _openstack_l3_east_west_cross_az_udp:
+.. _scenario_openstack_l3_east_west_cross_az_udp:
 
 OpenStack L3 East-West Cross-AZ UDP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -154,10 +154,10 @@ east-west). The load is generated by UDP traffic. The master and slave
 instances are in different availability zones. The scenario is used to test
 throughput between `nova` and `vcenter` zones.
 
-To use this scenario specify parameter ``--scenario networking/cross_az/udp_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/udp_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/cross_az/udp_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/udp_l3_east_west.yaml
 
-.. _openstack_l2_dense:
+.. _scenario_openstack_l2_dense:
 
 OpenStack L2 Dense
 ^^^^^^^^^^^^^^^^^^
@@ -165,10 +165,10 @@ In this scenario Shaker launches several pairs of instances on a single compute
 node. Instances are plugged into the same tenant network. The traffic goes
 within the tenant network (L2 domain).
 
-To use this scenario specify parameter ``--scenario networking/dense_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/dense_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/dense_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/dense_l2.yaml
 
-.. _openstack_l3_east_west_dense:
+.. _scenario_openstack_l3_east_west_dense:
 
 OpenStack L3 East-West Dense
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -176,10 +176,10 @@ In this scenario Shaker launches pairs of instances on the same compute node.
 Instances are connected to different tenant networks connected to one router.
 The traffic goes from one network to the other (L3 east-west).
 
-To use this scenario specify parameter ``--scenario networking/dense_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/dense_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/dense_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/dense_l3_east_west.yaml
 
-.. _openstack_l3_north_south_dense:
+.. _scenario_openstack_l3_north_south_dense:
 
 OpenStack L3 North-South Dense
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -188,10 +188,10 @@ Instances are connected to different tenant networks, each connected to own
 router. Instances in one of networks have floating IPs. The traffic goes from
 one network via external network to the other network.
 
-To use this scenario specify parameter ``--scenario networking/dense_l3_north_south``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/dense_l3_north_south.yaml
+To use this scenario specify parameter ``--scenario openstack/dense_l3_north_south``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/dense_l3_north_south.yaml
 
-.. _openstack_l3_north_south_dense_to_external_target:
+.. _scenario_openstack_l3_north_south_dense_to_external_target:
 
 OpenStack L3 North-South Dense to external target
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -200,10 +200,10 @@ network connected to external network. The traffic is sent to and from external
 host. The host name needs to be provided as command-line parameter, e.g.
 ``--matrix "{host: 172.10.1.2}"``.
 
-To use this scenario specify parameter ``--scenario networking/external/dense_l3_north_south_no_fip``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/dense_l3_north_south_no_fip.yaml
+To use this scenario specify parameter ``--scenario openstack/external/dense_l3_north_south_no_fip``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/dense_l3_north_south_no_fip.yaml
 
-.. _openstack_l3_north_south_dense_to_external_target_with_floating_ip:
+.. _scenario_openstack_l3_north_south_dense_to_external_target_with_floating_ip:
 
 OpenStack L3 North-South Dense to external target with floating IP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -212,10 +212,10 @@ network connected to external network. All instances have floating IPs. The
 traffic is sent to and from external host. The host name needs to be provided
 as command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 
-To use this scenario specify parameter ``--scenario networking/external/dense_l3_north_south_with_fip``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/dense_l3_north_south_with_fip.yaml
+To use this scenario specify parameter ``--scenario openstack/external/dense_l3_north_south_with_fip``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/dense_l3_north_south_with_fip.yaml
 
-.. _openstack_l3_north_south_to_external_target:
+.. _scenario_openstack_l3_north_south_to_external_target:
 
 OpenStack L3 North-South to external target
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -225,10 +225,10 @@ available compute nodes are utilized. The traffic is sent to and from external
 host (L3 north-south). The host name needs to be provided as command-line
 parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 
-To use this scenario specify parameter ``--scenario networking/external/full_l3_north_south_no_fip``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/full_l3_north_south_no_fip.yaml
+To use this scenario specify parameter ``--scenario openstack/external/full_l3_north_south_no_fip``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/full_l3_north_south_no_fip.yaml
 
-.. _openstack_l3_north_south_to_external_target_with_floating_ip:
+.. _scenario_openstack_l3_north_south_to_external_target_with_floating_ip:
 
 OpenStack L3 North-South to external target with floating IP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -239,10 +239,10 @@ traffic is sent to and from external host (L3 north-south). The host name needs
 to be provided as command-line parameter, e.g. ``--matrix "{host:
 172.10.1.2}"``.
 
-To use this scenario specify parameter ``--scenario networking/external/full_l3_north_south_with_fip``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/full_l3_north_south_with_fip.yaml
+To use this scenario specify parameter ``--scenario openstack/external/full_l3_north_south_with_fip``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/full_l3_north_south_with_fip.yaml
 
-.. _openstack_l3_north_south_performance_to_external_target:
+.. _scenario_openstack_l3_north_south_performance_to_external_target:
 
 OpenStack L3 North-South Performance to external target
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -251,10 +251,10 @@ external network. The traffic is sent to and from external host. By default one
 of public iperf3 servers is used, to override this the target host can be
 provided as command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 
-To use this scenario specify parameter ``--scenario networking/external/perf_l3_north_south_no_fip``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/perf_l3_north_south_no_fip.yaml
+To use this scenario specify parameter ``--scenario openstack/external/perf_l3_north_south_no_fip``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/perf_l3_north_south_no_fip.yaml
 
-.. _openstack_l3_north_south_performance_to_external_target_with_floating_ip:
+.. _scenario_openstack_l3_north_south_performance_to_external_target_with_floating_ip:
 
 OpenStack L3 North-South performance to external target with floating IP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -264,10 +264,10 @@ external host. By default one of public iperf3 servers is used, to override
 this the target host can be provided as command-line parameter, e.g. ``--matrix
 "{host: 172.10.1.2}"``.
 
-To use this scenario specify parameter ``--scenario networking/external/perf_l3_north_south_with_fip``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/perf_l3_north_south_with_fip.yaml
+To use this scenario specify parameter ``--scenario openstack/external/perf_l3_north_south_with_fip``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/perf_l3_north_south_with_fip.yaml
 
-.. _openstack_l2:
+.. _scenario_openstack_l2:
 
 OpenStack L2
 ^^^^^^^^^^^^
@@ -275,10 +275,10 @@ In this scenario Shaker launches pairs of instances in the same tenant network.
 Every instance is hosted on a separate compute node, all available compute
 nodes are utilized. The traffic goes within the tenant network (L2 domain).
 
-To use this scenario specify parameter ``--scenario networking/full_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/full_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/full_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/full_l2.yaml
 
-.. _openstack_l3_east_west:
+.. _scenario_openstack_l3_east_west:
 
 OpenStack L3 East-West
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -287,10 +287,10 @@ compute node. All available compute nodes are utilized. Instances are connected
 to one of 2 tenant networks, which plugged into single router. The traffic goes
 from one network to the other (L3 east-west).
 
-To use this scenario specify parameter ``--scenario networking/full_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/full_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/full_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/full_l3_east_west.yaml
 
-.. _openstack_l3_north_south:
+.. _scenario_openstack_l3_north_south:
 
 OpenStack L3 North-South
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -299,10 +299,10 @@ All available compute nodes are utilized. Instances are in different networks
 connected to different routers, master accesses slave by floating ip. The
 traffic goes from one network via external network to the other network.
 
-To use this scenario specify parameter ``--scenario networking/full_l3_north_south``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/full_l3_north_south.yaml
+To use this scenario specify parameter ``--scenario openstack/full_l3_north_south``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/full_l3_north_south.yaml
 
-.. _openstack_l2_performance:
+.. _scenario_openstack_l2_performance:
 
 OpenStack L2 Performance
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -310,10 +310,10 @@ In this scenario Shaker launches 1 pair of instances in the same tenant
 network. Each instance is hosted on a separate compute node. The traffic goes
 within the tenant network (L2 domain).
 
-To use this scenario specify parameter ``--scenario networking/perf_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/perf_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/perf_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/perf_l2.yaml
 
-.. _openstack_l3_east_west_performance:
+.. _scenario_openstack_l3_east_west_performance:
 
 OpenStack L3 East-West Performance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -322,10 +322,10 @@ compute node. Instances are connected to one of 2 tenant networks, which
 plugged into single router. The traffic goes from one network to the other (L3
 east-west).
 
-To use this scenario specify parameter ``--scenario networking/perf_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/perf_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/perf_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/perf_l3_east_west.yaml
 
-.. _openstack_l3_north_south_performance:
+.. _scenario_openstack_l3_north_south_performance:
 
 OpenStack L3 North-South Performance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -334,10 +334,10 @@ nodes. Instances are in different networks connected to different routers,
 master accesses slave by floating ip. The traffic goes from one network via
 external network to the other network.
 
-To use this scenario specify parameter ``--scenario networking/perf_l3_north_south``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/perf_l3_north_south.yaml
+To use this scenario specify parameter ``--scenario openstack/perf_l3_north_south``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/perf_l3_north_south.yaml
 
-.. _openstack_l2_udp:
+.. _scenario_openstack_l2_udp:
 
 OpenStack L2 UDP
 ^^^^^^^^^^^^^^^^
@@ -345,10 +345,10 @@ In this scenario Shaker launches pairs of instances in the same tenant network.
 Every instance is hosted on a separate compute node. The traffic goes within
 the tenant network (L2 domain). The load is generated by UDP traffic.
 
-To use this scenario specify parameter ``--scenario networking/udp_l2``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/udp_l2.yaml
+To use this scenario specify parameter ``--scenario openstack/udp_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/udp_l2.yaml
 
-.. _openstack_l3_east_west_udp:
+.. _scenario_openstack_l3_east_west_udp:
 
 OpenStack L3 East-West UDP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -357,10 +357,10 @@ compute node. Instances are connected to one of 2 tenant networks, which
 plugged into single router. The traffic goes from one network to the other (L3
 east-west). The load is generated by UDP traffic.
 
-To use this scenario specify parameter ``--scenario networking/udp_l3_east_west``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/udp_l3_east_west.yaml
+To use this scenario specify parameter ``--scenario openstack/udp_l3_east_west``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/udp_l3_east_west.yaml
 
-.. _openstack_l3_north_south_udp:
+.. _scenario_openstack_l3_north_south_udp:
 
 OpenStack L3 North-South UDP
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -369,10 +369,10 @@ Instances are in different networks connected to different routers, master
 accesses slave by floating ip. The traffic goes from one network via external
 network to the other network. The load is generated by UDP traffic.
 
-To use this scenario specify parameter ``--scenario networking/udp_l3_north_south``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/udp_l3_north_south.yaml
+To use this scenario specify parameter ``--scenario openstack/udp_l3_north_south``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/udp_l3_north_south.yaml
 
-.. _tcp_bandwidth:
+.. _scenario_tcp_bandwidth:
 
 TCP bandwidth
 ^^^^^^^^^^^^^
@@ -385,7 +385,7 @@ destination host can be overriden by command-line parameter, e.g. ``--matrix
 To use this scenario specify parameter ``--scenario spot/tcp``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/spot/tcp.yaml
 
-.. _udp_bandwidth:
+.. _scenario_udp_bandwidth:
 
 UDP bandwidth
 ^^^^^^^^^^^^^
@@ -400,7 +400,7 @@ Scenario source is available at: https://github.com/openstack/shaker/blob/master
 Heat Templates
 --------------
 
-.. _misc_instance_metadata:
+.. _template_misc_instance_metadata:
 
 misc/instance_metadata
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -408,72 +408,81 @@ Heat template creates a new Neutron network, a router to the external network,
 plugs instances into this network and assigns floating ips
 
 Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/instance_metadata.hot
-.. _networking_cross_az_l2:
 
-networking/cross_az/l2
-^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_cross_az_l2:
+
+openstack/cross_az/l2
+^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a new Neutron network, a router to the external
 network and plugs instances into this new network. All instances are located in
 the same L2 domain.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/l2.hot
-.. _networking_cross_az_l3_east_west:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/l2.hot
 
-networking/cross_az/l3_east_west
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_cross_az_l3_east_west:
+
+openstack/cross_az/l3_east_west
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a pair of networks plugged into the same router.
 Master instances and slave instances are connected into different networks.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/l3_east_west.hot
-.. _networking_cross_az_l3_north_south:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/l3_east_west.hot
 
-networking/cross_az/l3_north_south
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_cross_az_l3_north_south:
+
+openstack/cross_az/l3_north_south
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a new Neutron network plus a north_router to the
 external network. The template also assigns floating IP addresses to each
 instance so they are routable from the external network.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/cross_az/l3_north_south.hot
-.. _networking_external_l3_north_south_no_fip:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/cross_az/l3_north_south.hot
 
-networking/external/l3_north_south_no_fip
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_external_l3_north_south_no_fip:
+
+openstack/external/l3_north_south_no_fip
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a new Neutron network plugged into a router
 connected to the external network, and boots an instance in that network.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/l3_north_south_no_fip.hot
-.. _networking_external_l3_north_south_with_fip:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/l3_north_south_no_fip.hot
 
-networking/external/l3_north_south_with_fip
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_external_l3_north_south_with_fip:
+
+openstack/external/l3_north_south_with_fip
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a new Neutron network plugged into a router
 connected to the external network, and boots an instance in that network. The
 instance has floating IP.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/external/l3_north_south_with_fip.hot
-.. _networking_l2:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/external/l3_north_south_with_fip.hot
 
-networking/l2
-^^^^^^^^^^^^^
+.. _template_openstack_l2:
+
+openstack/l2
+^^^^^^^^^^^^
 This Heat template creates a new Neutron network, a router to the external
 network and plugs instances into this new network. All instances are located in
 the same L2 domain.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/l2.hot
-.. _networking_l3_east_west:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/l2.hot
 
-networking/l3_east_west
-^^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_l3_east_west:
+
+openstack/l3_east_west
+^^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a pair of networks plugged into the same router.
 Master instances and slave instances are connected into different networks.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/l3_east_west.hot
-.. _networking_l3_north_south:
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/l3_east_west.hot
 
-networking/l3_north_south
-^^^^^^^^^^^^^^^^^^^^^^^^^
+.. _template_openstack_l3_north_south:
+
+openstack/l3_north_south
+^^^^^^^^^^^^^^^^^^^^^^^^
 This Heat template creates a new Neutron network plus a north_router to the
 external network. The template also assigns floating IP addresses to each
 instance so they are routable from the external network.
 
-Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/networking/l3_north_south.hot
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/l3_north_south.hot
+

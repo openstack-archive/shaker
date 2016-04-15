@@ -11,12 +11,12 @@ How To Run
 ^^^^^^^^^^
 .. code::
 
-    shaker --server-endpoint <host:port> --scenario networking/full_l3_east_west --report <full_l3_east_west.html>
+    shaker --server-endpoint <host:port> --scenario openstack/full_l3_east_west --report <full_l3_east_west.html>
 
 Scenario
 ^^^^^^^^
 
-.. literalinclude:: ../../../shaker/scenarios/networking/full_l3_east_west.yaml
+.. literalinclude:: ../../../shaker/scenarios/openstack/full_l3_east_west.yaml
 
 Report
 ^^^^^^

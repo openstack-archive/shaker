@@ -17,7 +17,7 @@ How To Run
 Scenario
 ^^^^^^^^
 
-.. literalinclude:: ../../../shaker/scenarios/networking/full_l3_north_south.yaml
+.. literalinclude:: ../../../shaker/scenarios/openstack/full_l3_north_south.yaml
 
 Report
 ^^^^^^

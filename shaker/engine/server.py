@@ -217,7 +217,12 @@ def act():
     for scenario_param in [cfg.CONF.scenario]:
         LOG.debug('Processing scenario: %s', scenario_param)
 
-        alias = '%s%s.yaml' % (config.SCENARIOS, scenario_param)
+        alias_base = scenario_param
+        if alias_base[:11] == 'networking/':  # backward compatibility
+            LOG.warning('Scenarios from networking/ are moved to openstack/')
+            alias_base = 'openstack/' + alias_base[11:]
+
+        alias = '%s%s.yaml' % (config.SCENARIOS, alias_base)
         packaged = utils.resolve_relative_path(alias)
         # use packaged scenario or fallback to full path
         scenario_file_name = packaged or scenario_param

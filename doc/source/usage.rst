@@ -21,25 +21,25 @@ Common Parameters
 
 The following parameters are applicable for both OpenStack mode (`shaker`) and spot mode (`shaker-spot`).
 
-1. Run the scenario with defaults and generate interactive report into file `report.html`::
+1. Run the scenario with defaults and generate interactive report into file `report.html`:
 
   .. code::
 
       shaker --scenario <scenario> --report report.html
 
-2. Run the scenario and store raw result::
+2. Run the scenario and store raw result:
 
   .. code::
 
       shaker --scenario <scenario> --output output.json
 
-3. Run the scenario and store SLA verification results in `subunit <https://launchpad.net/subunit>`_ stream file::
+3. Run the scenario and store SLA verification results in `subunit <https://launchpad.net/subunit>`_ stream file:
 
   .. code::
 
       shaker --scenario <scenario> --subunit report.subunit
 
-4. Generate report from the raw data::
+4. Generate report from the raw data:
 
   .. code::
 

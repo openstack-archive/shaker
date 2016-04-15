@@ -40,7 +40,7 @@ floating ip
         - '[type == ''agent''] >> (stats.packets.avg > 100000)'
         title: UDP
         udp: true
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/perf_l3_north_south.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/perf_l3_north_south.yaml
     title: OpenStack L3 North-South Performance
 
 Ping
