@@ -1,8 +1,10 @@
 title: OpenStack L3 East-West
 
 description:
-  This scenario launches pairs of VMs in different networks connected to one
-  router (L3 east-west)
+  In this scenario Shaker launches pairs of instances, each instance on its own
+  compute node. All available compute nodes are utilized. Instances are
+  connected to one of 2 tenant networks, which plugged into single router.
+  The traffic goes from one network to the other (L3 east-west).
 
 deployment:
   template: l3_east_west.hot

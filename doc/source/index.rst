@@ -15,8 +15,9 @@ to execute. Additionally tests may be tuned dynamically in command-line.
 
     installation
     usage
-    tools
     architecture
+    tools
+    catalog
     examples/index
     examples_spot
     reports/index

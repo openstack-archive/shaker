@@ -1,9 +1,11 @@
 title: TCP bandwidth
 
-description:
-  This scenario uses iperf3 to measure TCP bandwidth between local host and
+description: >
+  This scenario uses iperf3 to measure TCP throughput between local host and
   ping.online.net (or against hosts provided via CLI). SLA check is verified
   and expects the speed to be at least 90Mbit and at most 20 retransmitts.
+  The destination host can be overriden by command-line parameter,
+  e.g. ``--matrix "{host: 172.10.1.2}"``.
 
 execution:
   tests:
