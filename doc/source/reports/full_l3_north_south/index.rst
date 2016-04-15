@@ -31,7 +31,7 @@ floating ip
       - class: flent
         method: tcp_bidirectional
         title: Bi-directional
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/full_l3_north_south.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/full_l3_north_south.yaml
     title: OpenStack L3 North-South
 
 Bi-directional

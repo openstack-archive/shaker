@@ -29,7 +29,7 @@ router (L3 east-west)
       - class: flent
         method: tcp_bidirectional
         title: Bi-directional
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/full_l3_east_west.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/full_l3_east_west.yaml
     title: OpenStack L3 East-West
 
 Bi-directional

@@ -29,7 +29,7 @@ hosted on a separate compute node.
       - class: flent
         method: tcp_bidirectional
         title: Bi-directional
-    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/networking/full_l2.yaml
+    file_name: /home/ishakhat/Work/shaker/shaker/scenarios/openstack/full_l2.yaml
     title: OpenStack L2
 
 Bi-directional
