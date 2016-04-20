@@ -1,0 +1,20 @@
+title: Ping
+
+description: >
+  This scenario uses ping to measure the latency between the local host and
+  the remote. The remote host can be provided via command-line, it defaults
+  to 8.8.8.8. The scenario verifies SLA and expects the latency to be at most
+  30ms.
+  The destination host can be overriden by command-line parameter,
+  e.g. ``--matrix "{host: 172.10.1.2}"``.
+
+execution:
+  tests:
+  -
+    title: Ping
+    class: flent
+    host: 8.8.8.8
+    method: ping
+    time: 10
+    sla:
+    - "[type == 'agent'] >> (stats.ping_icmp.avg < 30)"

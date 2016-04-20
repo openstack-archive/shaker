@@ -141,8 +141,9 @@ optional arguments:
                         "openstack/perf_l3_east_west",
                         "openstack/perf_l3_north_south", "openstack/udp_l2",
                         "openstack/udp_l3_east_west",
-                        "openstack/udp_l3_north_south", "spot/tcp",
-                        "spot/udp". Defaults to env[SHAKER_SCENARIO].
+                        "openstack/udp_l3_north_south", "spot/ping",
+                        "spot/tcp", "spot/udp". Defaults to
+                        env[SHAKER_SCENARIO].
   --server-endpoint SERVER_ENDPOINT
                         Address for server connections (host:port), defaults
                         to env[SHAKER_SERVER_ENDPOINT].
