@@ -34,22 +34,13 @@ def init():
     utils.init_config_and_logging(
         config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS)
 
-    openstack_client = None
+    openstack_params = utils.pack_openstack_params(cfg.CONF)
     try:
-        openstack_client = openstack.OpenStackClient(
-            username=cfg.CONF.os_username, password=cfg.CONF.os_password,
-            tenant_name=cfg.CONF.os_tenant_name, auth_url=cfg.CONF.os_auth_url,
-            region_name=cfg.CONF.os_region_name, cacert=cfg.CONF.os_cacert,
-            insecure=cfg.CONF.os_insecure
-        )
+        return openstack.OpenStackClient(openstack_params)
     except Exception as e:
-        LOG.error('Error establishing connection to OpenStack: %s. '
-                  'Please verify OpenStack credentials (--os-username, '
-                  '--os-password, --os-tenant-name, --os-auth-url, '
-                  '--os-cacert, --os-insecure)', e)
+        LOG.error('Failed to connect to OpenStack: %s. '
+                  'Please verify parameters: %s', e, openstack_params)
         exit(1)
-
-    return openstack_client
 
 
 def build_image():

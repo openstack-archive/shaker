@@ -10,6 +10,7 @@ usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
                       [--nowatch-log-file] [--os-auth-url <auth-url>]
                       [--os-cacert <auth-cacert>] [--os-insecure]
                       [--os-password <auth-password>]
+                      [--os-project-name <auth-project-name>]
                       [--os-region-name <auth-region-name>]
                       [--os-tenant-name <auth-tenant-name>]
                       [--os-username <auth-username>]
@@ -84,6 +85,10 @@ optional arguments:
                         defaults to env[OS_INSECURE].
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
+  --os-project-name <auth-project-name>
+                        Another way to specify tenant name. This option is
+                        mutually exclusive with --os-tenant-name. Defaults to
+                        env[OS_PROJECT_NAME].
   --os-region-name <auth-region-name>
                         Authentication region name, defaults to
                         env[OS_REGION_NAME].
