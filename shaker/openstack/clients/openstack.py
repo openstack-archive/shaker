@@ -13,90 +13,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import functools
-import time
-
-from shaker.openstack.clients import glance
-from shaker.openstack.clients import heat
-from shaker.openstack.clients import keystone
-from shaker.openstack.clients import neutron
-from shaker.openstack.clients import nova
+import os_client_config
+from oslo_log import log as logging
 
 
-# As of now only Nova and Neutron clients support Keystone sessions.
-# Thus the only way to create clients is from keystone client instance
-# and auth token. The token gets expired in an hour and there is no
-# way to automatically refresh it. So the current implementation is to
-# recreate keystone client from scratch
-
-MODERN_CLIENT_MAKERS = {
-    'neutron': neutron.create_client,
-    'nova': nova.create_client,
-}
-OLD_CLIENT_MAKERS = {
-    'glance': glance.create_client,
-    'heat': heat.create_client,
-}
-
-KEYSTONE_AUTH_EXPIRATION = 60
-
-
-class OpenStackClientProxy(object):
-    def __init__(self, keystone_creator, client_creator):
-        self.keystone_creator = keystone_creator
-        self.client_creator = client_creator
-        self.last_update_time = 0
-
-    def __getattribute__(self, name):
-        if name in ['keystone_creator', 'client_creator',
-                    'client', 'last_update_time']:
-            return super(OpenStackClientProxy, self).__getattribute__(name)
-        else:
-            now = int(time.time())
-            if now > self.last_update_time + KEYSTONE_AUTH_EXPIRATION:
-                self.last_update_time = now
-                self.client = self.client_creator(
-                    keystone_client=self.keystone_creator())
-            return self.client.__getattribute__(name)
+LOG = logging.getLogger(__name__)
 
 
 class OpenStackClient(object):
-    def __init__(self, username, password, tenant_name, auth_url, region_name,
-                 cacert, insecure):
-        self.region_name = region_name or 'RegionOne'
-        self.cacert = cacert or ''
-        self.insecure = insecure or False
-        self._osc_cache = {}
-        self.keystone_creator = functools.partial(
-            keystone.create_keystone_client,
-            username=username, password=password,
-            tenant_name=tenant_name, auth_url=auth_url, cacert=cacert,
-            insecure=insecure)
-        self.session_creator = functools.partial(
-            keystone.create_keystone_session, cacert,
-            username=username, password=password,
-            tenant_name=tenant_name, auth_url=auth_url,
-            insecure=insecure)
-        # ping OpenStack
-        self.keystone_creator()
+    def __init__(self, openstack_params):
+        LOG.debug('Establishing connection to OpenStack')
 
-    def __getattribute__(self, name):
-        if name != '_osc_cache' and name in self._osc_cache:
-            return self._osc_cache[name]
+        config = os_client_config.OpenStackConfig()
+        cloud_config = config.get_one_cloud(**openstack_params)
 
-        client = None
-        if name in MODERN_CLIENT_MAKERS:
-            session = self.session_creator()
-            client = MODERN_CLIENT_MAKERS[name](session, self.region_name)
-        elif name in OLD_CLIENT_MAKERS:
-            client_creator = functools.partial(
-                OLD_CLIENT_MAKERS[name], os_region_name=self.region_name,
-                cacert=self.cacert, insecure=self.insecure)
-            client = OpenStackClientProxy(self.keystone_creator,
-                                          client_creator)
+        self.keystone_session = cloud_config.get_session()
+        self.nova = cloud_config.get_legacy_client('compute')
+        self.neutron = cloud_config.get_legacy_client('network')
+        self.glance = cloud_config.get_legacy_client('image')
+        self.heat = cloud_config.get_legacy_client('orchestration')
 
-        if client:
-            self._osc_cache[name] = client
-            return client
-        else:
-            return super(OpenStackClient, self).__getattribute__(name)
+        # Ping OpenStack
+        self.keystone_session.get_token()
+
+        LOG.info('Connection to OpenStack is initialized')

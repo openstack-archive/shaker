@@ -13,21 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from glanceclient import client as glance_client_pkg
-
-
-GLANCE_VERSION = '1'
-
-
-def create_client(keystone_client, os_region_name, cacert, insecure):
-    image_api_url = keystone_client.service_catalog.url_for(
-        service_type='image', region_name=os_region_name)
-    return glance_client_pkg.Client(GLANCE_VERSION,
-                                    endpoint=image_api_url,
-                                    token=keystone_client.auth_token,
-                                    cacert=cacert,
-                                    insecure=insecure)
-
 
 def get_image(glance_client, image_name):
     for image in glance_client.images.list():

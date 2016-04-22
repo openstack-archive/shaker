@@ -78,6 +78,12 @@ OPENSTACK_OPTS = [
                sample_default='',
                help='Authentication tenant name, defaults to '
                     'env[OS_TENANT_NAME].'),
+    cfg.StrOpt('os-project-name', metavar='<auth-project-name>',
+               default=utils.env('OS_PROJECT_NAME'),
+               sample_default='',
+               help='Another way to specify tenant name. This option is '
+                    'mutually exclusive with --os-tenant-name. '
+                    'Defaults to env[OS_PROJECT_NAME].'),
     cfg.StrOpt('os-username', metavar='<auth-username>',
                default=utils.env('OS_USERNAME'),
                sample_default='',

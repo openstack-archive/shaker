@@ -23,16 +23,9 @@ from oslo_log import log as logging
 
 LOG = logging.getLogger(__name__)
 
-NOVA_VERSION = '2'
-
 
 class ForbiddenException(nova_client_pkg.exceptions.Forbidden):
     pass
-
-
-def create_client(keystone_session, os_region_name):
-    return nova_client_pkg.Client(NOVA_VERSION, session=keystone_session,
-                                  region_name=os_region_name)
 
 
 def get_available_compute_nodes(nova_client):

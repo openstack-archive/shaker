@@ -184,10 +184,13 @@ class TestServerPlayScenario(testtools.TestCase):
         deploy_obj.deploy.assert_called_once_with(
             self.deployment, base_dir='folder',
             server_endpoint='127.0.0.1:5999')
+        openstack_params = dict(
+            auth=dict(username='user', password='password',
+                      tenant_name='tenant', auth_url='auth-url'),
+            os_region_name='RegionOne',
+            os_cacert=None, os_insecure=False)
         deploy_obj.connect_to_openstack.assert_called_once_with(
-            'user', 'password', 'tenant', 'auth-url', 'RegionOne', None,
-            'shaker-flavor', 'shaker-image', None, False
-        )
+            openstack_params, 'shaker-flavor', 'shaker-image', None)
         deploy_obj.cleanup.assert_called_once_with()
 
     @mock.patch('shaker.engine.deploy.Deployment')

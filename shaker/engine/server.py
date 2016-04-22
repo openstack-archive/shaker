@@ -136,7 +136,7 @@ def execute(output, quorum, execution, agents, matrix=None):
 def _under_openstack():
     required = ['os_username', 'os_password', 'os_tenant_name', 'os_auth_url']
     for param in required:
-        if param not in cfg.CONF or not cfg.CONF[param]:
+        if param not in cfg.CONF:
             return False
     return True
 
@@ -149,12 +149,14 @@ def play_scenario(scenario):
         deployment = deploy.Deployment()
 
         if _under_openstack():
-            deployment.connect_to_openstack(
-                cfg.CONF.os_username, cfg.CONF.os_password,
-                cfg.CONF.os_tenant_name, cfg.CONF.os_auth_url,
-                cfg.CONF.os_region_name, cfg.CONF.external_net,
-                cfg.CONF.flavor_name, cfg.CONF.image_name,
-                cfg.CONF.os_cacert, cfg.CONF.os_insecure)
+            openstack_params = utils.pack_openstack_params(cfg.CONF)
+            try:
+                deployment.connect_to_openstack(
+                    openstack_params, cfg.CONF.flavor_name,
+                    cfg.CONF.image_name, cfg.CONF.external_net)
+            except Exception as e:
+                LOG.warning('Failed to connect to OpenStack: %s. Please '
+                            'verify parameters: %s', e, openstack_params)
 
         base_dir = os.path.dirname(scenario['file_name'])
         scenario_deployment = scenario.get('deployment', {})
@@ -192,8 +194,7 @@ def play_scenario(scenario):
             record = dict(id=utils.make_record_id(), status='interrupted')
         else:
             error_msg = 'Error while executing scenario: %s' % e
-            LOG.error(error_msg)
-            LOG.exception(e)
+            LOG.error(error_msg, exc_info=True)
             record = dict(id=utils.make_record_id(), status='error',
                           stderr=error_msg)
         output['records'][record['id']] = record
