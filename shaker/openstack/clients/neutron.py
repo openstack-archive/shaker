@@ -13,20 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from neutronclient.neutron import client as neutron_client_pkg
 from oslo_log import log as logging
 
 
 LOG = logging.getLogger(__name__)
-
-
-NEUTRON_VERSION = '2.0'
-
-
-def create_client(keystone_session, os_region_name):
-    return neutron_client_pkg.Client(NEUTRON_VERSION,
-                                     session=keystone_session,
-                                     region_name=os_region_name)
 
 
 def choose_external_net(neutron_client):

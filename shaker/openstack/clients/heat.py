@@ -15,24 +15,10 @@
 
 import time
 
-from heatclient import client as heat_client_pkg
 from oslo_log import log as logging
 
 
 LOG = logging.getLogger(__name__)
-
-
-HEAT_VERSION = '1'
-
-
-def create_client(keystone_client, os_region_name, cacert, insecure):
-    orchestration_api_url = keystone_client.service_catalog.url_for(
-        service_type='orchestration', region_name=os_region_name)
-    return heat_client_pkg.Client(HEAT_VERSION,
-                                  endpoint=orchestration_api_url,
-                                  token=keystone_client.auth_token,
-                                  ca_file=cacert,
-                                  insecure=insecure)
 
 
 def create_stack(heat_client, stack_name, template, parameters):

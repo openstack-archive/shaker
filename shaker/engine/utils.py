@@ -57,8 +57,12 @@ def init_config_and_logging(opts):
     conf.register_cli_opts(opts)
     conf.register_opts(opts)
     logging.register_options(conf)
-    logging.set_defaults(
-        default_log_levels=conf.default_log_levels + ['pykwalify=INFO'])
+
+    # requests to OpenStack services should be visible at DEBUG level
+    default_log_levels = [l for l in conf.default_log_levels
+                          if not l.startswith('keystoneauth')]
+    default_log_levels += ['pykwalify=INFO']
+    logging.set_defaults(default_log_levels=default_log_levels)
 
     try:
         conf(project='shaker')
@@ -250,3 +254,15 @@ def copy_value_by_path(src, src_param, dst, dst_param):
         set_value_by_path(dst, dst_param, v)
         return True
     return False
+
+
+def pack_openstack_params(conf):
+    params = dict(auth=dict(username=cfg.CONF.os_username,
+                            password=cfg.CONF.os_password,
+                            tenant_name=cfg.CONF.os_tenant_name,
+                            project_name=cfg.CONF.os_project_name,
+                            auth_url=cfg.CONF.os_auth_url),
+                  os_region_name=cfg.CONF.os_region_name,
+                  os_cacert=cfg.CONF.os_cacert,
+                  os_insecure=cfg.CONF.os_insecure)
+    return params
