@@ -157,8 +157,8 @@ def read_uri(uri):
         fd.close()
         return raw
     except Exception as e:
-        LOG.warn('Error "%(error)s" while reading uri %(uri)s',
-                 {'error': e, 'uri': uri})
+        LOG.warning('Error "%(error)s" while reading uri %(uri)s',
+                    {'error': e, 'uri': uri})
 
 
 def random_string(length=6):
