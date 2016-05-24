@@ -31,7 +31,10 @@ class OpenStackClient(object):
         self.nova = cloud_config.get_legacy_client('compute')
         self.neutron = cloud_config.get_legacy_client('network')
         self.glance = cloud_config.get_legacy_client('image')
-        self.heat = cloud_config.get_legacy_client('orchestration')
+
+        # heat client wants endpoint to be always set
+        endpoint = cloud_config.get_session_endpoint('orchestration')
+        self.heat = cloud_config.get_legacy_client('orchestration', endpoint=endpoint)
 
         # Ping OpenStack
         self.keystone_session.get_token()
