@@ -40,6 +40,9 @@ def env(*_vars, **kwargs):
     for v in _vars:
         value = os.environ.get(v)
         if value:
+            # escape "$" to avoid value interpolation by oslo.config
+            if value[0] == '$':
+                value = '$' + value
             return value
     return kwargs.get('default', None)
 
