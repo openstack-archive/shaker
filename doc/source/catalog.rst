@@ -337,6 +337,18 @@ external network to the other network.
 To use this scenario specify parameter ``--scenario openstack/perf_l3_north_south``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/perf_l3_north_south.yaml
 
+.. _scenario_openstack_l2_performance:
+
+OpenStack L2 Performance
+^^^^^^^^^^^^^^^^^^^^^^^^
+In this scenario Shaker launches 1 pair of instances in the same tenant
+network. Each instance is hosted on a separate compute node. The traffic goes
+within the tenant network (L2 domain). Neutron QoS feature is used to limit
+traffic throughput to 10 Mbit/s.
+
+To use this scenario specify parameter ``--scenario openstack/qos/perf_l2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/qos/perf_l2.yaml
+
 .. _scenario_openstack_l2_udp:
 
 OpenStack L2 UDP
@@ -498,4 +510,14 @@ external network. The template also assigns floating IP addresses to each
 instance so they are routable from the external network.
 
 Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/l3_north_south.hot
+
+.. _template_openstack_qos_l2_qos:
+
+openstack/qos/l2_qos
+^^^^^^^^^^^^^^^^^^^^
+This Heat template creates a new Neutron network, a router to the external
+network and plugs instances into this new network. All instances are located in
+the same L2 domain.
+
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/qos/l2_qos.hot
 

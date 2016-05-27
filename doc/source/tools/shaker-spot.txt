@@ -89,7 +89,8 @@ optional arguments:
                         "openstack/full_l2", "openstack/full_l3_east_west",
                         "openstack/full_l3_north_south", "openstack/perf_l2",
                         "openstack/perf_l3_east_west",
-                        "openstack/perf_l3_north_south", "openstack/udp_l2",
+                        "openstack/perf_l3_north_south",
+                        "openstack/qos/perf_l2", "openstack/udp_l2",
                         "openstack/udp_l3_east_west",
                         "openstack/udp_l3_north_south", "spot/ping",
                         "spot/tcp", "spot/udp". Defaults to
