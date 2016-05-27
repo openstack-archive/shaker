@@ -1,0 +1,36 @@
+title: OpenStack L2 QoS Performance
+
+description:
+  In this scenario Shaker launches 1 pair of instances in the same tenant
+  network. Each instance is hosted on a separate compute node. The traffic goes
+  within the tenant network (L2 domain). Neutron QoS feature is used to limit 
+  traffic throughput to 10 Mbit/s.
+
+deployment:
+  template: l2_qos.hot
+#  accommodation: [pair, single_room, compute_nodes: 2]
+  accommodation: [pair, double_room]
+
+execution:
+  tests:
+  -
+    title: Ping
+    class: flent
+    method: ping
+    time: 10
+    sla:
+    - "[type == 'agent'] >> (stats.ping_icmp.avg < 2.0)"
+  -
+    title: TCP
+    class: iperf3
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.avg < 11)"
+    - "[type == 'agent'] >> (stats.retransmits.max < 10)"
+  -
+    title: UDP
+    class: iperf3
+    udp: on
+    bandwidth: 0
+    datagram_size: 32
+    sla:
+    - "[type == 'agent'] >> (stats.packets.avg < 40000)"
