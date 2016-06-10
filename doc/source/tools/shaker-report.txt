@@ -6,7 +6,7 @@ usage: shaker-report [-h] [--book BOOK] [--config-dir DIR]
                      [--noverbose] [--nowatch-log-file] [--report REPORT]
                      [--report-template REPORT_TEMPLATE] [--subunit SUBUNIT]
                      [--syslog-log-facility SYSLOG_LOG_FACILITY]
-                     [--use-syslog] [--verbose] [--version] [--watch-log-file]
+                     [--use-syslog] [--verbose] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -66,7 +66,6 @@ optional arguments:
                         This option is ignored if log_config_append is set.
   --verbose, -v         If set to false, the logging level will be set to
                         WARNING instead of the default INFO level.
-  --version             show program's version number and exit
   --watch-log-file      Uses logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path

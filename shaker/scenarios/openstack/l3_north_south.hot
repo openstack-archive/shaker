@@ -18,6 +18,9 @@ parameters:
   server_endpoint:
     type: string
     description: Server endpoint address
+  dns_nameservers:
+    type: comma_delimited_list
+    description: DNS nameservers for the subnets
 
 resources:
   north_private_net:
@@ -30,7 +33,7 @@ resources:
     properties:
       network_id: { get_resource: north_private_net }
       cidr: 10.1.0.0/16
-      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+      dns_nameservers: { get_param: dns_nameservers }
 
   north_router:
     type: OS::Neutron::Router
@@ -54,7 +57,7 @@ resources:
     properties:
       network_id: { get_resource: south_private_net }
       cidr: 10.2.0.0/16
-      dns_nameservers: [ 8.8.8.8, 8.8.4.4 ]
+      dns_nameservers: { get_param: dns_nameservers }
 
   south_router:
     type: OS::Neutron::Router

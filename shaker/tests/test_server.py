@@ -190,7 +190,8 @@ class TestServerPlayScenario(testtools.TestCase):
             os_region_name='RegionOne',
             os_cacert=None, os_insecure=False)
         deploy_obj.connect_to_openstack.assert_called_once_with(
-            openstack_params, 'shaker-flavor', 'shaker-image', None)
+            openstack_params, 'shaker-flavor', 'shaker-image', None,
+            ['8.8.8.8', '8.8.4.4'])
         deploy_obj.cleanup.assert_called_once_with()
 
     @mock.patch('shaker.engine.deploy.Deployment')
