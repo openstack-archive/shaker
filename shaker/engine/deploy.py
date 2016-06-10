@@ -219,6 +219,7 @@ class Deployment(object):
         self.openstack_client = None
         self.has_stack = False
         self.privileged_mode = True
+        self.dns_nameservers = cfg.CONF.dns_nameservers
 
     def connect_to_openstack(self, openstack_params, flavor_name, image_name,
                              external_net):
@@ -276,6 +277,7 @@ class Deployment(object):
             'external_net': self.external_net,
             'image': self.image_name,
             'flavor': self.flavor_name,
+            'dns_namservers': self.dns_nameservers,
         }
         merged_parameters.update(specification.get('template_parameters', {}))
 

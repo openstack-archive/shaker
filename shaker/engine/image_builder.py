@@ -47,6 +47,7 @@ def build_image():
     openstack_client = init()
     flavor_name = cfg.CONF.flavor_name
     image_name = cfg.CONF.image_name
+    dns_nameservers = cfg.CONF.dns_nameservers
 
     if nova.does_flavor_exist(openstack_client.nova, flavor_name):
         LOG.info('Using existing flavor: %s', flavor_name)
@@ -79,7 +80,8 @@ def build_image():
                         neutron.choose_external_net(openstack_client.neutron))
         stack_name = 'shaker_%s' % uuid.uuid4()
         stack_parameters = {'external_net': external_net,
-                            'flavor': flavor_name}
+                            'flavor': flavor_name,
+                            'dns_nameservers': dns_nameservers}
 
         stack_id = None
 
