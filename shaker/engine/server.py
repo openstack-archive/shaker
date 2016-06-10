@@ -153,7 +153,8 @@ def play_scenario(scenario):
             try:
                 deployment.connect_to_openstack(
                     openstack_params, cfg.CONF.flavor_name,
-                    cfg.CONF.image_name, cfg.CONF.external_net)
+                    cfg.CONF.image_name, cfg.CONF.external_net,
+                    cfg.CONF.dns_nameservers)
             except Exception as e:
                 LOG.warning('Failed to connect to OpenStack: %s. Please '
                             'verify parameters: %s', e, openstack_params)

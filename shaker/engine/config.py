@@ -112,6 +112,12 @@ OPENSTACK_OPTS = [
                     'env[SHAKER_EXTERNAL_NET]. If no value provided then '
                     'Shaker picks any of available external networks.'),
 
+    cfg.ListOpt('dns-nameservers',
+                default=['8.8.8.8', '8.8.4.4'],
+                help='Comma seperated list of IPs of the DNS nameservers '
+                     'for the subnets. If no value is provided defaults to '
+                     ' Google Public DNS.'),
+
     cfg.StrOpt('image-name',
                default=utils.env('SHAKER_IMAGE') or 'shaker-image',
                help='Name of image to use. The default is created by '

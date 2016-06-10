@@ -221,7 +221,7 @@ class Deployment(object):
         self.privileged_mode = True
 
     def connect_to_openstack(self, openstack_params, flavor_name, image_name,
-                             external_net):
+                             external_net, dns_nameservers):
         LOG.debug('Connecting to OpenStack')
 
         self.openstack_client = openstack.OpenStackClient(openstack_params)
@@ -231,6 +231,7 @@ class Deployment(object):
         self.external_net = (external_net or
                              neutron.choose_external_net(
                                  self.openstack_client.neutron))
+        self.dns_nameservers = dns_nameservers
         self.stack_name = 'shaker_%s' % utils.random_string()
 
     def _get_compute_nodes(self, accommodation):
@@ -276,6 +277,7 @@ class Deployment(object):
             'external_net': self.external_net,
             'image': self.image_name,
             'flavor': self.flavor_name,
+            'dns_namservers': self.dns_nameservers,
         }
         merged_parameters.update(specification.get('template_parameters', {}))
 
