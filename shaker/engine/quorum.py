@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cgi
+import functools
 import multiprocessing
 import time
 import traceback
+from BaseHTTPServer import HTTPServer, BaseHTTPRequestHandler
 
 from oslo_log import log as logging
 
@@ -234,6 +237,70 @@ class LocalQuorum(object):
         return result
 
 
+class PostHandler(BaseHTTPRequestHandler):
+
+    def __init__(self, request, client_address, server, result_queue):
+        self.result_queue = result_queue
+        BaseHTTPRequestHandler.__init__(self, request, client_address, server)
+
+    def do_POST(self):
+        # Parse the form data posted
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={'REQUEST_METHOD':'POST',
+                     'CONTENT_TYPE':self.headers['Content-Type'],
+                     })
+
+        # Begin the response
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write("Hello!\n")
+
+        result = dict((k, form[k].value) for k in form)
+
+        # agent_id = form['agent-id']
+        # instance_id = form['instance-id']
+        #
+        # result = dict(agent_id=agent_id.value, instance_id=instance_id.value)
+
+        print result
+        self.result_queue.put(result)
+
+
+def run_http_server(host, port, result_queue):
+    handler = functools.partial(PostHandler, result_queue=result_queue)
+    server = HTTPServer((host, port), handler)
+    server.serve_forever()
+
+
+class AsyncQuorum(object):
+    def execute(self, executors):
+        result_queue = multiprocessing.Queue()
+
+        worker = multiprocessing.Process(
+            target=run_http_server,
+            kwargs=dict(host='localhost', port=5999, result_queue=result_queue))
+        worker.daemon = True
+        worker.start()
+
+        operation = ExecuteOperation(executors)
+        agent_ids = operation.get_active_agent_ids()
+        result = {}
+
+        while True:
+            item = result_queue.get()
+            agent_id = item['agent_id']
+            result[agent_id] = operation.process_reply(agent_id, item)
+
+            LOG.debug('Received: %s', item)
+
+            if len(result.keys()) == len(agent_ids):
+                break
+
+        return result
+
+
 def make_quorum(agent_ids, server_endpoint, polling_interval,
                 agent_loss_timeout, agent_join_timeout):
     message_queue = messaging.MessageQueue(server_endpoint)
@@ -259,3 +326,7 @@ def make_quorum(agent_ids, server_endpoint, polling_interval,
 
 def make_local_quorum():
     return LocalQuorum()
+
+
+def make_async_quorum():
+    return AsyncQuorum()

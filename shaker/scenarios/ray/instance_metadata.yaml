@@ -1,0 +1,16 @@
+title: OpenStack instances metadata query
+
+description:
+  In this scenario Shaker launches ten instances on a single compute node and
+  asks instances to retrieve the metadata. The scenario is used to load
+  metadata processes.
+
+deployment:
+  template: instance_metadata.hot
+  accommodation: [single_room, density: 1, compute_nodes: 1]
+
+execution:
+  tests:
+  -
+    title: Instance Metadata
+    class: kv

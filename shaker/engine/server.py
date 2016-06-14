@@ -93,12 +93,13 @@ def run_test(records, quorum, test, agents, progression):
             record.update(dict(
                 id=record_id,
                 agent=agent_id,
-                node=node,
                 concurrency=len(selected_agents),
                 test=test_title,
                 executor=test.get('class'),
                 type='agent',
             ))
+            if node:
+                record['node'] = node
             records[record_id] = record
             has_interrupted |= record['status'] == 'interrupted'
 
@@ -173,14 +174,16 @@ def play_scenario(scenario):
         if not agents:
             raise Exception('No agents deployed.')
 
-        if scenario_deployment:
-            quorum = quorum_pkg.make_quorum(
-                agents.keys(), server_endpoint,
-                cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
-                cfg.CONF.agent_join_timeout)
-        else:
-            # local
-            quorum = quorum_pkg.make_local_quorum()
+        quorum = quorum_pkg.make_async_quorum()
+
+        # if scenario_deployment:
+        #     quorum = quorum_pkg.make_quorum(
+        #         agents.keys(), server_endpoint,
+        #         cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
+        #         cfg.CONF.agent_join_timeout)
+        # else:
+        #     # local
+        #     quorum = quorum_pkg.make_local_quorum()
 
         matrix = cfg.CONF.matrix if 'matrix' in cfg.CONF else None
         if matrix:
