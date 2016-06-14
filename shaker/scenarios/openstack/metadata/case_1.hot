@@ -1,0 +1,87 @@
+heat_template_version: 2013-05-23
+
+description:
+  This Heat template creates a new Neutron network, a router to the external
+  network and plugs instances into this new network. All instances are located
+  in the same L2 domain.
+
+parameters:
+  image:
+    type: string
+    description: Name of image to use for servers
+  flavor:
+    type: string
+    description: Flavor to use for servers
+  external_net:
+    type: string
+    description: ID or name of external network
+  server_endpoint:
+    type: string
+    description: Server endpoint address
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: {{ unique }}_net
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: 10.0.0.0/16
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+{% for agent in agents.values() %}
+
+  {{ agent.id }}:
+    type: OS::Nova::Server
+    properties:
+      name: {{ agent.id }}
+      image: { get_param: image }
+      flavor: { get_param: flavor }
+      availability_zone: "nova:{{ agent.node }}"
+      networks:
+        - port: { get_resource: {{ agent.id }}_port }
+      user_data_format: RAW
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/sh
+            while true
+            do
+                instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`
+                curl http://$SERVER_ENDPOINT/ -F instance_id=$instance_id -F agent_id=$AGENT_ID
+                sleep 30
+            done
+          params:
+            "$SERVER_ENDPOINT": { get_param: server_endpoint }
+            "$AGENT_ID": {{ agent.id }}
+
+  {{ agent.id }}_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+{% endfor %}
+
+outputs:
+{% for agent in agents.values() %}
+  {{ agent.id }}_instance_name:
+    value: { get_attr: [ {{ agent.id }}, instance_name ] }
+  {{ agent.id }}_ip:
+    value: { get_attr: [ {{ agent.id }}, networks, { get_attr: [private_net, name] }, 0 ] }
+{% endfor %}
