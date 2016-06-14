@@ -178,9 +178,10 @@
 
       function showAgentRecord(contentArea, record) {
         var chart_id = "chart_" + Math.round(Math.random() * 10000);
-        var ext_options = {
-          command_yaml: jsyaml.safeDump(record["command"]),
-          chart_id: chart_id};
+        var ext_options = {chart_id: chart_id};
+        if (record["command"]) {
+          ext_options["command_yaml"] = jsyaml.safeDump(record["command"]);
+        }
         if (record["stats"]) {
           ext_options["stats_yaml"] = jsyaml.safeDump(record["stats"]);
         }
@@ -543,8 +544,10 @@
     <h4>Stats</h4>
     <pre>{{ stats_yaml }}</pre>
   {{/if}}
-  <h4>Command</h4>
-  <pre>{{ command_yaml }}</pre>
+  {{#if command}}
+    <h4>Command</h4>
+    <pre>{{ command_yaml }}</pre>
+  {{/if}}
   {{#if stdout}}
     <h4>Stdout</h4>
     <pre>{{ stdout }}</pre>

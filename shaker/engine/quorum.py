@@ -13,7 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import cgi
+import functools
 import multiprocessing
+import six
 import time
 import traceback
 
@@ -22,6 +25,7 @@ from oslo_log import log as logging
 from shaker.agent import agent as agent_process
 from shaker.engine.executors import base as base_executors
 from shaker.engine import messaging
+from shaker.engine import utils
 
 
 LOG = logging.getLogger(__name__)
@@ -133,7 +137,15 @@ class CleanOperation(BaseOperation):
         return reply
 
 
-class Quorum(object):
+class BaseQuorum(object):
+    def join(self, agent_ids):
+        pass
+
+    def execute(self, executors):
+        pass
+
+
+class Quorum(BaseQuorum):
     def __init__(self, message_queue, polling_interval, agent_loss_timeout,
                  agent_join_timeout):
         self.message_queue = message_queue
@@ -213,14 +225,18 @@ class Quorum(object):
 
     def join(self, agent_ids):
         LOG.info('Waiting for quorum of agents: %s', agent_ids)
-        return self._run(JoinOperation(agent_ids, self.polling_interval,
-                                       self.agent_join_timeout))
+        result = self._run(JoinOperation(agent_ids, self.polling_interval,
+                                         self.agent_join_timeout))
+        failed = dict((agent_id, rec['status']) for
+                      agent_id, rec in result.items() if rec['status'] != 'ok')
+        if failed:
+            raise Exception('Agents failed to join: %s' % failed)
 
     def execute(self, executors):
         return self._run(ExecuteOperation(executors))
 
 
-class LocalQuorum(object):
+class LocalQuorum(BaseQuorum):
     def execute(self, executors):
         operation = ExecuteOperation(executors)
         agent_ids = operation.get_active_agent_ids()
@@ -234,7 +250,90 @@ class LocalQuorum(object):
         return result
 
 
-def make_quorum(agent_ids, server_endpoint, polling_interval,
+class HTTPPostHandler(six.moves.BaseHTTPServer.BaseHTTPRequestHandler):
+
+    def __init__(self, request, client_address, server, result_queue):
+        self.result_queue = result_queue
+        six.moves.BaseHTTPServer.BaseHTTPRequestHandler.__init__(
+            self, request, client_address, server)
+
+    def do_POST(self):
+        # Parse the form data posted
+        form = cgi.FieldStorage(
+            fp=self.rfile,
+            headers=self.headers,
+            environ={'REQUEST_METHOD': 'POST',
+                     'CONTENT_TYPE': self.headers['Content-Type'],
+                     })
+
+        # Send the response
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write("Hello!\n")
+
+        result = dict((k, form[k].value) for k in form)
+
+        if 'agent_id' in result:
+            self.result_queue.put(result)
+
+
+def run_http_server(host, port, result_queue):
+    handler = functools.partial(HTTPPostHandler, result_queue=result_queue)
+    server = six.moves.BaseHTTPServer.HTTPServer((host, port), handler)
+    server.serve_forever()
+
+
+class AsyncQuorum(BaseQuorum):
+    def __init__(self, server_endpoint, agent_loss_timeout):
+        self.server_endpoint = server_endpoint
+        self.agent_join_timeout = agent_loss_timeout
+
+        self.result_queue = multiprocessing.Queue()
+
+        host, port = utils.split_address(self.server_endpoint)
+
+        worker = multiprocessing.Process(
+            target=run_http_server,
+            kwargs=dict(host=host, port=int(port),
+                        result_queue=self.result_queue))
+        worker.daemon = True
+        worker.start()
+
+        LOG.info('HTTP listener is started at %s:%s', host, port)
+
+    def execute(self, executors):
+        operation = ExecuteOperation(executors)
+        agent_ids = operation.get_active_agent_ids()
+        deadline = time.time() + self.agent_join_timeout
+        result = {}
+
+        while (time.time() < deadline) and len(result.keys()) < len(agent_ids):
+            try:
+                item = self.result_queue.get(timeout=10)
+                agent_id = item['agent_id']
+
+                if agent_id not in agent_ids:
+                    continue  # ignore unexpected
+
+                result[agent_id] = operation.process_reply(agent_id, item)
+
+                LOG.debug('Received: %s', item)
+
+                if len(result.keys()) == len(agent_ids):
+                    break
+            except six.moves.queue.Empty:
+                pass
+
+        lost = agent_ids - set(result.keys())
+        if lost:
+            LOG.warning('Lost agents: %s', lost)
+            result.update(dict((a_id, operation.process_failure(a_id))
+                          for a_id in lost))
+
+        return result
+
+
+def make_quorum(server_endpoint, polling_interval,
                 agent_loss_timeout, agent_join_timeout):
     message_queue = messaging.MessageQueue(server_endpoint)
 
@@ -245,17 +344,13 @@ def make_quorum(agent_ids, server_endpoint, polling_interval,
     heartbeat.daemon = True
     heartbeat.start()
 
-    quorum = Quorum(message_queue, polling_interval, agent_loss_timeout,
-                    agent_join_timeout)
-    result = quorum.join(set(agent_ids))
-
-    failed = dict((agent_id, rec['status'])
-                  for agent_id, rec in result.items() if rec['status'] != 'ok')
-    if failed:
-        raise Exception('Agents failed to join: %s' % failed)
-
-    return quorum
+    return Quorum(message_queue, polling_interval, agent_loss_timeout,
+                  agent_join_timeout)
 
 
 def make_local_quorum():
     return LocalQuorum()
+
+
+def make_async_quorum(server_endpoint, agent_join_timeout):
+    return AsyncQuorum(server_endpoint, agent_join_timeout)

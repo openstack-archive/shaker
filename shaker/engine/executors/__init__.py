@@ -15,6 +15,7 @@
 
 from shaker.engine.executors import flent
 from shaker.engine.executors import iperf
+from shaker.engine.executors import kv
 from shaker.engine.executors import netperf
 from shaker.engine.executors import shell
 
@@ -26,6 +27,7 @@ EXECUTORS = {
     'iperf_graph': iperf.IperfGraphExecutor,
     'iperf3': iperf.Iperf3Executor,
     'flent': flent.FlentExecutor,
+    'kv': kv.KVExecutor,
     '_default': shell.ShellExecutor,
 }
 
