@@ -163,6 +163,19 @@ def play_scenario(scenario):
         server_endpoint = (cfg.CONF.server_endpoint
                            if 'server_endpoint' in cfg.CONF else None)
 
+        is_asynchronous = utils.get_value_by_path(scenario,
+                                                  'execution.asynchronous')
+
+        if is_asynchronous:
+            quorum = quorum_pkg.make_async_quorum(server_endpoint,
+                                                  cfg.CONF.agent_join_timeout)
+        elif scenario_deployment:
+            quorum = quorum_pkg.make_quorum(
+                server_endpoint, cfg.CONF.polling_interval,
+                cfg.CONF.agent_loss_timeout, cfg.CONF.agent_join_timeout)
+        else:
+            quorum = quorum_pkg.make_local_quorum()
+
         agents = deployment.deploy(scenario_deployment, base_dir=base_dir,
                                    server_endpoint=server_endpoint)
 
@@ -173,14 +186,7 @@ def play_scenario(scenario):
         if not agents:
             raise Exception('No agents deployed.')
 
-        if scenario_deployment:
-            quorum = quorum_pkg.make_quorum(
-                agents.keys(), server_endpoint,
-                cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
-                cfg.CONF.agent_join_timeout)
-        else:
-            # local
-            quorum = quorum_pkg.make_local_quorum()
+        quorum.join(agents.keys())
 
         matrix = cfg.CONF.matrix if 'matrix' in cfg.CONF else None
         if matrix:
