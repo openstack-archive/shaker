@@ -31,10 +31,13 @@ mapping:
               - type: str
   execution:
     type: map
+    required: True
     mapping:
       progression:
         type: str
         enum: [linear, arithmetic, quadratic, geometric]
+      asynchronous:
+        type: bool
       tests:
         type: seq
         required: True

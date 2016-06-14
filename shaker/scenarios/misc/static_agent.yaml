@@ -14,15 +14,4 @@ execution:
   tests:
   -
     title: List all files
-    class: shell
-    program: ls -al
-    sla:
-    - "[type == 'agent'] >> (stderr == '')"
-  -
-    title: Run sample script
-    class: shell
-    script: |
-      #!/bin/bash
-      echo "hello world"
-    sla:
-    - "[type == 'agent'] >> (stdout & '.*hello world.*')"
+    class: kv
