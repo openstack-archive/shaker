@@ -1,0 +1,16 @@
+title: OpenStack instances metadata query
+
+description:
+  In this scenario Shaker launches instances that report their metadata back.
+  Upon success the report should contain replies from all instances.
+
+deployment:
+  template: case_1.hot
+  accommodation: [ single_room, density: 1 ]
+
+execution:
+  asynchronous: yes
+  tests:
+  -
+    title: Get Instance Metadata
+    class: kv
