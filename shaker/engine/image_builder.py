@@ -30,9 +30,8 @@ from shaker.openstack.clients import openstack
 LOG = logging.getLogger(__name__)
 
 
-def init():
-    utils.init_config_and_logging(
-        config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS)
+def init(cfg_options):
+    utils.init_config_and_logging(cfg_options)
 
     openstack_params = utils.pack_openstack_params(cfg.CONF)
     try:
@@ -44,7 +43,7 @@ def init():
 
 
 def build_image():
-    openstack_client = init()
+    openstack_client = init(config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS)
     flavor_name = cfg.CONF.flavor_name
     image_name = cfg.CONF.image_name
 
@@ -53,7 +52,9 @@ def build_image():
     else:
         try:
             nova.create_flavor(openstack_client.nova, name=flavor_name,
-                               ram=512, vcpus=1, disk=3)
+                               ram=cfg.CONF.flavor_ram,
+                               vcpus=cfg.CONF.flavor_vcpus,
+                               disk=cfg.CONF.flavor_disk)
             LOG.info('Created flavor %s', flavor_name)
         except nova.ForbiddenException:
             LOG.error('User does not have permissions to create the flavor. '
@@ -116,7 +117,7 @@ def build_image():
 
 
 def cleanup():
-    openstack_client = init()
+    openstack_client = init(config.OPENSTACK_OPTS)
     flavor_name = cfg.CONF.flavor_name
     image_name = cfg.CONF.image_name
 
