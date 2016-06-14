@@ -254,10 +254,7 @@ class TestQuorum(testtools.TestCase):
         ]
 
         quorum = make_quorum(self._message_queue_gen(event_stream))
-        result = quorum.join(['alpha'])
-        lost = [agent_id for agent_id, r in result.items()
-                if r['status'] == 'lost']
-        self.assertEqual([], lost)
+        quorum.join(['alpha'])
 
     def test_join_failed(self):
         self.mock_time.return_value = 0
@@ -273,7 +270,4 @@ class TestQuorum(testtools.TestCase):
         ]
 
         quorum = make_quorum(self._message_queue_gen(event_stream))
-        result = quorum.join(['_lost'])
-        lost = [agent_id for agent_id, r in result.items()
-                if r['status'] == 'lost']
-        self.assertEqual(['_lost'], lost)
+        self.assertRaises(quorum_pkg.QuorumException, quorum.join, ['_lost'])
