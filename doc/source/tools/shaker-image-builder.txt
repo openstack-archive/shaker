@@ -2,7 +2,10 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--config-file PATH] [--debug]
                             [--dns-nameservers DNS_NAMESERVERS]
                             [--external-net EXTERNAL_NET]
+                            [--flavor-disk FLAVOR_DISK]
                             [--flavor-name FLAVOR_NAME]
+                            [--flavor-ram FLAVOR_RAM]
+                            [--flavor-vcpus FLAVOR_VCPUS]
                             [--image-builder-template IMAGE_BUILDER_TEMPLATE]
                             [--image-name IMAGE_NAME]
                             [--log-config-append PATH]
@@ -43,9 +46,18 @@ optional arguments:
                         Name or ID of external network, defaults to
                         env[SHAKER_EXTERNAL_NET]. If no value provided then
                         Shaker picks any of available external networks.
+  --flavor-disk FLAVOR_DISK
+                        Shaker image disk size in GB, defaults to
+                        env[SHAKER_FLAVOR_DISK]
   --flavor-name FLAVOR_NAME
                         Name of image flavor. The default is created by
                         shaker-image-builder.
+  --flavor-ram FLAVOR_RAM
+                        Shaker image RAM size in MB, defaults to
+                        env[SHAKER_FLAVOR_RAM]
+  --flavor-vcpus FLAVOR_VCPUS
+                        Number of cores to allocate for Shaker image, defaults
+                        to env[SHAKER_FLAVOR_VCPUS]
   --image-builder-template IMAGE_BUILDER_TEMPLATE
                         Heat template containing receipt of building the
                         image. Can be a file name or one of aliases: "centos",

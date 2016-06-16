@@ -215,6 +215,18 @@ IMAGE_BUILDER_OPTS = [
                    'Heat template containing receipt of building the image. '
                    'Can be a file name or one of aliases: %s. '
                    'Defaults to "ubuntu".', IMAGE_BUILDER_TEMPLATES)),
+    cfg.IntOpt('flavor-ram',
+               default=utils.env('SHAKER_FLAVOR_RAM') or 512,
+               help='Shaker image RAM size in MB, defaults to '
+                    'env[SHAKER_FLAVOR_RAM]'),
+    cfg.IntOpt('flavor-vcpus',
+               default=utils.env('SHAKER_FLAVOR_VCPUS') or 1,
+               help='Number of cores to allocate for Shaker image, '
+                    'defaults to env[SHAKER_FLAVOR_VCPUS]'),
+    cfg.IntOpt('flavor-disk',
+               default=utils.env('SHAKER_FLAVOR_DISK') or 3,
+               help='Shaker image disk size in GB, defaults to '
+                    'env[SHAKER_FLAVOR_DISK]'),
 ]
 
 
