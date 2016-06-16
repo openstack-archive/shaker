@@ -71,9 +71,9 @@ class ReSTPublisher(object):
                 self.index.write(' ' * 4 + line + '\n')
         self.index.write('\n')
 
-    def chart_line(self, chart_id, chart, meta, x_title):
+    def chart_line(self, chart_id, samples, meta, x_title):
         line_chart = pygal.Line(style=style.RedBlueStyle,
-                                fill=True,
+                                fill=False,
                                 legend_at_bottom=True,
                                 include_x_axis=True,
                                 x_title=x_title)
@@ -83,7 +83,8 @@ class ReSTPublisher(object):
             if meta[i][1]:
                 line_title += ', %s' % meta[i][1]
             kwargs = dict(secondary=True) if i == 2 else {}
-            line_chart.add(line_title, chart[i][1:], **kwargs)
+            values = [samples[x][i] for x in range(len(samples))]
+            line_chart.add(line_title, values, **kwargs)
 
         line_chart.render_to_file(os.path.join(self.folder,
                                                '%s.svg' % chart_id))
@@ -92,7 +93,7 @@ class ReSTPublisher(object):
     def chart_xy(self, chart_id, chart, meta, x_title):
         xy_chart = pygal.XY(style=style.RedBlueStyle,
                             legend_at_bottom=True,
-                            fill=True,
+                            fill=False,
                             include_x_axis=True,
                             x_title=x_title)
 
@@ -114,7 +115,7 @@ class ReSTPublisher(object):
         self.index.write('\n')
 
     def table(self, t):
-        widths = [max(len(c), TABLE_FLOAT_PREC) for c in t[0]]
+        widths = [max(len(c), TABLE_FLOAT_PREC + 6) for c in t[0]]
 
         for r in t:
             for i in range(len(widths)):
@@ -193,6 +194,29 @@ def write_sla(publisher, records, sla_records):
         publisher.table(table)
 
 
+def write_record_stats(publisher, record):
+    table = [['Metric', 'Min', 'Avg', 'Max']]
+
+    meta = record['meta']
+    stats = record['stats']
+
+    for i in range(1, len(meta)):
+        metric = meta[i][0]
+        if meta[i][1]:
+            metric += ', %s' % meta[i][1]
+
+        s = stats[meta[i][0]]
+        value_min = s.get('min') or ''
+        value_avg = s.get('avg') or ''
+        value_max = s.get('max') or ''
+
+        table.append([metric, value_min, value_avg, value_max])
+
+    if len(table) > 1:
+        publisher.subheader('Stats')
+        publisher.table(table)
+
+
 def write_errors(publisher, records):
     bad_records = [r for r in records if r.get('status') in {'lost', 'error'}]
     if bad_records:
@@ -232,12 +256,11 @@ def write_agent_block_detailed(publisher, records):
         if len(records) > 1:
             publisher.header('Agent %s' % record['agent'], level=3)
 
-        if record.get('chart'):
-            publisher.chart_line(record['id'], record['chart'], record['meta'],
-                                 x_title='time, s')
+        if record.get('samples'):
+            publisher.chart_line(record['id'], record['samples'],
+                                 record['meta'], x_title='time, s')
 
-        publisher.subheader('Stats')
-        publisher.code(yamlize(record['stats']))
+        write_record_stats(publisher, record)
 
 
 def write_stats(publisher, records, row_header, show_all=False):
