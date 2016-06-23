@@ -8,8 +8,7 @@ description:
 
 deployment:
   template: l2_qos.hot
-#  accommodation: [pair, single_room, compute_nodes: 2]
-  accommodation: [pair, double_room]
+  accommodation: [pair, single_room, compute_nodes: 2]
 
 execution:
   tests:
