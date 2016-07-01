@@ -136,10 +136,12 @@ OPENSTACK_OPTS = [
 SERVER_AGENT_OPTS = [
     cfg.IntOpt('agent-loss-timeout',
                default=utils.env('SHAKER_AGENT_LOSS_TIMEOUT') or 60,
-               help='Timeout to treat agent as lost in seconds'),
+               help='Timeout to treat agent as lost in seconds, '
+                    'defaults to env[SHAKER_AGENT_LOSS_TIMEOUT]'),
     cfg.IntOpt('agent-join-timeout',
                default=utils.env('SHAKER_AGENT_JOIN_TIMEOUT') or 600,
-               help='How long to wait for agents to join in seconds (time '
+               help='Timeout to treat agent as join failed in seconds '
+                    'defaults to env[SHAKER_AGENT_JOIN_TIMEOUT] (time '
                     'between stack deployment and start of scenario '
                     'execution).'),
 ]
