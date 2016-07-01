@@ -128,7 +128,7 @@ OPENSTACK_OPTS = [
                     'shaker-image-builder.'),
     cfg.BoolOpt('cleanup-on-error',
                 default=(utils.env('SHAKER_CLEANUP_ON_ERROR') or True),
-                help='Cleans up the heat-stack upon any error occured during '
+                help='Clean up the heat-stack upon any error occured during '
                      'scenario execution.'),
 
 ]

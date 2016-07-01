@@ -32,7 +32,7 @@ optional arguments:
                         other logging configuration options are ignored (for
                         example, logging_context_format_string).
   --log-date-format DATE_FORMAT
-                        Defines the format string for %(asctime)s in log
+                        Define the format string for %(asctime)s in log
                         records. Default: None . This option is ignored if
                         log_config_append is set.
   --log-dir LOG_DIR, --logdir LOG_DIR
@@ -61,7 +61,7 @@ optional arguments:
                         This option is ignored if log_config_append is set.
   --verbose, -v         If set to false, the logging level will be set to
                         WARNING instead of the default INFO level.
-  --watch-log-file      Uses logging handler designed to watch file system.
+  --watch-log-file      Use logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path
                         instantaneously. It makes sense only if log_file

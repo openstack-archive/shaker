@@ -31,7 +31,7 @@ optional arguments:
                         Timeout to treat agent as lost in seconds
   --book BOOK           Generate report in ReST format and store it into the
                         specified folder, defaults to env[SHAKER_BOOK].
-  --cleanup-on-error    Cleans up the heat-stack upon any error occured during
+  --cleanup-on-error    Clean up the heat-stack upon any error occured during
                         scenario execution.
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
@@ -68,7 +68,7 @@ optional arguments:
                         other logging configuration options are ignored (for
                         example, logging_context_format_string).
   --log-date-format DATE_FORMAT
-                        Defines the format string for %(asctime)s in log
+                        Define the format string for %(asctime)s in log
                         records. Default: None . This option is ignored if
                         log_config_append is set.
   --log-dir LOG_DIR, --logdir LOG_DIR
@@ -168,7 +168,7 @@ optional arguments:
                         This option is ignored if log_config_append is set.
   --verbose, -v         If set to false, the logging level will be set to
                         WARNING instead of the default INFO level.
-  --watch-log-file      Uses logging handler designed to watch file system.
+  --watch-log-file      Use logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path
                         instantaneously. It makes sense only if log_file
