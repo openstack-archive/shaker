@@ -196,16 +196,15 @@ def write_sla(publisher, records, sla_records):
 
 def write_record_stats(publisher, record):
     table = [['Metric', 'Min', 'Avg', 'Max']]
-
-    meta = record['meta']
     stats = record['stats']
 
-    for i in range(1, len(meta)):
-        metric = meta[i][0]
-        if meta[i][1]:
-            metric += ', %s' % meta[i][1]
+    for key in stats.keys():
+        metric = key
+        unit = stats[key].get('unit') or ''
+        if unit:
+            metric += ', %s' % unit
 
-        s = stats[meta[i][0]]
+        s = stats[key]
         value_min = s.get('min') or ''
         value_avg = s.get('avg') or ''
         value_max = s.get('max') or ''
