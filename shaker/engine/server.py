@@ -14,9 +14,11 @@
 # limitations under the License.
 
 import copy
+import datetime
 import json
 import os
 import re
+import tempfile
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -246,8 +248,15 @@ def act():
         output['agents'].update(play_output['agents'])
         output['tests'].update(play_output['tests'])
 
+    output_path = ""
     if cfg.CONF.output:
-        utils.write_file(json.dumps(output, indent=2), cfg.CONF.output)
+        output_path = cfg.CONF.output
+    else:
+        tmp_dir = tempfile.gettempdir()
+        tmp_report = "shaker_%s.json" % str(
+            datetime.datetime.now()).replace(' ', '_')
+        output_path = os.path.join(tmp_dir, tmp_report)
+    utils.write_file(json.dumps(output, indent=2), output_path)
 
     if cfg.CONF.no_report_on_error and 'error' in output:
         LOG.info('Skipped report generation due to errors and '

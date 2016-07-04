@@ -166,7 +166,9 @@ SCENARIO_OPTS = [
     cfg.StrOpt('output',
                default=utils.env('SHAKER_OUTPUT'),
                help='File for output in JSON format, '
-                    'defaults to env[SHAKER_OUTPUT].'),
+                    'defaults to env[SHAKER_OUTPUT]. If it is empty, then '
+                    'output will be saved to '
+                    '/tmp/shaker_<time_execution>.json'),
     cfg.BoolOpt('no-report-on-error',
                 default=(utils.env('SHAKER_NO_REPORT_ON_ERROR') or False),
                 help='Do not generate report for failed scenarios'),
