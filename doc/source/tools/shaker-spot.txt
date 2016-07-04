@@ -34,7 +34,7 @@ optional arguments:
                         other logging configuration options are ignored (for
                         example, logging_context_format_string).
   --log-date-format DATE_FORMAT
-                        Define the format string for %(asctime)s in log
+                        Defines the format string for %(asctime)s in log
                         records. Default: None . This option is ignored if
                         log_config_append is set.
   --log-dir LOG_DIR, --logdir LOG_DIR
@@ -60,7 +60,8 @@ optional arguments:
   --noverbose           The inverse of --verbose
   --nowatch-log-file    The inverse of --watch-log-file
   --output OUTPUT       File for output in JSON format, defaults to
-                        env[SHAKER_OUTPUT].
+                        env[SHAKER_OUTPUT]. If it is empty, then output will
+                        save to /tmp/shaker_<time_execution>.json
   --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
   --report-template REPORT_TEMPLATE
                         Template for report. Can be a file name or one of
@@ -105,7 +106,7 @@ optional arguments:
                         This option is ignored if log_config_append is set.
   --verbose, -v         If set to false, the logging level will be set to
                         WARNING instead of the default INFO level.
-  --watch-log-file      Use logging handler designed to watch file system.
+  --watch-log-file      Uses logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path
                         instantaneously. It makes sense only if log_file

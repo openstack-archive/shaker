@@ -25,12 +25,12 @@ optional arguments:
   -h, --help            show this help message and exit
   --agent-join-timeout AGENT_JOIN_TIMEOUT
                         Timeout to treat agent as join failed in seconds,
-                        defaults to env[SHAKER_AGENT_JOIN_TIMEOUT] (time 
+                        defaults to env[SHAKER_AGENT_JOIN_TIMEOUT] (time
                         between stack deployment and start of scenario
                         execution).
   --agent-loss-timeout AGENT_LOSS_TIMEOUT
-                        Timeout to treat agent as lost in seconds, defaults 
-                        to env[SHAKER_AGENT_LOSS_TIMEOUT]
+                        Timeout to treat agent as lost in seconds, defaults to
+                        env[SHAKER_AGENT_LOSS_TIMEOUT]
   --book BOOK           Generate report in ReST format and store it into the
                         specified folder, defaults to env[SHAKER_BOOK].
   --cleanup-on-error    Clean up the heat-stack upon any error occured during
@@ -70,7 +70,7 @@ optional arguments:
                         other logging configuration options are ignored (for
                         example, logging_context_format_string).
   --log-date-format DATE_FORMAT
-                        Define the format string for %(asctime)s in log
+                        Defines the format string for %(asctime)s in log
                         records. Default: None . This option is ignored if
                         log_config_append is set.
   --log-dir LOG_DIR, --logdir LOG_DIR
@@ -120,7 +120,8 @@ optional arguments:
   --os-username <auth-username>
                         Authentication username, defaults to env[OS_USERNAME].
   --output OUTPUT       File for output in JSON format, defaults to
-                        env[SHAKER_OUTPUT].
+                        env[SHAKER_OUTPUT]. If it is empty, then output will
+                        save to /tmp/shaker_<time_execution>.json
   --polling-interval POLLING_INTERVAL
                         How frequently the agent polls server, in seconds
   --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
@@ -170,7 +171,7 @@ optional arguments:
                         This option is ignored if log_config_append is set.
   --verbose, -v         If set to false, the logging level will be set to
                         WARNING instead of the default INFO level.
-  --watch-log-file      Use logging handler designed to watch file system.
+  --watch-log-file      Uses logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path
                         instantaneously. It makes sense only if log_file

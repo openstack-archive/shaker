@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import copy
+import datetime
 import json
 import os
 import re
@@ -248,6 +249,10 @@ def act():
 
     if cfg.CONF.output:
         utils.write_file(json.dumps(output, indent=2), cfg.CONF.output)
+    else:
+        tmp_report = str(datetime.datetime.now()).replace(' ', '_')
+        utils.write_file(json.dumps(output, indent=2),
+                         '/tmp/shaker_%s.json' % tmp_report)
 
     if cfg.CONF.no_report_on_error and 'error' in output:
         LOG.info('Skipped report generation due to errors and '
