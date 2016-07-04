@@ -184,6 +184,12 @@
         if (record["stats"]) {
           ext_options["stats_yaml"] = jsyaml.safeDump(record["stats"]);
         }
+        if ((record["start"]) && (record["finish"])) {
+          ext_options["time_info"] = jsyaml.safeDump({
+            "start": new Date(record["start"] * 1000).toISOString(),
+            "finish": new Date(record["finish"] * 1000).toISOString()
+          });
+        }
         contentArea.append(executor_template(
             {record: $.extend({}, record, ext_options)}
         ));
@@ -542,6 +548,10 @@
   {{#if stats_yaml}}
     <h4>Stats</h4>
     <pre>{{ stats_yaml }}</pre>
+  {{/if}}
+  {{#if time_info}}
+    <h4>Time Info</h4>
+    <pre>{{ time_info }}</pre>
   {{/if}}
   <h4>Command</h4>
   <pre>{{ command_yaml }}</pre>
