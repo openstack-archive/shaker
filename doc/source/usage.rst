@@ -83,6 +83,7 @@ that allow control the scheduling precisely:
     * ``double_room`` - 2 instances per compute node
     * ``density: N`` - the multiplier for number of instances per compute node
     * ``compute_nodes: N`` - how many compute nodes should be used (by default Shaker use all of them)
+    * ``zones: [Z1, Z2]`` - list of Nova availability zones to use
 
 Examples:
 
