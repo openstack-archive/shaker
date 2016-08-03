@@ -1,15 +1,15 @@
-usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
+usage: shaker-cleanup [-h] [--cleanup] [--cleanup-on-error] [--config-dir DIR]
                       [--config-file PATH] [--debug]
                       [--dns-nameservers DNS_NAMESERVERS]
                       [--external-net EXTERNAL_NET]
                       [--flavor-name FLAVOR_NAME] [--image-name IMAGE_NAME]
                       [--log-config-append PATH]
                       [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
-                      [--log-file PATH] [--nocleanup-on-error] [--nodebug]
-                      [--noos-insecure] [--nouse-syslog] [--noverbose]
-                      [--nowatch-log-file] [--os-auth-url <auth-url>]
-                      [--os-cacert <auth-cacert>] [--os-insecure]
-                      [--os-password <auth-password>]
+                      [--log-file PATH] [--nocleanup] [--nocleanup-on-error]
+                      [--nodebug] [--noos-insecure] [--nouse-syslog]
+                      [--noverbose] [--nowatch-log-file]
+                      [--os-auth-url <auth-url>] [--os-cacert <auth-cacert>]
+                      [--os-insecure] [--os-password <auth-password>]
                       [--os-project-name <auth-project-name>]
                       [--os-region-name <auth-region-name>]
                       [--os-tenant-name <auth-tenant-name>]
@@ -19,6 +19,7 @@ usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
 
 optional arguments:
   -h, --help            show this help message and exit
+  --cleanup             Cleanup the image and the flavor.
   --cleanup-on-error    Clean up the heat-stack upon any error occured during
                         scenario execution.
   --config-dir DIR      Path to a config directory to pull *.conf files from.
@@ -68,6 +69,7 @@ optional arguments:
                         If no default is set, logging will go to stderr as
                         defined by use_stderr. This option is ignored if
                         log_config_append is set.
+  --nocleanup           The inverse of --cleanup
   --nocleanup-on-error  The inverse of --cleanup-on-error
   --nodebug             The inverse of --debug
   --noos-insecure       The inverse of --os-insecure
