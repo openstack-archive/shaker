@@ -125,11 +125,11 @@ def cleanup():
 
     image = glance.get_image(openstack_client.glance, image_name)
     if image:
-        openstack_client.glance.images.delete(image)
+        openstack_client.glance.images.delete(image.id)
 
     flavor = nova.get_flavor(openstack_client.nova, flavor_name)
     if flavor:
-        openstack_client.nova.flavors.delete(flavor)
+        openstack_client.nova.flavors.delete(flavor.id)
 
 if __name__ == "__main__":
     build_image()
