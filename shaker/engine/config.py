@@ -233,8 +233,22 @@ IMAGE_BUILDER_OPTS = [
                     'env[SHAKER_FLAVOR_DISK]'),
 ]
 
+CLEANUP_OPTS = [
+    cfg.BoolOpt('cleanup',
+                default=(utils.env('SHAKER_CLEANUP') or True),
+                help='Cleanup the image and the flavor.'),
+]
+
+# very specific, should not be listed in list_opts()
+ALL_IN_ONE_OPTS = [
+    cfg.StrOpt('artifacts-dir', default=utils.env('SHAKER_ARTIFACTS_DIR'),
+               help='If specified, directs Shaker to store there all its '
+                    'artifacts (output, report, subunit and book). '
+                    'Defaults to env[SHAKER_ARTIFACTS_DIR].'),
+]
+
 
 def list_opts():
     all_opts = (COMMON_OPTS + OPENSTACK_OPTS + SERVER_OPTS + REPORT_OPTS +
-                INPUT_OPTS + AGENT_OPTS + IMAGE_BUILDER_OPTS)
+                INPUT_OPTS + AGENT_OPTS + IMAGE_BUILDER_OPTS + CLEANUP_OPTS)
     yield (None, copy.deepcopy(all_opts))

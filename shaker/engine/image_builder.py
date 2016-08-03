@@ -30,9 +30,7 @@ from shaker.openstack.clients import openstack
 LOG = logging.getLogger(__name__)
 
 
-def init(cfg_options):
-    utils.init_config_and_logging(cfg_options)
-
+def init():
     openstack_params = utils.pack_openstack_params(cfg.CONF)
     try:
         return openstack.OpenStackClient(openstack_params)
@@ -43,7 +41,7 @@ def init(cfg_options):
 
 
 def build_image():
-    openstack_client = init(config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS)
+    openstack_client = init()
     flavor_name = cfg.CONF.flavor_name
     image_name = cfg.CONF.image_name
     dns_nameservers = cfg.CONF.dns_nameservers
@@ -119,9 +117,13 @@ def build_image():
 
 
 def cleanup():
-    openstack_client = init(config.OPENSTACK_OPTS)
+    openstack_client = init()
     flavor_name = cfg.CONF.flavor_name
     image_name = cfg.CONF.image_name
+
+    if not cfg.CONF.cleanup:
+        LOG.info('Skip cleanup')
+        return
 
     image = glance.get_image(openstack_client.glance, image_name)
     if image:
@@ -131,5 +133,18 @@ def cleanup():
     if flavor:
         openstack_client.nova.flavors.delete(flavor.id)
 
-if __name__ == "__main__":
+
+def build_image_entry_point():
+    utils.init_config_and_logging(
+        config.OPENSTACK_OPTS + config.IMAGE_BUILDER_OPTS
+    )
     build_image()
+
+
+def cleanup_entry_point():
+    utils.init_config_and_logging(config.OPENSTACK_OPTS + config.CLEANUP_OPTS)
+    cleanup()
+
+
+if __name__ == "__main__":
+    build_image_entry_point()

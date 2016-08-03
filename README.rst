@@ -10,36 +10,62 @@ Shaker is able to deploy OpenStack instances and networks in different
 topologies. Shaker scenario specifies the deployment and list of tests
 to execute. Additionally tests may be tuned dynamically in command-line.
 
-Features:
+Features
+--------
 
     * User-defined topology via Heat templates
     * Simultaneously test execution on multiple instances
-    * Pluggable tools
     * Interactive report with stats and charts
     * Built-in SLA verification
 
-Requirements:
+Deployment Requirements
+-----------------------
 
     * Shaker server routable from OpenStack cloud
-    * Admin-user access to OpenStack API
+    * Admin-user access to OpenStack API is preferable
 
-Setup:
+Run in Python Environment
+-------------------------
 
- 1. ``pip install pyshaker`` - installs the tool and all its python dependencies
- 2. ``shaker-image-builder`` - builds shaker image and stores it in Glance
+.. code-block:: bash
+
+   $ pip install pyshaker
+   $ . openrc
+   $ shaker-image-builder
+   $ shaker --server-endpoint <host:port> --scenario <scenario> --report <report.html>``
+
+where:
+    * ``host`` and ``port`` - host and port of machine where Shaker is deployed
+    * ``scenario`` - the scenario to execute, e.g. `openstack/perf_l2` (
+      `catalog <http://pyshaker.readthedocs.io/en/latest/catalog.html>`_)
+    * ``<report.html>`` - file to store the final report
+
+Full list of parameters is available in `documentation <http://pyshaker.readthedocs.io/en/latest/tools.html#shaker>`_.
 
 
-Run:
+Shaker in Container
+-------------------
 
- ``shaker --server-endpoint <host:port> --scenario <scenario.yaml> --report <report.html>``
+Shaker is available as container a container at Docker Hub at
+`shakhat/shaker <https://hub.docker.com/r/shakhat/shaker/>`_
 
- where:
-    * ``<host:port>`` - address of machine where Shaker is deployed and any free port
-    * ``<scenario.yaml>`` - the scenario to execute; L2, L3 east-west and L3 north-south already included
-    * ``<report.html>`` - file to store the report
+.. code-block:: bash
+
+    $ docker run -p <port>:5999 -v <artifacts-dir>:/artifacts shakhat/shaker --scenario <scenario> --server-endpoint <host:port>
+      --os-auth-url <os-auth-url> --os-username <os-username> --os-password <os-password> --os-project-name <os-project-name>
+
+where:
+ * ``host`` and ``port`` - host and port on machine where Shaker is deployed
+ * ``artifacts-dir`` - where to store report and raw result
+ * ``scenario`` - the scenario to execute, e.g. `openstack/perf_l2` (
+   `catalog <http://pyshaker.readthedocs.io/en/latest/catalog.html>`_)
+ * ``os-XXX`` - OpenStack cloud credentials
 
 
-Links:
+Links
+-----
+
  * PyPi - https://pypi.python.org/pypi/pyshaker/
- * Docs - http://pyshaker.readthedocs.org/
+ * Docker - https://hub.docker.com/r/shakhat/shaker/
+ * Docs - http://pyshaker.readthedocs.io/
  * Bugtracker - https://launchpad.net/shaker/
