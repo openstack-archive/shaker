@@ -81,7 +81,7 @@ OPENSTACK_OPTS = [
     cfg.StrOpt('os-project-name', metavar='<auth-project-name>',
                default=utils.env('OS_PROJECT_NAME'),
                sample_default='',
-               help='Another way to specify tenant name. This option is '
+               help='Authentication project name. This option is '
                     'mutually exclusive with --os-tenant-name. '
                     'Defaults to env[OS_PROJECT_NAME].'),
     cfg.StrOpt('os-username', metavar='<auth-username>',
@@ -114,7 +114,7 @@ OPENSTACK_OPTS = [
 
     cfg.ListOpt('dns-nameservers',
                 default=['8.8.8.8', '8.8.4.4'],
-                help='Comma seperated list of IPs of the DNS nameservers '
+                help='Comma-separated list of IPs of the DNS nameservers '
                      'for the subnets. If no value is provided defaults to '
                      ' Google Public DNS.'),
 
@@ -128,7 +128,7 @@ OPENSTACK_OPTS = [
                     'shaker-image-builder.'),
     cfg.BoolOpt('cleanup-on-error',
                 default=(utils.env('SHAKER_CLEANUP_ON_ERROR') or True),
-                help='Clean up the heat-stack upon any error occured during '
+                help='Clean up the heat-stack upon any error occurred during '
                      'scenario execution.'),
 
 ]

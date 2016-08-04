@@ -19,7 +19,7 @@ usage: shaker-cleanup [-h] [--cleanup-on-error] [--config-dir DIR]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --cleanup-on-error    Clean up the heat-stack upon any error occured during
+  --cleanup-on-error    Clean up the heat-stack upon any error occurred during
                         scenario execution.
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
@@ -33,7 +33,7 @@ optional arguments:
   --debug, -d           If set to true, the logging level will be set to DEBUG
                         instead of the default INFO level.
   --dns-nameservers DNS_NAMESERVERS
-                        Comma seperated list of IPs of the DNS nameservers for
+                        Comma-separated list of IPs of the DNS nameservers for
                         the subnets. If no value is provided defaults to
                         Google Public DNS.
   --external-net EXTERNAL_NET
@@ -85,8 +85,8 @@ optional arguments:
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
   --os-project-name <auth-project-name>
-                        Another way to specify tenant name. This option is
-                        mutually exclusive with --os-tenant-name. Defaults to
+                        Authentication project name. This option is mutually
+                        exclusive with --os-tenant-name. Defaults to
                         env[OS_PROJECT_NAME].
   --os-region-name <auth-region-name>
                         Authentication region name, defaults to

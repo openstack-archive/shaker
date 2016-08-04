@@ -6,14 +6,18 @@ Configuration
 -------------
 
 For OpenStack scenarios the connection is configured using standard
-``openrc`` file. (Refer to
+``openrc`` file (refer to
 http://docs.openstack.org/cli-reference/common/cli_set_environment_variables_using_openstack_rc.html
 on how to retrieve it).
 The config can be passed to Shaker rather by sourcing into system env ``source openrc``
-or via set of CLI parameters ``--os-tenant-name``, ``--os-username``, ``--os-password``,
-``--os-auth-url`` and ``--os-region-name``. Note that Shaker requires a user with admin privileges.
-Connection to SSL endpoints is configuredby parameters ``--os-cacert`` and ``--os-insecure``
-(to disable strict verifications of certificates).
+or via set of CLI parameters ``--os-project-name``, ``--os-username``, ``--os-password``,
+``--os-auth-url`` and ``--os-region-name``.
+Connection to SSL endpoints is configured by parameters ``--os-cacert`` and ``--os-insecure``
+(to disable certificate verification).
+
+.. note::
+    Shaker is better run under user with admin privileges. However, it's possible
+    to run under ordinary user too - refer to :ref:`non_admin_mode`
 
 
 Common Parameters
