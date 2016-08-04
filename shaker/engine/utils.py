@@ -257,14 +257,14 @@ def copy_value_by_path(src, src_param, dst, dst_param):
 
 
 def pack_openstack_params(conf):
-    params = dict(auth=dict(username=cfg.CONF.os_username,
-                            password=cfg.CONF.os_password,
-                            auth_url=cfg.CONF.os_auth_url),
-                  os_region_name=cfg.CONF.os_region_name,
-                  os_cacert=cfg.CONF.os_cacert,
-                  os_insecure=cfg.CONF.os_insecure)
-    if cfg.CONF.os_tenant_name:
-        params['auth']['tenant_name'] = cfg.CONF.os_tenant_name
-    if cfg.CONF.os_project_name:
-        params['auth']['project_name'] = cfg.CONF.os_project_name
+    params = dict(auth=dict(username=conf.os_username,
+                            password=conf.os_password,
+                            auth_url=conf.os_auth_url),
+                  os_region_name=conf.os_region_name,
+                  os_cacert=conf.os_cacert,
+                  os_insecure=conf.os_insecure)
+    if conf.os_tenant_name:
+        params['auth']['tenant_name'] = conf.os_tenant_name
+    if conf.os_project_name:
+        params['auth']['project_name'] = conf.os_project_name
     return params
