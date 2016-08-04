@@ -123,10 +123,11 @@ def save_to_subunit(sla_records, subunit_filename):
             test_id = _get_location(item.record) + ':' + item.expression
 
             if item.state != sla.STATE_TRUE:
+                file_bytes = yaml.safe_dump(
+                    item.record, default_flow_style=False).encode('utf8')
                 output.status(test_id=test_id, file_name='results',
                               mime_type='text/plain; charset="utf8"', eof=True,
-                              file_bytes=yaml.safe_dump(
-                                  item.record, default_flow_style=False))
+                              file_bytes=file_bytes)
 
             output.status(test_id=test_id,
                           test_status=state2subunit.get(item.state, 'skip'))
