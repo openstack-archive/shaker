@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import errno
 import os
 import tempfile
 
@@ -33,16 +32,6 @@ def _make_filename(folder, prefix, ext=None):
     return os.path.join(folder, tmp_report)
 
 
-def _mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
-
-
 def _configure_log_file(log_file):
     cfg.CONF.set_override('log_file', log_file)
     logging.setup(cfg.CONF, 'shaker')
@@ -52,15 +41,13 @@ def _configure_log_file(log_file):
 def main():
     utils.init_config_and_logging(
         config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
-        config.REPORT_OPTS + config.IMAGE_BUILDER_OPTS + config.CLEANUP_OPTS +
-        config.ALL_IN_ONE_OPTS
+        config.REPORT_OPTS + config.IMAGE_BUILDER_OPTS + config.CLEANUP_OPTS
     )
 
     artifacts_dir = cfg.CONF.artifacts_dir
-    if artifacts_dir:
-        _mkdir_p(artifacts_dir)
-    else:
+    if not artifacts_dir:
         artifacts_dir = tempfile.mkdtemp(prefix='shaker')
+        cfg.CONF.set_override('artifacts_dir', artifacts_dir)
 
     # image-builder
     _configure_log_file(_make_filename(artifacts_dir, 'image_builder', 'log'))
@@ -68,20 +55,18 @@ def main():
     image_builder.build_image()
 
     # core
-    scenario = cfg.CONF.scenario
-    prefix = utils.strict(scenario)
+    _configure_log_file(_make_filename(artifacts_dir, 'execution', 'log'))
+    if len(cfg.CONF.scenario) > 1:
+        cfg.CONF.set_override(
+            'output', _make_filename(artifacts_dir, 'aggregated', 'json'))
+        cfg.CONF.set_override(
+            'report', _make_filename(artifacts_dir, 'aggregated', 'html'))
+        cfg.CONF.set_override(
+            'subunit', _make_filename(artifacts_dir, 'aggregated', 'subunit'))
+        cfg.CONF.set_override(
+            'book', _make_filename(artifacts_dir, 'aggregated'))
 
-    _configure_log_file(_make_filename(artifacts_dir, prefix, 'log'))
-
-    LOG.info('Executing scenario: %s', scenario)
-
-    cfg.CONF.set_override('output',
-                          _make_filename(artifacts_dir, prefix, 'json'))
-    cfg.CONF.set_override('report',
-                          _make_filename(artifacts_dir, prefix, 'html'))
-    cfg.CONF.set_override('subunit',
-                          _make_filename(artifacts_dir, prefix, 'subunit'))
-    cfg.CONF.set_override('book', _make_filename(artifacts_dir, prefix))
+    LOG.info('Executing scenario(s)')
     server.act()
 
     # cleanup

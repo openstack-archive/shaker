@@ -141,3 +141,9 @@ class TestUtils(testtools.TestCase):
         res = utils.copy_value_by_path(src, 'sum.jitter_ms', dst, 'jitter.avg')
         self.assertEqual({}, dst)
         self.assertFalse(res)
+
+    def test_merge_dicts(self):
+        src = [{'a': {1: 9, 2: 8}, 'b': {1: 3}}, {'a': {3: 7}, 'c': {4: 8}}]
+        expected = {'a': {1: 9, 2: 8, 3: 7}, 'b': {1: 3}, 'c': {4: 8}}
+        res = utils.merge_dicts(src)
+        self.assertEqual(expected, res)

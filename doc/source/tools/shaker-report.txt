@@ -23,8 +23,8 @@ optional arguments:
                         precedence. Defaults to None.
   --debug, -d           If set to true, the logging level will be set to DEBUG
                         instead of the default INFO level.
-  --input INPUT         File to read test results from, defaults to
-                        env[SHAKER_INPUT].
+  --input INPUT         File or list of files to read test results from,
+                        defaults to env[SHAKER_INPUT].
   --log-config-append PATH, --log_config PATH
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.

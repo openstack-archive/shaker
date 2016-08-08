@@ -48,7 +48,7 @@ optional arguments:
   --book BOOK           Generate report in ReST format and store it into the
                         specified folder, defaults to env[SHAKER_BOOK].
   --cleanup             Cleanup the image and the flavor.
-  --cleanup-on-error    Clean up the heat-stack upon any error occured during
+  --cleanup-on-error    Clean up the heat-stack upon any error occurred during
                         scenario execution.
   --config-dir DIR      Path to a config directory to pull *.conf files from.
                         This file set is sorted, so as to provide a
@@ -62,7 +62,7 @@ optional arguments:
   --debug, -d           If set to true, the logging level will be set to DEBUG
                         instead of the default INFO level.
   --dns-nameservers DNS_NAMESERVERS
-                        Comma seperated list of IPs of the DNS nameservers for
+                        Comma-separated list of IPs of the DNS nameservers for
                         the subnets. If no value is provided defaults to
                         Google Public DNS.
   --external-net EXTERNAL_NET
@@ -137,8 +137,8 @@ optional arguments:
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
   --os-project-name <auth-project-name>
-                        Another way to specify tenant name. This option is
-                        mutually exclusive with --os-tenant-name. Defaults to
+                        Authentication project name. This option is mutually
+                        exclusive with --os-tenant-name. Defaults to
                         env[OS_PROJECT_NAME].
   --os-region-name <auth-region-name>
                         Authentication region name, defaults to
@@ -150,7 +150,7 @@ optional arguments:
                         Authentication username, defaults to env[OS_USERNAME].
   --output OUTPUT       File for output in JSON format, defaults to
                         env[SHAKER_OUTPUT]. If it is empty, then output will
-                        be saved to /tmp/shaker_<time_execution>.json
+                        be saved to /tmp/shaker_<time_now>.json
   --polling-interval POLLING_INTERVAL
                         How frequently the agent polls server, in seconds
   --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
@@ -158,9 +158,10 @@ optional arguments:
                         Template for report. Can be a file name or one of
                         aliases: "interactive", "json". Defaults to
                         "interactive".
-  --scenario SCENARIO   Scenario to play. Can be a file name or one of
-                        aliases: "misc/instance_metadata",
-                        "misc/static_agent", "misc/static_agents_pair",
+  --scenario SCENARIO   Comma-separated list of scenarios to play. Each entity
+                        can be a file name or one of aliases:
+                        "misc/instance_metadata", "misc/static_agent",
+                        "misc/static_agents_pair",
                         "openstack/cross_az/full_l2",
                         "openstack/cross_az/full_l3_east_west",
                         "openstack/cross_az/full_l3_north_south",

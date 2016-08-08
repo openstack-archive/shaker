@@ -38,10 +38,7 @@ class ReSTPublisher(object):
         self.folder = folder
 
         LOG.info('Create ReST book in: %s', folder)
-        try:
-            os.makedirs(folder)
-        except OSError as e:
-            LOG.warning(e)
+        utils.mkdir_tree(folder)
         self.index = open(os.path.join(folder, 'index.rst'), 'w+')
 
     def __del__(self):

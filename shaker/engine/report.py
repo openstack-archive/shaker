@@ -142,9 +142,7 @@ def save_to_subunit(sla_records, subunit_filename):
 
 
 def generate_report(data, report_template, report_filename, subunit_filename,
-                    book_folder=None):
-    LOG.debug('Generating report, template: %s, output: %s',
-              report_template, report_filename or '<dummy>')
+                    book_folder):
 
     calculate_stats(data['records'], data['tests'])
 
@@ -183,10 +181,13 @@ def generate_report(data, report_template, report_filename, subunit_filename,
 def main():
     utils.init_config_and_logging(config.REPORT_OPTS + config.INPUT_OPTS)
 
-    LOG.debug('Reading JSON data from: %s', cfg.CONF.input)
-    report_data = json.loads(utils.read_file(cfg.CONF.input))
+    outputs = []
+    for input_filename in cfg.CONF.input:
+        LOG.debug('Reading JSON data from: %s', input_filename)
+        outputs.append(json.loads(utils.read_file(input_filename)))
 
-    generate_report(report_data, cfg.CONF.report_template, cfg.CONF.report,
+    aggregated = utils.merge_dicts(outputs)
+    generate_report(aggregated, cfg.CONF.report_template, cfg.CONF.report,
                     cfg.CONF.subunit, cfg.CONF.book)
 
 
