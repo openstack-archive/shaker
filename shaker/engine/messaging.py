@@ -13,13 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import multiprocessing
+
 from oslo_log import log as logging
 import zmq
 
+from shaker.agent import agent
 from shaker.engine import utils
 
 
 LOG = logging.getLogger(__name__)
+
+HEARTBEAT_AGENT = '__heartbeat'
 
 
 class MessageQueue(object):
@@ -30,6 +35,13 @@ class MessageQueue(object):
         self.socket = context.socket(zmq.REP)
         self.socket.bind("tcp://*:%s" % port)
         LOG.info('Listening on *:%s', port)
+
+        heartbeat = multiprocessing.Process(
+            target=agent.work,
+            kwargs=dict(agent_id=HEARTBEAT_AGENT, endpoint=endpoint,
+                        ignore_sigint=True))
+        heartbeat.daemon = True
+        heartbeat.start()
 
     def __iter__(self):
         try:

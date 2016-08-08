@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import multiprocessing
 import time
 import traceback
 
@@ -21,7 +20,6 @@ from oslo_log import log as logging
 
 from shaker.agent import agent as agent_process
 from shaker.engine.executors import base as base_executors
-from shaker.engine import messaging
 
 
 LOG = logging.getLogger(__name__)
@@ -234,17 +232,8 @@ class LocalQuorum(object):
         return result
 
 
-def make_quorum(agent_ids, server_endpoint, polling_interval,
+def make_quorum(agent_ids, message_queue, polling_interval,
                 agent_loss_timeout, agent_join_timeout):
-    message_queue = messaging.MessageQueue(server_endpoint)
-
-    heartbeat = multiprocessing.Process(
-        target=agent_process.work,
-        kwargs=dict(agent_id=HEARTBEAT_AGENT, endpoint=server_endpoint,
-                    polling_interval=polling_interval, ignore_sigint=True))
-    heartbeat.daemon = True
-    heartbeat.start()
-
     quorum = Quorum(message_queue, polling_interval, agent_loss_timeout,
                     agent_join_timeout)
     result = quorum.join(set(agent_ids))

@@ -27,6 +27,16 @@ can be used for Shaker integration testing.
 To use this scenario specify parameter ``--scenario misc/static_agent``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/static_agent.yaml
 
+.. _scenario_static_agents_2:
+
+Static agents 2
+^^^^^^^^^^^^^^^
+In this scenario Shaker runs tests on pre-deployed static agents. The scenario
+can be used for Shaker integration testing.
+
+To use this scenario specify parameter ``--scenario misc/static_agent_2``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/static_agent_2.yaml
+
 .. _scenario_paired_static_agents:
 
 Paired static agents
