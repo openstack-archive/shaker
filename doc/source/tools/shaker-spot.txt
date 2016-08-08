@@ -1,16 +1,21 @@
-usage: shaker-spot [-h] [--book BOOK] [--config-dir DIR] [--config-file PATH]
-                   [--debug] [--log-config-append PATH]
-                   [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
-                   [--log-file PATH] [--matrix MATRIX] [--no-report-on-error]
-                   [--nodebug] [--nono-report-on-error] [--nouse-syslog]
-                   [--noverbose] [--nowatch-log-file] [--output OUTPUT]
-                   [--report REPORT] [--report-template REPORT_TEMPLATE]
-                   [--scenario SCENARIO] [--subunit SUBUNIT]
+usage: shaker-spot [-h] [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
+                   [--config-dir DIR] [--config-file PATH] [--debug]
+                   [--log-config-append PATH] [--log-date-format DATE_FORMAT]
+                   [--log-dir LOG_DIR] [--log-file PATH] [--matrix MATRIX]
+                   [--no-report-on-error] [--nodebug] [--nono-report-on-error]
+                   [--nouse-syslog] [--noverbose] [--nowatch-log-file]
+                   [--output OUTPUT] [--report REPORT]
+                   [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
+                   [--subunit SUBUNIT]
                    [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
                    [--verbose] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
+  --artifacts-dir ARTIFACTS_DIR
+                        If specified, directs Shaker to store there all its
+                        artifacts (output, report, subunit and book). Defaults
+                        to env[SHAKER_ARTIFACTS_DIR].
   --book BOOK           Generate report in ReST format and store it into the
                         specified folder, defaults to env[SHAKER_BOOK].
   --config-dir DIR      Path to a config directory to pull *.conf files from.
@@ -67,9 +72,10 @@ optional arguments:
                         Template for report. Can be a file name or one of
                         aliases: "interactive", "json". Defaults to
                         "interactive".
-  --scenario SCENARIO   Scenario to play. Can be a file name or one of
-                        aliases: "misc/instance_metadata",
-                        "misc/static_agent", "misc/static_agents_pair",
+  --scenario SCENARIO   Comma-separated list of scenarios to play. Each entity
+                        can be a file name or one of aliases:
+                        "misc/instance_metadata", "misc/static_agent",
+                        "misc/static_agents_pair",
                         "openstack/cross_az/full_l2",
                         "openstack/cross_az/full_l3_east_west",
                         "openstack/cross_az/full_l3_north_south",

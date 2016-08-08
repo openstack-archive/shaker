@@ -27,6 +27,7 @@ IMAGE_BUILDER_TEMPLATES = 'shaker/resources/image_builder_templates/'
 REPORT_TEMPLATES = 'shaker/resources/report_templates/'
 SCENARIOS = 'shaker/scenarios/'
 SCHEMAS = 'shaker/resources/schemas/'
+DEFAULT_POLLING_INTERVAL = 10
 
 
 class Endpoint(types.String):
@@ -64,7 +65,8 @@ COMMON_OPTS = [
             help='Address for server connections (host:port), '
                  'defaults to env[SHAKER_SERVER_ENDPOINT].'),
     cfg.IntOpt('polling-interval',
-               default=utils.env('SHAKER_POLLING_INTERVAL') or 10,
+               default=(utils.env('SHAKER_POLLING_INTERVAL') or
+                        DEFAULT_POLLING_INTERVAL),
                help='How frequently the agent polls server, in seconds')
 ]
 
@@ -147,13 +149,14 @@ SERVER_AGENT_OPTS = [
 ]
 
 SCENARIO_OPTS = [
-    cfg.StrOpt('scenario',
-               default=utils.env('SHAKER_SCENARIO'),
-               required=True,
-               help=utils.make_help_options(
-                   'Scenario to play. Can be a file name or one of aliases: '
-                   '%s. Defaults to env[SHAKER_SCENARIO].', SCENARIOS,
-                   type_filter=lambda x: x.endswith('.yaml'))),
+    cfg.ListOpt('scenario',
+                default=utils.env('SHAKER_SCENARIO'),
+                required=True,
+                help=utils.make_help_options(
+                    'Comma-separated list of scenarios to play. Each entity '
+                    'can be a file name or one of aliases: '
+                    '%s. Defaults to env[SHAKER_SCENARIO].', SCENARIOS,
+                    type_filter=lambda x: x.endswith('.yaml'))),
     cfg.Opt('matrix',
             default=utils.env('SHAKER_MATRIX'),
             type=Yaml(),
@@ -169,6 +172,10 @@ SCENARIO_OPTS = [
                     'defaults to env[SHAKER_OUTPUT]. If it is empty, then '
                     'output will be saved to '
                     '/tmp/shaker_<time_execution>.json'),
+    cfg.StrOpt('artifacts-dir', default=utils.env('SHAKER_ARTIFACTS_DIR'),
+               help='If specified, directs Shaker to store there all its '
+                    'artifacts (output, report, subunit and book). '
+                    'Defaults to env[SHAKER_ARTIFACTS_DIR].'),
     cfg.BoolOpt('no-report-on-error',
                 default=(utils.env('SHAKER_NO_REPORT_ON_ERROR') or False),
                 help='Do not generate report for failed scenarios'),

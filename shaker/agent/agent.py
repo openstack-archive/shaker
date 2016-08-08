@@ -125,7 +125,8 @@ def work_act(socket, agent_id, polling_interval):
     sleep(polling_interval)
 
 
-def work(agent_id, endpoint, polling_interval, ignore_sigint=False):
+def work(agent_id, endpoint, polling_interval=config.DEFAULT_POLLING_INTERVAL,
+         ignore_sigint=False):
     LOG.info('Agent id is: %s', agent_id)
     LOG.info('Connecting to server: %s', endpoint)
 

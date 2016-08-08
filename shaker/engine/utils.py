@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import errno
 import functools
 import itertools
 import logging as std_logging
@@ -268,3 +269,17 @@ def pack_openstack_params(conf):
     if cfg.CONF.os_project_name:
         params['auth']['project_name'] = cfg.CONF.os_project_name
     return params
+
+
+def mkdir_tree(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
+def join_folder_prefix_ext(folder, prefix, ext=None):
+    return os.path.join(folder, '%s.%s' % (prefix, ext) if ext else prefix)

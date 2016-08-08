@@ -20,12 +20,14 @@ import os
 import re
 import tempfile
 
+import functools
 from oslo_config import cfg
 from oslo_log import log as logging
 
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.engine import executors as executors_classes
+from shaker.engine import messaging
 from shaker.engine import quorum as quorum_pkg
 from shaker.engine import report
 from shaker.engine import utils
@@ -136,16 +138,17 @@ def execute(output, quorum, execution, agents, matrix=None):
 
 
 def _under_openstack():
-    required = ['os_username', 'os_password', 'os_tenant_name', 'os_auth_url']
+    required = ['os_username', 'os_password', 'os_auth_url']
     for param in required:
         if param not in cfg.CONF:
             return False
     return True
 
 
-def play_scenario(scenario):
+def play_scenario(message_queue, scenario):
     deployment = None
-    output = dict(scenario=scenario, records={}, agents={}, tests={})
+    output = dict(scenarios={}, records={}, agents={}, tests={})
+    output['scenarios'][scenario['title']] = scenario
 
     try:
         deployment = deploy.Deployment()
@@ -178,7 +181,7 @@ def play_scenario(scenario):
 
         if scenario_deployment:
             quorum = quorum_pkg.make_quorum(
-                agents.keys(), server_endpoint,
+                agents.keys(), message_queue,
                 cfg.CONF.polling_interval, cfg.CONF.agent_loss_timeout,
                 cfg.CONF.agent_join_timeout)
         else:
@@ -215,43 +218,69 @@ def play_scenario(scenario):
     return output
 
 
+def read_scenario(scenario_name):
+    alias_base = scenario_name
+    if alias_base[:11] == 'networking/':  # backward compatibility
+        LOG.warning('Scenarios from networking/ are moved to openstack/')
+        alias_base = 'openstack/' + alias_base[11:]
+
+    alias = '%s%s.yaml' % (config.SCENARIOS, alias_base)
+    packaged = utils.resolve_relative_path(alias)
+
+    # use packaged scenario or fallback to full path
+    scenario_file_name = packaged or scenario_name
+    LOG.debug('Scenario %s is resolved to %s', scenario_name,
+              scenario_file_name)
+
+    scenario = utils.read_yaml_file(scenario_file_name)
+
+    schema = utils.read_yaml_file(utils.resolve_relative_path(
+        '%s%s.yaml' % (config.SCHEMAS, 'scenario')))
+    utils.validate_yaml(scenario, schema)
+
+    scenario['title'] = scenario.get('title') or scenario_file_name
+    scenario['file_name'] = scenario_file_name
+
+    return scenario
+
+
 def act():
     output = dict(records={}, agents={}, scenarios={}, tests={})
 
-    for scenario_param in [cfg.CONF.scenario]:
-        LOG.debug('Processing scenario: %s', scenario_param)
+    message_queue = None
+    if 'server_endpoint' in cfg.CONF:
+        message_queue = messaging.MessageQueue(cfg.CONF.server_endpoint)
 
-        alias_base = scenario_param
-        if alias_base[:11] == 'networking/':  # backward compatibility
-            LOG.warning('Scenarios from networking/ are moved to openstack/')
-            alias_base = 'openstack/' + alias_base[11:]
+    artifacts_dir = cfg.CONF.artifacts_dir
+    if artifacts_dir:
+        utils.mkdir_tree(artifacts_dir)
 
-        alias = '%s%s.yaml' % (config.SCENARIOS, alias_base)
-        packaged = utils.resolve_relative_path(alias)
-        # use packaged scenario or fallback to full path
-        scenario_file_name = packaged or scenario_param
+    for scenario_name in cfg.CONF.scenario:
+        LOG.info('Play scenario: %s', scenario_name)
 
-        LOG.info('Play scenario: %s', scenario_file_name)
-        scenario = utils.read_yaml_file(scenario_file_name)
+        scenario = read_scenario(scenario_name)
 
-        schema = utils.read_yaml_file(utils.resolve_relative_path(
-            '%s%s.yaml' % (config.SCHEMAS, 'scenario')))
-        utils.validate_yaml(scenario, schema)
+        play_output = play_scenario(message_queue, scenario)
 
-        scenario['title'] = scenario.get('title') or scenario_file_name
-        scenario['file_name'] = scenario_file_name
+        # if requested make separate reports
+        if artifacts_dir:
+            prefix = utils.strict(scenario_name)
+            report_name_fn = functools.partial(
+                utils.join_folder_prefix_ext, artifacts_dir, prefix)
+            utils.write_file(json.dumps(output, indent=2),
+                             report_name_fn('json'))
+            report.generate_report(
+                output, cfg.CONF.report_template, report_name_fn('html'),
+                report_name_fn('subunit'), report_name_fn())
 
-        play_output = play_scenario(scenario)
-
-        output['scenarios'][scenario['title']] = play_output['scenario']
+        # aggregate reports
+        output['scenarios'].update(play_output['scenarios'])
         output['records'].update(play_output['records'])
         output['agents'].update(play_output['agents'])
         output['tests'].update(play_output['tests'])
 
-    output_path = ""
-    if cfg.CONF.output:
-        output_path = cfg.CONF.output
-    else:
+    output_path = cfg.CONF.output
+    if not output_path:
         tmp_dir = tempfile.gettempdir()
         tmp_report = "shaker_%s.json" % str(
             datetime.datetime.now()).replace(' ', '_')
