@@ -151,7 +151,7 @@ class TestServerPlayScenario(testtools.TestCase):
         }
 
         # act!
-        output = server.play_scenario(self.scenario)
+        output = server.play_scenario(mock.MagicMock, self.scenario)
 
         self.assertNotContainsSimilarRecord({'status': 'error'}, output)
         self.assertContainsSimilarRecord({
@@ -177,7 +177,7 @@ class TestServerPlayScenario(testtools.TestCase):
         }
 
         # act!
-        output = server.play_scenario(self.scenario)
+        output = server.play_scenario(mock.MagicMock, self.scenario)
 
         self.assertNotContainsSimilarRecord({'status': 'error'}, output)
 
@@ -202,7 +202,7 @@ class TestServerPlayScenario(testtools.TestCase):
         deploy_obj.deploy.return_value = {}
 
         # act!
-        output = server.play_scenario(self.scenario)
+        output = server.play_scenario(mock.MagicMock, self.scenario)
 
         self.assertEqual(1, len(output['records']))
         self.assertContainsSimilarRecord({'status': 'error'}, output)
@@ -220,7 +220,7 @@ class TestServerPlayScenario(testtools.TestCase):
         deploy_obj.deploy.side_effect = KeyboardInterrupt
 
         # act!
-        output = server.play_scenario(self.scenario)
+        output = server.play_scenario(mock.MagicMock, self.scenario)
 
         self.assertEqual(1, len(output['records']))
         self.assertContainsSimilarRecord({'status': 'interrupted'}, output)

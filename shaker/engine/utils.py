@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import errno
 import functools
 import itertools
 import logging as std_logging
@@ -21,6 +22,7 @@ import random
 import re
 import uuid
 
+import collections
 from oslo_config import cfg
 from oslo_log import log as logging
 from pykwalify import core as pykwalify_core
@@ -184,6 +186,14 @@ def flatten_dict(d, prefix='', sep='.'):
     return res
 
 
+def merge_dicts(src):
+    res = collections.defaultdict(dict)
+    for one in src:
+        for k in one.keys():
+            res[k].update(one[k])
+    return res
+
+
 def make_help_options(message, base, type_filter=None):
     path = resolve_relative_path(base)
     files = itertools.chain.from_iterable(
@@ -268,3 +278,17 @@ def pack_openstack_params(conf):
     if conf.os_project_name:
         params['auth']['project_name'] = conf.os_project_name
     return params
+
+
+def mkdir_tree(path):
+    try:
+        os.makedirs(path)
+    except OSError as exc:
+        if exc.errno == errno.EEXIST and os.path.isdir(path):
+            pass
+        else:
+            raise
+
+
+def join_folder_prefix_ext(folder, prefix, ext=None):
+    return os.path.join(folder, '%s.%s' % (prefix, ext) if ext else prefix)

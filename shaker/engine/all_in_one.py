@@ -11,8 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import errno
-import os
 import tempfile
 
 from oslo_config import cfg
@@ -26,23 +24,6 @@ from shaker.engine import utils
 LOG = logging.getLogger(__name__)
 
 
-def _make_filename(folder, prefix, ext=None):
-    tmp_report = prefix
-    if ext:
-        tmp_report = '%s.%s' % (tmp_report, ext)
-    return os.path.join(folder, tmp_report)
-
-
-def _mkdir_p(path):
-    try:
-        os.makedirs(path)
-    except OSError as exc:
-        if exc.errno == errno.EEXIST and os.path.isdir(path):
-            pass
-        else:
-            raise
-
-
 def _configure_log_file(log_file):
     cfg.CONF.set_override('log_file', log_file)
     logging.setup(cfg.CONF, 'shaker')
@@ -52,40 +33,43 @@ def _configure_log_file(log_file):
 def main():
     utils.init_config_and_logging(
         config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
-        config.REPORT_OPTS + config.IMAGE_BUILDER_OPTS + config.CLEANUP_OPTS +
-        config.ALL_IN_ONE_OPTS
+        config.REPORT_OPTS + config.IMAGE_BUILDER_OPTS + config.CLEANUP_OPTS
     )
 
     artifacts_dir = cfg.CONF.artifacts_dir
-    if artifacts_dir:
-        _mkdir_p(artifacts_dir)
-    else:
+    if not artifacts_dir:
         artifacts_dir = tempfile.mkdtemp(prefix='shaker')
+        cfg.CONF.set_override('artifacts_dir', artifacts_dir)
 
     # image-builder
-    _configure_log_file(_make_filename(artifacts_dir, 'image_builder', 'log'))
+    _configure_log_file(utils.join_folder_prefix_ext(
+        artifacts_dir, 'image_builder', 'log'))
     LOG.info('Building the image')
     image_builder.build_image()
 
     # core
-    scenario = cfg.CONF.scenario
-    prefix = utils.strict(scenario)
+    _configure_log_file(utils.join_folder_prefix_ext(
+        artifacts_dir, 'execution', 'log'))
 
-    _configure_log_file(_make_filename(artifacts_dir, prefix, 'log'))
+    if len(cfg.CONF.scenario) > 1:
+        cfg.CONF.set_override(
+            'output', utils.join_folder_prefix_ext(
+                artifacts_dir, 'aggregated', 'json'))
+        cfg.CONF.set_override(
+            'report', utils.join_folder_prefix_ext(
+                artifacts_dir, 'aggregated', 'html'))
+        cfg.CONF.set_override(
+            'subunit', utils.join_folder_prefix_ext(
+                artifacts_dir, 'aggregated', 'subunit'))
+        cfg.CONF.set_override(
+            'book', utils.join_folder_prefix_ext(artifacts_dir, 'aggregated'))
 
-    LOG.info('Executing scenario: %s', scenario)
-
-    cfg.CONF.set_override('output',
-                          _make_filename(artifacts_dir, prefix, 'json'))
-    cfg.CONF.set_override('report',
-                          _make_filename(artifacts_dir, prefix, 'html'))
-    cfg.CONF.set_override('subunit',
-                          _make_filename(artifacts_dir, prefix, 'subunit'))
-    cfg.CONF.set_override('book', _make_filename(artifacts_dir, prefix))
+    LOG.info('Executing scenario(s)')
     server.act()
 
     # cleanup
-    _configure_log_file(_make_filename(artifacts_dir, 'cleanup', 'log'))
+    _configure_log_file(utils.join_folder_prefix_ext(
+        artifacts_dir, 'cleanup', 'log'))
     LOG.info('Cleaning up')
     image_builder.cleanup()
 

@@ -1,5 +1,6 @@
 usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
-              [--agent-loss-timeout AGENT_LOSS_TIMEOUT] [--book BOOK]
+              [--agent-loss-timeout AGENT_LOSS_TIMEOUT]
+              [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
               [--cleanup-on-error] [--config-dir DIR] [--config-file PATH]
               [--debug] [--dns-nameservers DNS_NAMESERVERS]
               [--external-net EXTERNAL_NET] [--flavor-name FLAVOR_NAME]
@@ -31,6 +32,10 @@ optional arguments:
   --agent-loss-timeout AGENT_LOSS_TIMEOUT
                         Timeout to treat agent as lost in seconds, defaults to
                         env[SHAKER_AGENT_LOSS_TIMEOUT]
+  --artifacts-dir ARTIFACTS_DIR
+                        If specified, directs Shaker to store there all its
+                        artifacts (output, report, subunit and book). Defaults
+                        to env[SHAKER_ARTIFACTS_DIR].
   --book BOOK           Generate report in ReST format and store it into the
                         specified folder, defaults to env[SHAKER_BOOK].
   --cleanup-on-error    Clean up the heat-stack upon any error occurred during
@@ -121,7 +126,7 @@ optional arguments:
                         Authentication username, defaults to env[OS_USERNAME].
   --output OUTPUT       File for output in JSON format, defaults to
                         env[SHAKER_OUTPUT]. If it is empty, then output will
-                        be saved to /tmp/shaker_<time_execution>.json
+                        be saved to /tmp/shaker_<time_now>.json
   --polling-interval POLLING_INTERVAL
                         How frequently the agent polls server, in seconds
   --report REPORT       Report file name, defaults to env[SHAKER_REPORT].
@@ -129,9 +134,10 @@ optional arguments:
                         Template for report. Can be a file name or one of
                         aliases: "interactive", "json". Defaults to
                         "interactive".
-  --scenario SCENARIO   Scenario to play. Can be a file name or one of
-                        aliases: "misc/instance_metadata",
-                        "misc/static_agent", "misc/static_agents_pair",
+  --scenario SCENARIO   Comma-separated list of scenarios to play. Each entity
+                        can be a file name or one of aliases:
+                        "misc/instance_metadata", "misc/static_agent",
+                        "misc/static_agents_pair",
                         "openstack/cross_az/full_l2",
                         "openstack/cross_az/full_l3_east_west",
                         "openstack/cross_az/full_l3_north_south",
