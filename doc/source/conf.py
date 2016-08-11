@@ -24,7 +24,11 @@ sys.path.insert(0, os.path.abspath('../..'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinxcontrib.httpdomain',
+    'oslo_config.sphinxconfiggen',
+    'oslo_config.sphinxext',
 ]
+
+# config_generator_config_file = 'config-generator.conf'
 
 # autodoc generation is a bit aggressive and a nuisance when doing heavy
 # text edit cycles.

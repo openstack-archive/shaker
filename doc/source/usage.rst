@@ -13,7 +13,8 @@ The config can be passed to Shaker rather by sourcing into system env ``source o
 or via set of CLI parameters ``--os-project-name``, ``--os-username``, ``--os-password``,
 ``--os-auth-url`` and ``--os-region-name``.
 Connection to SSL endpoints is configured by parameters ``--os-cacert`` and ``--os-insecure``
-(to disable certificate verification).
+(to disable certificate verification). Configuration can also be specified in
+config file, refer to :ref:`config`. Config file name can be passed by parameter ``--config-file``.
 
 .. note::
     Shaker is better run under user with admin privileges. However, it's possible

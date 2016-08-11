@@ -21,4 +21,5 @@ to execute. Additionally tests may be tuned dynamically in command-line.
     examples/index
     examples_spot
     reports/index
+    config
     contributing
