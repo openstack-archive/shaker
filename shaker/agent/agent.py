@@ -69,12 +69,12 @@ def run_command(command):
             *shlex.split(command['data']), check_exit_code=False)
 
     elif command['type'] == 'script':
-        fd = tempfile.mkstemp()
-        os.write(fd[0], command['data'])
-        os.close(fd[0])
-        LOG.debug('Stored script into %s', fd[1])
+        file_name = tempfile.mktemp()
+        with open(file_name, mode='w') as fd:
+            fd.write(command['data'])
+        LOG.debug('Stored script into %s', file_name)
         command_stdout, command_stderr = processutils.execute(
-            *shlex.split('bash %s' % fd[1]), check_exit_code=False)
+            *shlex.split('bash %s' % file_name), check_exit_code=False)
 
     else:
         command_stderr = 'Unknown command type : %s' % command['type']
@@ -116,11 +116,13 @@ def work_act(socket, agent_id, agent_config):
     if task.get('operation') == 'execute':
         result = run_command(task.get('command'))
         send_reply(socket, agent_id, result)
+        LOG.info('Finished executing task: %s', task)
 
     elif task.get('operation') == 'configure':
         if 'polling_interval' in task:
             agent_config['polling_interval'] = task.get('polling_interval')
             send_reply(socket, agent_id, {})
+            LOG.info('Agent reconfigured: %s', agent_config)
 
     sleep(agent_config['polling_interval'])
 
