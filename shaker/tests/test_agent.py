@@ -25,11 +25,12 @@ class TestAgent(testtools.TestCase):
     def test_work_act_idle(self, mock_sleep):
         agent_id = 'the-agent'
         polling_interval = 10
+        agent_config = dict(polling_interval=polling_interval)
 
         mock_socket = mock.Mock()
         mock_socket.recv_json.side_effect = [{}]
 
-        agent.work_act(mock_socket, agent_id, polling_interval)
+        agent.work_act(mock_socket, agent_id, agent_config)
 
         mock_sleep.assert_called_once_with(polling_interval)
         mock_socket.send_json.assert_called_once_with(
@@ -41,6 +42,7 @@ class TestAgent(testtools.TestCase):
     def test_work_act_execute(self, mock_run_command, mock_sleep):
         agent_id = 'the-agent'
         polling_interval = 10
+        agent_config = dict(polling_interval=polling_interval)
 
         mock_socket = mock.Mock()
         mock_socket.recv_json.side_effect = [
@@ -49,7 +51,7 @@ class TestAgent(testtools.TestCase):
         execute_result = {'res': 'data'}
         mock_run_command.return_value = execute_result
 
-        agent.work_act(mock_socket, agent_id, polling_interval)
+        agent.work_act(mock_socket, agent_id, agent_config)
 
         mock_sleep.assert_called_once_with(polling_interval)
 
@@ -66,6 +68,7 @@ class TestAgent(testtools.TestCase):
         polling_interval = 10
         start_at = 1234
         now = 1230
+        agent_config = dict(polling_interval=polling_interval)
 
         mock_socket = mock.Mock()
         mock_socket.recv_json.side_effect = [
@@ -76,7 +79,7 @@ class TestAgent(testtools.TestCase):
 
         mock_now.return_value = now
 
-        agent.work_act(mock_socket, agent_id, polling_interval)
+        agent.work_act(mock_socket, agent_id, agent_config)
 
         mock_sleep.assert_has_calls([
             mock.call(start_at - now),
@@ -92,18 +95,19 @@ class TestAgent(testtools.TestCase):
     @mock.patch('shaker.agent.agent.run_command')
     def test_work_act_configure(self, mock_run_command, mock_sleep):
         agent_id = 'the-agent'
-        polling_interval = 10
+        new_polling_interval = 2
+        agent_config = dict(polling_interval=10)
 
         mock_socket = mock.Mock()
         mock_socket.recv_json.side_effect = [
-            dict(operation='configure', polling_interval=polling_interval),
+            dict(operation='configure', polling_interval=new_polling_interval),
             dict(),
         ]
 
-        agent.work_act(mock_socket, agent_id, polling_interval)
+        agent.work_act(mock_socket, agent_id, agent_config)
 
         mock_sleep.assert_has_calls([
-            mock.call(polling_interval),
+            mock.call(new_polling_interval),
         ])
 
         mock_socket.send_json.assert_has_calls([

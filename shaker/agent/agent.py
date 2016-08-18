@@ -98,7 +98,7 @@ def get_socket(endpoint):
     return socket
 
 
-def work_act(socket, agent_id, polling_interval):
+def work_act(socket, agent_id, agent_config):
     task = poll_task(socket, agent_id)
     start_at = task.get('start_at')
 
@@ -119,21 +119,24 @@ def work_act(socket, agent_id, polling_interval):
 
     elif task.get('operation') == 'configure':
         if 'polling_interval' in task:
-            polling_interval = task.get('polling_interval')
+            agent_config['polling_interval'] = task.get('polling_interval')
             send_reply(socket, agent_id, {})
 
-    sleep(polling_interval)
+    sleep(agent_config['polling_interval'])
 
 
 def work(agent_id, endpoint, polling_interval, ignore_sigint=False):
     LOG.info('Agent id is: %s', agent_id)
     LOG.info('Connecting to server: %s', endpoint)
 
+    agent_config = dict(polling_interval=polling_interval)
+    LOG.info('Agent config: %s', agent_config)
+
     socket = get_socket(endpoint)
 
     while True:
         try:
-            work_act(socket, agent_id, polling_interval)
+            work_act(socket, agent_id, agent_config)
 
         except BaseException as e:
             if isinstance(e, KeyboardInterrupt):
