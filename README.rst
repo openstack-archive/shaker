@@ -12,17 +12,15 @@ to execute. Additionally tests may be tuned dynamically in command-line.
 
 Features
 --------
-
-    * User-defined topology via Heat templates
-    * Simultaneously test execution on multiple instances
-    * Interactive report with stats and charts
-    * Built-in SLA verification
+* User-defined topology via Heat templates
+* Simultaneously test execution on multiple instances
+* Interactive report with stats and charts
+* Built-in SLA verification
 
 Deployment Requirements
 -----------------------
-
-    * Shaker server routable from OpenStack cloud
-    * Admin-user access to OpenStack API is preferable
+* Shaker server routable from OpenStack cloud
+* Admin-user access to OpenStack API is preferable
 
 Run in Python Environment
 -------------------------
@@ -46,7 +44,7 @@ Full list of parameters is available in `documentation <http://pyshaker.readthed
 Shaker in Container
 -------------------
 
-Shaker is available as container a container at Docker Hub at
+Shaker is available as container at Docker Hub at
 `shakhat/shaker <https://hub.docker.com/r/shakhat/shaker/>`_
 
 .. code-block:: bash
@@ -64,8 +62,7 @@ where:
 
 Links
 -----
-
- * PyPi - https://pypi.python.org/pypi/pyshaker/
- * Docker - https://hub.docker.com/r/shakhat/shaker/
- * Docs - http://pyshaker.readthedocs.io/
- * Bugtracker - https://launchpad.net/shaker/
+* PyPi - https://pypi.python.org/pypi/pyshaker/
+* Docker - https://hub.docker.com/r/shakhat/shaker/
+* Docs - http://pyshaker.readthedocs.io/
+* Bugtracker - https://launchpad.net/shaker/

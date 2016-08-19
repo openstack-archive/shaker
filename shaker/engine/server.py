@@ -276,6 +276,7 @@ def act():
     aggregated = utils.merge_dicts(outputs)
 
     utils.write_file(json.dumps(aggregated, indent=2), cfg.CONF.output)
+    LOG.info('Raw output is stored to: %s', cfg.CONF.output)
 
     report.generate_report(aggregated, cfg.CONF.report_template,
                            cfg.CONF.report, cfg.CONF.subunit, cfg.CONF.book)
