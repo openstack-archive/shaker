@@ -68,33 +68,17 @@ resources:
       user_data_format: RAW
       user_data: |
         #!/bin/bash
-        yum clean all
-        yum update -y
-        cat<<'EOF' >> /etc/yum.repos.d/home_fengshuo_zeromq.repo
-        [home_fengshuo_zeromq]
-        name=The latest stable of zeromq builds CentOS_CentOS-6
-        type=rpm-md
-        baseurl=http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/CentOS_CentOS-6/
-        gpgcheck=1
-        gpgkey=http://download.opensuse.org/repositories/home:/fengshuo:/zeromq/CentOS_CentOS-6/repodata/repomd.xml.key
-        enabled=1
-        EOF
-        yum update -y
         yum install -y wget
-        wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
-        rpm -Uvh epel-release-7*.rpm
-        wget http://pkgs.repoforge.org/rpmforge-release/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
-        rpm -Uvh rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+        yum install -y epel-release
         yum install -y  iperf  gcc gcc-c++ python-devel  screen
-        yum install -y zeromq
-        yum install -y zeromq-devel
+        yum install -y zeromq zeromq-devel
         wget ftp://ftp.netperf.org/netperf/netperf-2.7.0.tar.gz
         tar xvzf netperf-2.7.0.tar.gz
         cd  netperf-2.7.0
         ./configure --enable-demo=yes
         make
         make install
-        wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py &&  python get-pip.py
+        easy_install pip
         pip install pbr flent pyshaker-agent
         service network restart
         cat<<'EOF' >> /etc/systemd/system/iperf.service
