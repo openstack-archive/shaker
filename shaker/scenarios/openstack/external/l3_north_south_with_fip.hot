@@ -77,6 +77,7 @@ resources:
 
   {{ agent.id }}_floating_ip:
     type: OS::Neutron::FloatingIP
+    depends_on: router_interface_2
     properties:
       floating_network: { get_param: external_net }
       port_id: { get_resource: {{ agent.id }}_port }
