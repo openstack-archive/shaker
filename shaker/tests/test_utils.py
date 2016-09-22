@@ -126,7 +126,7 @@ class TestUtils(testtools.TestCase):
 
     def test_get_value_by_path_none(self):
         data = {'jitter': {'min': 5}}
-        self.assertEqual(None, utils.get_value_by_path(data, 'jitter.avg'))
+        self.assertIsNone(utils.get_value_by_path(data, 'jitter.avg'))
 
     def test_copy_value_by_path(self):
         src = {'sum': {'jitter_ms': 7}}
