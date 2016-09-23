@@ -70,7 +70,7 @@ resources:
         #!/bin/bash
         yum install -y wget
         yum install -y epel-release
-        yum install -y  iperf  gcc gcc-c++ python-devel  screen
+        yum install -y  iperf iperf3 gcc gcc-c++ python-devel  screen
         yum install -y zeromq zeromq-devel
         wget ftp://ftp.netperf.org/netperf/netperf-2.7.0.tar.gz
         tar xvzf netperf-2.7.0.tar.gz
@@ -91,6 +91,16 @@ resources:
         [Install]
         WantedBy=multi-user.target
         EOF
+        cat<<'EOF' >> /etc/systemd/system/iperf3.service
+        [Unit]
+        Description=iperf3 Service
+        After=network.target
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/iperf3 -s
+        [Install]
+        WantedBy=multi-user.target
+        EOF
         cat<<'EOF' >> /etc/systemd/system/netperf.service
         [Unit]
         Description="Netperf netserver daemon"
@@ -102,6 +112,8 @@ resources:
         EOF
         systemctl start iperf
         systemctl enable iperf
+        systemctl start iperf3
+        systemctl enable iperf3
         systemctl start netperf
         systemctl enable netperf
         setenforce 0
