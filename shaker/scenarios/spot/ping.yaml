@@ -5,7 +5,7 @@ description: >
   the remote. The remote host can be provided via command-line, it defaults
   to 8.8.8.8. The scenario verifies SLA and expects the latency to be at most
   30ms.
-  The destination host can be overriden by command-line parameter,
+  The destination host can be overridden by command-line parameter,
   e.g. ``--matrix "{host: 172.10.1.2}"``.
 
 execution:

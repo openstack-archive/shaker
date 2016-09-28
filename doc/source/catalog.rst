@@ -391,7 +391,7 @@ Ping
 This scenario uses ping to measure the latency between the local host and the
 remote. The remote host can be provided via command-line, it defaults to
 8.8.8.8. The scenario verifies SLA and expects the latency to be at most 30ms.
-The destination host can be overriden by command-line parameter, e.g.
+The destination host can be overridden by command-line parameter, e.g.
 ``--matrix "{host: 172.10.1.2}"``.
 
 To use this scenario specify parameter ``--scenario spot/ping``.
@@ -404,7 +404,7 @@ TCP bandwidth
 This scenario uses iperf3 to measure TCP throughput between local host and
 ping.online.net (or against hosts provided via CLI). SLA check is verified and
 expects the speed to be at least 90Mbit and at most 20 retransmitts. The
-destination host can be overriden by command-line parameter, e.g. ``--matrix
+destination host can be overridden by command-line parameter, e.g. ``--matrix
 "{host: 172.10.1.2}"``.
 
 To use this scenario specify parameter ``--scenario spot/tcp``.
@@ -417,7 +417,7 @@ UDP bandwidth
 This scenario uses iperf3 to measure UDP throughput between local host and
 ping.online.net (or against hosts provided via CLI). SLA check is verified and
 requires at least 10 000 packets per second. The destination host can be
-overriden by command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
+overridden by command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 
 To use this scenario specify parameter ``--scenario spot/udp``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/spot/udp.yaml
