@@ -1,0 +1,9 @@
+Code-Review+1: zhangyanxian <zhang.yanxian@zte.com.cn>
+Code-Review+2: Ilya Shakhat <ishakhat@mirantis.com>
+Workflow+1: Ilya Shakhat <ishakhat@mirantis.com>
+Verified+2: Jenkins
+Submitted-by: Jenkins
+Submitted-at: Tue, 04 Oct 2016 08:00:41 +0000
+Reviewed-on: https://review.openstack.org/378486
+Project: openstack/shaker
+Branch: refs/heads/master
