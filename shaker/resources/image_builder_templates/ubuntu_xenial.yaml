@@ -1,0 +1,102 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Heat teamplate that creates Shaker image based on Ubuntu Xenial (16.04)
+
+parameters:
+  external_net:
+    type: string
+    description: ID or name of public network for which floating IP addresses will be allocated
+  flavor:
+    type: string
+    description: Flavor to use for servers
+  dns_nameservers:
+    type: comma_delimited_list
+    description: DNS nameservers for the image builder subnet
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: shaker_image_builder_net
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: 10.0.0.0/29
+      dns_nameservers: { get_param: dns_nameservers }
+
+  router:
+    type: OS::Neutron::Router
+    properties:
+      external_gateway_info:
+        network: { get_param: external_net }
+
+  router_interface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: { get_resource: router }
+      subnet_id: { get_resource: private_subnet }
+
+  master_image:
+    type: OS::Glance::Image
+    properties:
+      container_format: bare
+      disk_format: qcow2
+      location: https://cloud-images.ubuntu.com/releases/xenial/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
+      min_disk: 3
+      min_ram: 512
+      name: shaker_image_build_template
+
+  master_image_server_port:
+    type: OS::Neutron::Port
+    properties:
+      network_id: { get_resource: private_net }
+      fixed_ips:
+        - subnet_id: { get_resource: private_subnet }
+
+  master_image_server:
+    type: OS::Nova::Server
+    properties:
+      name: shaker_image_builder_server
+      image: { get_resource: master_image }
+      flavor: { get_param: flavor }
+      networks:
+        - port: { get_resource: master_image_server_port }
+      user_data_format: RAW
+      user_data: |
+        #!/bin/bash
+        sudo apt-add-repository "deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse"
+        sudo apt-get update
+        sudo apt-get -y install iperf iperf3 netperf python-dev libzmq-dev build-essential
+        wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
+        sudo pip install flent pyshaker-agent
+        shaker-agent -h || (echo "[critical] Failed to run pyshaker-agent. Check if it is installed in the image"; sleep 20)
+        cat<<'EOF' >> /etc/systemd/system/iperf.service
+        [Unit]
+        Description=iperf Service
+        After=network.target
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/iperf -s
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        cat<<'EOF' >> /etc/systemd/system/iperf3.service
+        [Unit]
+        Description=iperf3 Service
+        After=network.target
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/iperf3 -s
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        systemctl enable iperf
+        systemctl enable iperf3
+        sudo shutdown -P now
+
+outputs:
+  server_info:
+    value: { get_attr: [ master_image_server, show ] }
