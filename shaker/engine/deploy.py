@@ -57,6 +57,14 @@ def prepare_for_cross_az(compute_nodes, zones):
 
 
 def generate_agents(compute_nodes, accommodation, unique):
+    if 'graph' in accommodation:
+        return _generate_agents_from_graph(
+            compute_nodes, accommodation, unique)
+    else:
+        return _generate_agents_classic(compute_nodes, accommodation, unique)
+
+
+def _generate_agents_classic(compute_nodes, accommodation, unique):
     density = accommodation.get('density') or 1
 
     zones = accommodation.get('zones')
@@ -115,6 +123,47 @@ def generate_agents(compute_nodes, accommodation, unique):
         raise DeploymentException('Not enough compute nodes %(cn)s for '
                                   'requested instance accommodation %(acc)s' %
                                   dict(cn=compute_nodes, acc=accommodation))
+
+    # inject availability zone
+    for agent in agents.values():
+        az = agent['zone']
+        if agent['node']:
+            az += ':' + agent['node']
+        agent['availability_zone'] = az
+
+    return agents
+
+
+def _generate_agents_from_graph(compute_nodes, accommodation, unique):
+    # spread graph nodes against available compute nodes
+
+    graph = accommodation['graph']
+    density = accommodation.get('density') or 1
+    agents = {}
+
+    # map colors to nodes
+    colors = set(item for line in graph for item in line[:2])
+    if len(colors) > len(compute_nodes):
+        raise DeploymentException('Not enough compute nodes %(cn)s for '
+                                  'requested instance accommodation %(acc)s'
+                                  % dict(cn=compute_nodes, acc=accommodation))
+    color_to_node = dict(zip(colors, compute_nodes))
+
+    for i in range(density):
+        for pair in graph:
+            src, dst = pair
+            pair_id = utils.random_string()
+            master_id = '%s_%s_%s' % (unique, src, pair_id)
+            slave_id = '%s_%s_%s' % (unique, dst, pair_id)
+            master = dict(id=master_id, mode='master', slave_id=slave_id,
+                          node=color_to_node[src]['host'],
+                          zone=color_to_node[src]['zone'])
+            slave = dict(id=slave_id, mode='slave', master_id=master_id,
+                         node=color_to_node[dst]['host'],
+                         zone=color_to_node[dst]['zone'])
+
+            agents[master_id] = master
+            agents[slave_id] = slave
 
     # inject availability zone
     for agent in agents.values():

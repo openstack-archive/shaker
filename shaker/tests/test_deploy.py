@@ -369,6 +369,25 @@ class TestDeploy(testtools.TestCase):
         actual = deploy.generate_agents(nodes, accommodation, unique)
         self.assertEqual(expected, actual)
 
+    @mock.patch('shaker.engine.utils.random_string')
+    def test_generate_agents_from_graph(self, urs):
+        urs.side_effect = [0, 1]
+        unique = 'UU1D'
+        nodes = [
+            {'host': 'uno', 'zone': 'nova'},
+            {'host': 'duo', 'zone': 'nova'},
+            {'host': 'tre', 'zone': 'nova'},
+            {'host': 'quattro', 'zone': 'nova'},
+        ]
+        accommodation = deploy.normalize_accommodation(
+            [{'graph': [['red', 'blue'], ['blue', 'green']]}])
+        actual = deploy.generate_agents(nodes, accommodation, unique)
+
+        self.assertEqual('UU1D_blue_0', actual['UU1D_red_0']['slave_id'])
+        self.assertEqual('UU1D_red_0', actual['UU1D_blue_0']['master_id'])
+        self.assertEqual('UU1D_green_1', actual['UU1D_blue_1']['slave_id'])
+        self.assertEqual('UU1D_blue_1', actual['UU1D_green_1']['master_id'])
+
     def test_filter_agents_all_deployed(self):
         agents = {
             'UU1D_agent_0': {

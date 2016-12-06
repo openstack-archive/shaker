@@ -29,6 +29,10 @@ mapping:
               type: seq
               sequence:
               - type: str
+            graph:
+              type: seq
+              sequence:
+              - type: any
   execution:
     type: map
     mapping:
