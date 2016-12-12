@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: shaker
+  labels:
+    app: shaker
+spec:
+  containers:
+  - args:
+    - --debug
+    - --nocleanup
+    env:
+    - name: OS_USERNAME
+      value: admin
+    - name: OS_PASSWORD
+      value: password
+    - name: OS_PROJECT_NAME
+      value: admin
+    - name: OS_AUTH_URL
+      value: http://keystone.ccp:5000/
+    - name: SHAKER_SCENARIO
+      value: openstack/perf_l2
+    - name: SHAKER_SERVER_ENDPOINT
+      value: 172.20.9.7:31999
+    image: shakhat/shaker
+    imagePullPolicy: Always
+    name: shaker
+    securityContext:
+      privileged: false
+    volumeMounts:
+    - mountPath: /artifacts
+      name: artifacts
+  dnsPolicy: ClusterFirst
+  restartPolicy: Never
+  volumes:
+  - name: artifacts
+    hostPath:
+      path: /tmp
