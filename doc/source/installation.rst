@@ -114,3 +114,28 @@ Non-OpenStack Deployment (aka Spot mode)
 
 To run scenarios against remote nodes (``shaker-spot`` command) install shaker on the local host.
 Make sure all necessary system tools are installed too. See :ref:`spot_scenarios` for more details.
+
+
+Run Shaker against OpenStack deployed by Fuel-CCP on Kubernetes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Shaker can be run in Kubernetes environment and can execute scenarios against
+OpenStack deployed by Fuel-CCP tool.
+
+Shaker app contains k8s service:
+
+  .. literalinclude:: k8s/shaker-svc.yaml
+    :language: yaml
+
+and pod:
+
+  .. literalinclude:: k8s/shaker-pod.yaml
+    :language: yaml
+
+You may need to change values for variables defined in config files:
+
+  * `SHAKER_SERVER_ENDPOINT` should point to external address of Kubernetes cluster,
+    and OpenStack instances must have access to it
+  * `OS_***` parameters describe connection to Keystone endpoint
+  * `SHAKER_SCENARIO` needs to be alter to run the appropriate scenario
+  * Pod is configured to write logs into /tmp on the node that hosts the pod

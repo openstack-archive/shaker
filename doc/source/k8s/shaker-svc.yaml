@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: shaker
+spec:
+  ports:
+  - nodePort: 31999
+    port: 31999
+    protocol: TCP
+    targetPort: 31999
+  selector:
+    app: shaker
+  type: NodePort
