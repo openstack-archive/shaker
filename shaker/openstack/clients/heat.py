@@ -77,7 +77,7 @@ def wait_stack_completion(heat_client, stack_id):
 
 def get_stack_outputs(heat_client, stack_id):
     # try to use optimized way to retrieve outputs, fallback otherwise
-    if getattr(heat_client.stacks, 'output_list'):
+    if hasattr(heat_client.stacks, 'output_list'):
         try:
             output_list = heat_client.stacks.output_list(stack_id)['outputs']
 
