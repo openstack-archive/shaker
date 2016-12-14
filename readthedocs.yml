@@ -1,0 +1,4 @@
+python:
+    setup_py_install: true
+
+requirements_file: rtd-requirements.txt
