@@ -77,19 +77,24 @@ def wait_stack_completion(heat_client, stack_id):
 
 def get_stack_outputs(heat_client, stack_id):
     # try to use optimized way to retrieve outputs, fallback otherwise
-    if getattr(heat_client.stacks, 'output_list'):
-        try:
-            output_list = heat_client.stacks.output_list(stack_id)['outputs']
+    try:
+        if getattr(heat_client.stacks, 'output_list'):
+            try:
+                output_list = heat_client.stacks.output_list(
+                    stack_id)['outputs']
 
-            result = {}
-            for output in output_list:
-                output_key = output['output_key']
-                value = heat_client.stacks.output_show(stack_id, output_key)
-                result[output_key] = value['output']['output_value']
+                result = {}
+                for output in output_list:
+                    output_key = output['output_key']
+                    value = heat_client.stacks.output_show(
+                        stack_id, output_key)
+                    result[output_key] = value['output']['output_value']
 
-            return result
-        except Exception as e:
-            LOG.info('Cannot get output list, fallback to old way: %s', e)
+                return result
+            except Exception as e:
+                LOG.info('Cannot get output list, fallback to old way: %s', e)
+    except Exception as e:
+        LOG.info('Cannot get output list, fallback to old way: %s', e)
 
     outputs_list = heat_client.stacks.get(stack_id).to_dict()['outputs']
     return dict((item['output_key'], item['output_value'])
