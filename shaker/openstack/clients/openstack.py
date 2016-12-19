@@ -26,7 +26,9 @@ class OpenStackClient(object):
 
         config = os_client_config.OpenStackConfig()
         cloud_config = config.get_one_cloud(**openstack_params)
-
+        if openstack_params['os_insecure']:
+            cloud_config.config['verify'] = False
+            cloud_config.config['cacert'] = None
         self.keystone_session = cloud_config.get_session()
         self.nova = cloud_config.get_legacy_client('compute')
         self.neutron = cloud_config.get_legacy_client('network')
