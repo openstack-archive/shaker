@@ -19,7 +19,7 @@ from shaker.engine.executors import base
 from shaker.engine import utils
 
 
-FLENT_EXEC = 'zcat `%s 2>&1 | grep "se with" | grep -Po \'\\./\\S+\'`'
+FLENT_EXEC = 'zcat `%s 2>&1 | grep "file written" | grep -Po "\\./\\S+gz"`'
 FLENT_EXTRA_TIME = 10  # by default flent adds by 5 secs before and after run
 
 
