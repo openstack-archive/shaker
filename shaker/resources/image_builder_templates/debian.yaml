@@ -45,7 +45,7 @@ resources:
     properties:
       container_format: bare
       disk_format: qcow2
-      location: http://cdimage.debian.org/cdimage/openstack/8.1.0/debian-8.1.0-openstack-amd64.qcow2
+      location: http://cdimage.debian.org/cdimage/openstack/archive/8.6.0/debian-8.6.0-openstack-amd64.qcow2
       min_disk: 3
       min_ram: 512
       name: shaker_image_build_template
