@@ -4,11 +4,16 @@
 Spot Scenarios
 ==============
 
+Spot scenarios are executed between the local machine (where shaker runs) and
+the remote. Local machine must have all necessary tools installed, e.g. the
+following scenarios require iperf3_ and flent_ utilities.
+
 TCP
 ---
 
 This scenario tests TCP bandwidth to the destination host. By default it sends traffic to one
-of public iperf servers. This can be overridden via parameter ``--matrix "{host:<host>}"``.
+of public iperf3 servers. This can be overridden via parameter ``--matrix "{host:<host>}"``.
+The scenario requires iperf3_ to be installed locally.
 
 How To Run
 ^^^^^^^^^^
@@ -47,16 +52,44 @@ UDP
 ---
 
 This scenario tests UDP packets per second to the destination host. By default it sends traffic to one
-of public iperf servers. This can be overridden via parameter ``--matrix "{host:<host>}"``.
+of public iperf3 servers. This can be overridden via parameter ``--matrix "{host:<host>}"``.
+The scenario requires iperf3_ to be installed locally.
 
 How To Run
 ^^^^^^^^^^
 
-  .. code::
+.. code::
 
-      shaker-spot --scenario spot/udp --report report.html
+  shaker-spot --scenario spot/udp --report report.html
 
 Scenario
 ^^^^^^^^
 
 .. literalinclude:: ../../shaker/scenarios/spot/udp.yaml
+
+
+Ping
+----
+
+This scenario tests ICMP ping between the local machine and the remote. By default pings are
+sent to public 8.8.8.8 address. The remote address can be overridden via parameter
+``--matrix "{host: <host>}"``. The scenario requires flent_ to be installed locally.
+
+How To Run
+^^^^^^^^^^
+
+.. code::
+
+    shaker-spot --scenario spot/ping --report report.html
+
+Scenario
+^^^^^^^^
+
+.. literalinclude:: ../../shaker/scenarios/spot/ping.yaml
+
+
+
+.. references:
+
+.. _iperf3: https://iperf.fr/
+.. _flent: https://flent.org/

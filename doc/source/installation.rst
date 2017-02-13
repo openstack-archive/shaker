@@ -113,7 +113,7 @@ Non-OpenStack Deployment (aka Spot mode)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To run scenarios against remote nodes (``shaker-spot`` command) install shaker on the local host.
-Make sure all necessary system tools are installed too. See :ref:`spot_scenarios` for more details.
+Make sure all necessary tools are installed too. Refer to :ref:`spot_scenarios` for more details.
 
 
 Run Shaker against OpenStack deployed by Fuel-CCP on Kubernetes
