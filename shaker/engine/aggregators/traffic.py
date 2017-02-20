@@ -15,12 +15,7 @@
 
 import collections
 
-from oslo_log import log as logging
-
 from shaker.engine.aggregators import base
-
-
-LOG = logging.getLogger(__name__)
 
 
 def _filter_none(array):
