@@ -54,11 +54,14 @@ def validate_required_opts(conf, opts):
             raise cfg.RequiredOptError(opt.name)
 
 
-def init_config_and_logging(opts):
+def init_config_and_logging(opts, **conf_overrides):
     conf = cfg.CONF
     conf.register_cli_opts(opts)
     conf.register_opts(opts)
     logging.register_options(conf)
+
+    for k, v in conf_overrides.items():
+        conf.set_override(k, v)
 
     # requests to OpenStack services should be visible at DEBUG level
     default_log_levels = [l for l in conf.default_log_levels
@@ -266,7 +269,15 @@ def copy_value_by_path(src, src_param, dst, dst_param):
     return False
 
 
+class MisconfigurationException(Exception):
+    pass
+
+
 def pack_openstack_params(conf):
+    if not conf.os_auth_url:
+        raise MisconfigurationException(
+            'OpenStack authentication endpoint is missing')
+
     params = dict(auth=dict(username=conf.os_username,
                             password=conf.os_password,
                             auth_url=conf.os_auth_url),

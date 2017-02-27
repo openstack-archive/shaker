@@ -10,4 +10,4 @@ VOLUME /artifacts
 
 STOPSIGNAL SIGTERM
 
-ENTRYPOINT ["/usr/local/bin/shaker-all-in-one", "--artifacts-dir", "/artifacts"]
+ENTRYPOINT ["/usr/local/bin/shaker-all-in-one", "--artifacts-dir", "/artifacts", "--log-dir", "/artifacts"]

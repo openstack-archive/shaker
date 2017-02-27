@@ -24,16 +24,11 @@ from shaker.engine import utils
 LOG = logging.getLogger(__name__)
 
 
-def _configure_log_file(log_file):
-    cfg.CONF.set_override('log_file', log_file)
-    logging.setup(cfg.CONF, 'shaker')
-    cfg.CONF.log_opt_values(LOG, logging.DEBUG)
-
-
 def main():
     utils.init_config_and_logging(
         config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
-        config.REPORT_OPTS + config.IMAGE_BUILDER_OPTS + config.CLEANUP_OPTS
+        config.REPORT_OPTS + config.IMAGE_BUILDER_OPTS + config.CLEANUP_OPTS,
+        use_stderr=True
     )
 
     artifacts_dir = cfg.CONF.artifacts_dir
@@ -42,15 +37,10 @@ def main():
         cfg.CONF.set_override('artifacts_dir', artifacts_dir)
 
     # image-builder
-    _configure_log_file(utils.join_folder_prefix_ext(
-        artifacts_dir, 'image_builder', 'log'))
     LOG.info('Building the image')
     image_builder.build_image()
 
     # core
-    _configure_log_file(utils.join_folder_prefix_ext(
-        artifacts_dir, 'execution', 'log'))
-
     if len(cfg.CONF.scenario) > 1:
         cfg.CONF.set_override(
             'output', utils.join_folder_prefix_ext(
@@ -68,8 +58,6 @@ def main():
     server.act()
 
     # cleanup
-    _configure_log_file(utils.join_folder_prefix_ext(
-        artifacts_dir, 'cleanup', 'log'))
     LOG.info('Cleaning up')
     image_builder.cleanup()
 

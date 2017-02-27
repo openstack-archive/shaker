@@ -135,11 +135,13 @@ class TestServerPlayScenario(testtools.TestCase):
         s = 'Output should not contain record similar to: %s' % expected
         self.assertFalse(has, msg=s)
 
+    @mock.patch('shaker.engine.server._under_openstack')
     @mock.patch('shaker.engine.server.execute')
     @mock.patch('shaker.engine.deploy.Deployment')
-    def test_play_scenario(self, deploy_clz_mock, execute_mock):
+    def test_play_scenario(self, deploy_clz_mock, execute_mock, under_mock):
         deploy_obj = mock.Mock()
         deploy_clz_mock.return_value = deploy_obj
+        under_mock.return_value = False
 
         def _execute(output, quorum, execution, agents, matrix=None):
             output['records'].update({'UUID': {'id': 'UUID', 'status': 'ok'}})
@@ -194,10 +196,12 @@ class TestServerPlayScenario(testtools.TestCase):
             ['8.8.8.8', '8.8.4.4'])
         deploy_obj.cleanup.assert_called_once_with()
 
+    @mock.patch('shaker.engine.server._under_openstack')
     @mock.patch('shaker.engine.deploy.Deployment')
-    def test_play_scenario_no_agents(self, deploy_clz_mock):
+    def test_play_scenario_no_agents(self, deploy_clz_mock, under_mock):
         deploy_obj = mock.Mock()
         deploy_clz_mock.return_value = deploy_obj
+        under_mock.return_value = False
 
         deploy_obj.deploy.return_value = {}
 
@@ -212,10 +216,12 @@ class TestServerPlayScenario(testtools.TestCase):
             server_endpoint='127.0.0.1:5999')
         deploy_obj.cleanup.assert_called_once_with()
 
+    @mock.patch('shaker.engine.server._under_openstack')
     @mock.patch('shaker.engine.deploy.Deployment')
-    def test_play_scenario_interrupted(self, deploy_clz_mock):
+    def test_play_scenario_interrupted(self, deploy_clz_mock, under_mock):
         deploy_obj = mock.Mock()
         deploy_clz_mock.return_value = deploy_obj
+        under_mock.return_value = False
 
         deploy_obj.deploy.side_effect = KeyboardInterrupt
 
