@@ -140,6 +140,8 @@ def _under_openstack():
     for param in required:
         if param not in cfg.CONF:
             return False
+        if not cfg.CONF.get(param):
+            return False
     return True
 
 

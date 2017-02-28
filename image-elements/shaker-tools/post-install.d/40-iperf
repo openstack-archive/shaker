@@ -1,0 +1,34 @@
+#!/bin/bash
+
+set -eux
+set -o pipefail
+
+cat<<'EOF' >> /etc/systemd/system/iperf.service
+[Unit]
+Description=iperf Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/iperf -s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+cat<<'EOF' >> /etc/systemd/system/iperf3.service
+[Unit]
+Description=iperf3 Service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/iperf3 -s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable iperf
+systemctl enable iperf3
+
