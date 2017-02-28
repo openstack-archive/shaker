@@ -25,8 +25,6 @@ import uuid
 import collections
 from oslo_config import cfg
 from oslo_log import log as logging
-from pykwalify import core as pykwalify_core
-from pykwalify import errors as pykwalify_errors
 import six
 import yaml
 
@@ -233,14 +231,6 @@ def algebraic_product(**kwargs):
 
 def strict(s):
     return re.sub(r'[^\w\d]+', '_', re.sub(r'\(.+\)', '', s)).lower()
-
-
-def validate_yaml(data, schema):
-    c = pykwalify_core.Core(source_data=data, schema_data=schema)
-    try:
-        c.validate(raise_exception=True)
-    except pykwalify_errors.SchemaError as e:
-        raise Exception('File does not conform to schema: %s' % e)
 
 
 def get_value_by_path(src, param):

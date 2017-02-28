@@ -29,7 +29,7 @@ from shaker.engine import messaging
 from shaker.engine import quorum as quorum_pkg
 from shaker.engine import report
 from shaker.engine import utils
-
+from shaker.engine import validation_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -140,6 +140,8 @@ def _under_openstack():
     for param in required:
         if param not in cfg.CONF:
             return False
+        if not cfg.CONF.get(param):
+            return False
     return True
 
 
@@ -234,7 +236,7 @@ def read_scenario(scenario_name):
 
     schema = utils.read_yaml_file(utils.resolve_relative_path(
         '%s%s.yaml' % (config.SCHEMAS, 'scenario')))
-    utils.validate_yaml(scenario, schema)
+    validation_utils.validate_yaml(scenario, schema)
 
     scenario['title'] = scenario.get('title') or scenario_file_name
     scenario['file_name'] = scenario_file_name

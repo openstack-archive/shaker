@@ -21,6 +21,7 @@ import testtools
 import yaml
 
 from shaker.engine import utils
+from shaker.engine import validation_utils
 
 
 class TestReport(testtools.TestCase):
@@ -56,7 +57,7 @@ class TestReport(testtools.TestCase):
             schema_data = utils.read_yaml_file(scenario_schema_file)
 
             try:
-                utils.validate_yaml(source_data, schema_data)
+                validation_utils.validate_yaml(source_data, schema_data)
             except Exception as e:
                 self.fail('Scenario %s does not conform to schema: %s' %
                           (file_name, e))
