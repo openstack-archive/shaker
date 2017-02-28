@@ -44,8 +44,15 @@ For full features support it is advised to run Shaker by admin user. However
 with some limitations it works for non-admin user - see :ref:`non_admin_mode` for details.
 
 
-First Run
-^^^^^^^^^
+Build base image
+^^^^^^^^^^^^^^^^
+
+Automatic build in OpenStack
+----------------------------
+
+.. note::
+    This method requires Glance v.1 API; the base image is downloaded directly
+    from Internet into Glance.
 
 Build the master image. The process downloads Ubuntu cloud image, installs all necessary packages and stores
 snapshot into Glance. This snapshot is used by ``shaker`` as base of instances.
@@ -54,6 +61,17 @@ snapshot into Glance. This snapshot is used by ``shaker`` as base of instances.
 
     $ shaker-image-builder
 
+
+Manual build with disk-image-builder
+------------------------------------
+
+Shaker image can also be built using `disk-image-builder`_ tool.
+
+    #. Install disk-image-builder
+    #. git clone git://git.openstack.org/openstack/shaker
+    #. export ELEMENTS_PATH=shaker/image-elements
+    #. disk-image-create -o shaker-image.qcow2 ubuntu vm shaker-agent shaker-tools
+    #. openstack image create --public --file shaker-image.qcow2 --disk-format qcow2 shaker-image
 
 
 .. _non_admin_mode:
@@ -141,3 +159,8 @@ You may need to change values for variables defined in config files:
   * Pod is configured to write logs into /tmp on the node that hosts the pod
   * `port`, `nodePort` and `targetPort` must be equal and not to conflict with
     other exposed services
+
+
+.. references:
+
+.. _disk-image-builder: https://docs.openstack.org/developer/diskimage-builder/
