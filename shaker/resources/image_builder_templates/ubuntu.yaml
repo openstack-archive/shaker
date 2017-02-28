@@ -1,8 +1,7 @@
 heat_template_version: 2013-05-23
 
 description: >
-  HOT template to create a new neutron network plus a router to the public
-  network, and for deploying servers into the new network.
+  Heat template that creates Shaker image based on Ubuntu Xenial (16.04)
 
 parameters:
   external_net:
@@ -45,7 +44,7 @@ resources:
     properties:
       container_format: bare
       disk_format: qcow2
-      location: https://cloud-images.ubuntu.com/releases/14.04.1/release/ubuntu-14.04-server-cloudimg-amd64-disk1.img
+      location: https://cloud-images.ubuntu.com/releases/xenial/release/ubuntu-16.04-server-cloudimg-amd64-disk1.img
       min_disk: 3
       min_ram: 512
       name: shaker_image_build_template
@@ -68,17 +67,32 @@ resources:
       user_data_format: RAW
       user_data: |
         #!/bin/bash
-        sudo apt-add-repository "deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse"
-        sudo apt-get update
-        sudo apt-get -y install iperf netperf python-dev libzmq-dev screen
-        wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
-        sudo pip install flent pyshaker-agent
-        shaker-agent -h || (echo "[critical] Failed to run pyshaker-agent. Check if it is installed in the image"; sleep 20)
-        sudo apt-add-repository "deb http://ftp.debian.org/debian/ jessie main" && sudo apt-get update
-        sudo apt-get -y --force-yes install iperf3
-        echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s' | sudo tee /etc/init/iperf-tcp.conf
-        echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf -s --udp' | sudo tee /etc/init/iperf-udp.conf
-        echo -e 'start on startup\ntask\nexec /usr/bin/screen -dmS sudo nice -n -20 /usr/bin/iperf3 -s' | sudo tee /etc/init/iperf3.conf
+        sudo apt update
+        sudo apt -y install iperf iperf3 netperf python-dev libzmq-dev build-essential python-pip
+        sudo pip install flent pyshaker
+        shaker-agent -h || (echo "[critical] Failed to run shaker-agent. Check if it is installed in the image"; sleep 20)
+        cat<<'EOF' >> /etc/systemd/system/iperf.service
+        [Unit]
+        Description=iperf Service
+        After=network.target
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/iperf -s
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        cat<<'EOF' >> /etc/systemd/system/iperf3.service
+        [Unit]
+        Description=iperf3 Service
+        After=network.target
+        [Service]
+        Type=simple
+        ExecStart=/usr/bin/iperf3 -s
+        [Install]
+        WantedBy=multi-user.target
+        EOF
+        systemctl enable iperf
+        systemctl enable iperf3
         sudo shutdown -P now
 
 outputs:

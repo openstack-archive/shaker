@@ -84,8 +84,7 @@ optional arguments:
   --image-builder-template IMAGE_BUILDER_TEMPLATE
                         Heat template containing receipt of building the
                         image. Can be a file name or one of aliases: "centos",
-                        "debian", "ubuntu", "ubuntu_xenial". Defaults to
-                        "ubuntu".
+                        "debian", "ubuntu". Defaults to "ubuntu".
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.

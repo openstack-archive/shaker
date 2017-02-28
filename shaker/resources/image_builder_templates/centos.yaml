@@ -79,7 +79,7 @@ resources:
         make
         make install
         easy_install pip
-        pip install pbr flent pyshaker-agent
+        pip install pbr flent pyshaker
         service network restart
         cat<<'EOF' >> /etc/systemd/system/iperf.service
         [Unit]
