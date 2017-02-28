@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -eux
+set -o pipefail
+
+install-packages build-essential g++ python-dev libzmq-dev
+
+pip install pyshaker
