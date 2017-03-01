@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import datetime
-import os
 import shlex
 import tempfile
 import time
@@ -23,7 +22,6 @@ import uuid
 from oslo_concurrency import processutils
 from oslo_config import cfg
 from oslo_log import log as logging
-import psutil
 import sys
 import zmq
 
@@ -153,37 +151,9 @@ def work(agent_id, endpoint, polling_interval=config.DEFAULT_POLLING_INTERVAL,
                 break
 
 
-def get_mac():
+def get_node_uuid():
     s = '%012x' % uuid.getnode()
     return ':'.join([s[i:i + 2] for i in range(0, len(s), 2)])
-
-
-def check_if_already_running(my_endpoint):
-    def _pick_shaker_agents():
-        PSUTIL2 = psutil.version_info >= (2, 0)  # compatibility bw 1.x and 2.x
-
-        my_pid = os.getpid()
-        for pid in psutil.get_pid_list():
-            if pid != my_pid:
-                try:
-                    p = psutil.Process(pid)
-                except Exception as e:
-                    LOG.info('Exception while iterating process list: %s', e)
-
-                name = p.name() if PSUTIL2 else p.name
-                if name == 'shaker-agent':
-                    yield (p.cmdline() if PSUTIL2 else p.cmdline)
-
-    for cmdline in _pick_shaker_agents():
-        LOG.info('Found running shaker-agent: %s', ' '.join(cmdline))
-
-        args = iter(cmdline)
-        for arg in args:
-            if arg == '--server-endpoint':
-                other_endpoint = next(args)
-                return other_endpoint == my_endpoint
-
-    return None
 
 
 def main():
@@ -193,13 +163,9 @@ def main():
     polling_interval = cfg.CONF.polling_interval
     agent_id = cfg.CONF.agent_id
 
-    if check_if_already_running(endpoint):
-        LOG.warning('Shaker-agent already running with the same endpoint')
-        exit(1)
-
     if not agent_id:
-        agent_id = get_mac()
-        LOG.info('Using MAC address as agent_id: %s', agent_id)
+        agent_id = get_node_uuid()
+        LOG.info('Using node uuid as agent_id: %s', agent_id)
 
     work(agent_id, endpoint, polling_interval)
 
