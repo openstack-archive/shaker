@@ -27,7 +27,6 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from pykwalify import core as pykwalify_core
 from pykwalify import errors as pykwalify_errors
-import six
 import yaml
 
 
@@ -154,18 +153,6 @@ def split_address(address):
     return host, port
 
 
-def read_uri(uri):
-    try:
-        req = six.moves.urllib.request.Request(url=uri)
-        fd = six.moves.urllib.request.urlopen(req)
-        raw = fd.read()
-        fd.close()
-        return raw
-    except Exception as e:
-        LOG.warning('Error "%(error)s" while reading uri %(uri)s',
-                    {'error': e, 'uri': uri})
-
-
 def random_string(length=6):
     return ''.join(random.sample('adefikmoprstuz', length))
 
@@ -214,7 +201,7 @@ def algebraic_product(**kwargs):
     values = []
     total = 1
 
-    for key, item in six.iteritems(kwargs):
+    for key, item in kwargs.items():
         position_to_key[len(values)] = key
         if type(item) != list:
             item = [item]  # enclose single item into the list
@@ -226,7 +213,7 @@ def algebraic_product(**kwargs):
 
     for chain in itertools.product(*values):
         result = {}
-        for position, key in six.iteritems(position_to_key):
+        for position, key in position_to_key.items():
             result[key] = chain[position]
         yield result
 
