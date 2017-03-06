@@ -6,6 +6,7 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--flavor-name FLAVOR_NAME]
                             [--flavor-ram FLAVOR_RAM]
                             [--flavor-vcpus FLAVOR_VCPUS]
+                            [--image-builder-mode IMAGE_BUILDER_MODE]
                             [--image-builder-template IMAGE_BUILDER_TEMPLATE]
                             [--image-name IMAGE_NAME]
                             [--log-config-append PATH]
@@ -58,6 +59,13 @@ optional arguments:
   --flavor-vcpus FLAVOR_VCPUS
                         Number of cores to allocate for Shaker image, defaults
                         to env[SHAKER_FLAVOR_VCPUS]
+  --image-builder-mode IMAGE_BUILDER_MODE
+                        Image building mode: "heat" - using Heat template
+                        (requires Glance v1 for base image upload); "dib" -
+                        using diskimage-builder elements (requires qemu-utils
+                        and debootstrap). If not set, switches to "dib" if
+                        Glance v1 is not available. Can be specified as
+                        env[SHAKER_IMAGE_BUILDER_MODE]
   --image-builder-template IMAGE_BUILDER_TEMPLATE
                         Heat template containing receipt of building the
                         image. Can be a file name or one of aliases: "centos",

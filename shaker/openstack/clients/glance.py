@@ -19,3 +19,7 @@ def get_image(glance_client, image_name):
         if image.name == image_name:
             return image
     return None
+
+
+def get_supported_versions(glance_client):
+    return set(version['id'] for version in glance_client.versions.list())

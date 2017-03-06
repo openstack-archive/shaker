@@ -248,6 +248,15 @@ IMAGE_BUILDER_OPTS = [
                default=utils.env('SHAKER_FLAVOR_DISK') or 3,
                help='Shaker image disk size in GB, defaults to '
                     'env[SHAKER_FLAVOR_DISK]'),
+    cfg.StrOpt('image-builder-mode',
+               default=utils.env('SHAKER_IMAGE_BUILDER_MODE'),
+               choices=['heat', 'dib'],
+               help='Image building mode: "heat" - using Heat template '
+                    '(requires Glance v1 for base image upload); '
+                    '"dib" - using diskimage-builder elements '
+                    '(requires qemu-utils and debootstrap). If not set, '
+                    'switches to "dib" if Glance v1 is not available. '
+                    'Can be specified as env[SHAKER_IMAGE_BUILDER_MODE]'),
 ]
 
 CLEANUP_OPTS = [
