@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -eux
+set -o pipefail
+
+echo "Enabling PMTU Discovery"
+echo "net.ipv4.tcp_mtu_probing=1" >> /etc/sysctl.conf
