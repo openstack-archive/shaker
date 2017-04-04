@@ -1,8 +1,21 @@
 FROM python:3.5
-MAINTAINER Ilya Shakhat <shakhat@gmail.com>
+LABEL maintainer "Ilya Shakhat <shakhat@gmail.com>"
+
+RUN echo "deb http://httpredir.debian.org/debian jessie non-free" >> /etc/apt/sources.list \
+    && apt-get update \
+    && apt-get -y install --no-install-recommends \
+        sudo \
+        uuid-runtime \
+        qemu-utils \
+        debootstrap \
+        iperf \
+        iperf3 \
+        netperf \
+        python-openstackclient \
+    && apt-get clean
 
 ADD . /opt/shaker/
-RUN pip install -r /opt/shaker/requirements.txt
+RUN pip install -r /opt/shaker/requirements.txt flent
 WORKDIR /opt/shaker/
 RUN python setup.py install
 
