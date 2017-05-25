@@ -6,8 +6,8 @@ Configuration
 -------------
 
 For OpenStack scenarios the connection is configured using standard
-``openrc`` file (refer to
-http://docs.openstack.org/cli-reference/common/cli_set_environment_variables_using_openstack_rc.html
+``openrc`` file (refer to `Set environment variables using the OpenStack RC file
+<https://docs.openstack.org/admin-guide/common/cli-set-environment-variables-using-openstack-rc.html>`_
 on how to retrieve it).
 The config can be passed to Shaker rather by sourcing into system env ``source openrc``
 or via set of CLI parameters ``--os-project-name``, ``--os-username``, ``--os-password``,
