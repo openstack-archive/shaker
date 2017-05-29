@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import fixtures
 import mock
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture_pkg
-from oslotest import mockpatch
 import testtools
 
 from shaker.engine import config
@@ -119,7 +119,7 @@ class TestServerPlayScenario(testtools.TestCase):
         self.config_fixture.config(server_endpoint='127.0.0.1:5999')
         self.config_fixture.config(scenario=self.scenario_file_name)
 
-        self.useFixture(mockpatch.Patch('shaker.engine.quorum.make_quorum'))
+        self.useFixture(fixtures.MockPatch('shaker.engine.quorum.make_quorum'))
 
     def assertContainsSimilarRecord(self, expected, output):
         has = False
