@@ -72,9 +72,9 @@ resources:
         yum install -y epel-release
         yum install -y  iperf iperf3 gcc gcc-c++ python-devel  screen
         yum install -y zeromq zeromq-devel
-        wget ftp://ftp.netperf.org/netperf/netperf-2.7.0.tar.gz
+        wget https://github.com/HewlettPackard/netperf/archive/netperf-2.7.0.tar.gz
         tar xvzf netperf-2.7.0.tar.gz
-        cd  netperf-2.7.0
+        cd netperf-netperf-2.7.0
         ./configure --enable-demo=yes
         make
         make install
