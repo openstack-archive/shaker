@@ -3,5 +3,16 @@
 set -eux
 set -o pipefail
 
-install-packages netperf
-
+if [[ ${DISTRO_NAME} =~ "centos" ]]; then
+     wget https://github.com/HewlettPackard/netperf/archive/netperf-2.7.0.tar.gz
+     tar xvzf netperf-2.7.0.tar.gz
+     pushd netperf-netperf-2.7.0
+     ./configure --enable-demo=yes
+     make
+     make install
+     popd
+else
+    if [[ ${DISTRO_NAME} =~ "ubuntu" ]]; then
+        install-packages netperf
+    fi
+fi

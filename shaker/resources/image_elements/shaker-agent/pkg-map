@@ -1,0 +1,26 @@
+{
+  "family": {
+    "redhat": {
+      "g++": "gcc-c++",
+      "screen": "screen",
+      "libzmq-dev": "zeromq-devel",
+      "pyhton-dev": "python-devel",
+      "wget": "wget"
+    },
+    "debian": {
+      "g++": "g++",
+      "screen": "screen",
+      "libzmq-dev": "libzmq-dev",
+      "python-dev": "python-dev",
+      "wget": "wget"
+    }
+  },
+  "default": {
+    "g++": "g++",
+    "screen": "screen",
+    "libzmq-dev": "libzmq-dev",
+    "python-dev": "python-dev",
+    "wget": "wget"
+
+  }
+}
