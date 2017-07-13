@@ -257,6 +257,12 @@ IMAGE_BUILDER_OPTS = [
                     '(requires qemu-utils and debootstrap). If not set, '
                     'switches to "dib" if Glance v1 is not available. '
                     'Can be specified as env[SHAKER_IMAGE_BUILDER_MODE]'),
+    cfg.StrOpt('image-builder-distro',
+               default=(utils.env('SHAKER_IMAGE_BUILDER_DISTRO') or
+                        'ubuntu'),
+               choices=['ubuntu', 'centos7'],
+               help='Operating System Distribution for shaker image '
+                    'when using diskimage-builder, defaults to ubuntu'),
 ]
 
 CLEANUP_OPTS = [
