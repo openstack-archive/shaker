@@ -6,6 +6,7 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--flavor-name FLAVOR_NAME]
                             [--flavor-ram FLAVOR_RAM]
                             [--flavor-vcpus FLAVOR_VCPUS]
+                            [--image-builder-distro IMAGE_BUILDER_DISTRO]
                             [--image-builder-mode IMAGE_BUILDER_MODE]
                             [--image-builder-template IMAGE_BUILDER_TEMPLATE]
                             [--image-name IMAGE_NAME]
@@ -13,8 +14,9 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--log-date-format DATE_FORMAT]
                             [--log-dir LOG_DIR] [--log-file PATH]
                             [--nocleanup-on-error] [--nodebug]
-                            [--noos-insecure] [--nouse-syslog] [--noverbose]
-                            [--nowatch-log-file] [--os-auth-url <auth-url>]
+                            [--noos-insecure] [--nouse-journal]
+                            [--nouse-syslog] [--nowatch-log-file]
+                            [--os-auth-url <auth-url>]
                             [--os-cacert <auth-cacert>] [--os-insecure]
                             [--os-password <auth-password>]
                             [--os-project-name <auth-project-name>]
@@ -22,14 +24,14 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--os-tenant-name <auth-tenant-name>]
                             [--os-username <auth-username>]
                             [--syslog-log-facility SYSLOG_LOG_FACILITY]
-                            [--use-syslog] [--verbose] [--watch-log-file]
+                            [--use-journal] [--use-syslog] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
   --cleanup-on-error    Clean up the heat-stack upon any error occurred during
                         scenario execution.
-  --config-dir DIR      Path to a config directory to pull *.conf files from.
-                        This file set is sorted, so as to provide a
+  --config-dir DIR      Path to a config directory to pull `*.conf` files
+                        from. This file set is sorted, so as to provide a
                         predictable parse order if individual options are
                         over-ridden. The set is parsed after the file(s)
                         specified via previous --config-file, arguments hence
@@ -59,6 +61,9 @@ optional arguments:
   --flavor-vcpus FLAVOR_VCPUS
                         Number of cores to allocate for Shaker image, defaults
                         to env[SHAKER_FLAVOR_VCPUS]
+  --image-builder-distro IMAGE_BUILDER_DISTRO
+                        Operating System Distribution for shaker image when
+                        using diskimage-builder, defaults to ubuntu
   --image-builder-mode IMAGE_BUILDER_MODE
                         Image building mode: "heat" - using Heat template
                         (requires Glance v1 for base image upload); "dib" -
@@ -73,7 +78,7 @@ optional arguments:
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.
-  --log-config-append PATH, --log_config PATH
+  --log-config-append PATH, --log-config PATH, --log_config PATH
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.
                         For details about logging configuration files, see the
@@ -98,8 +103,8 @@ optional arguments:
   --nocleanup-on-error  The inverse of --cleanup-on-error
   --nodebug             The inverse of --debug
   --noos-insecure       The inverse of --os-insecure
+  --nouse-journal       The inverse of --use-journal
   --nouse-syslog        The inverse of --use-syslog
-  --noverbose           The inverse of --verbose
   --nowatch-log-file    The inverse of --watch-log-file
   --os-auth-url <auth-url>
                         Authentication URL, defaults to env[OS_AUTH_URL].
@@ -126,11 +131,15 @@ optional arguments:
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines. This option is
                         ignored if log_config_append is set.
+  --use-journal         Enable journald for logging. If running in a systemd
+                        environment you may wish to enable journal support.
+                        Doing so will use the journal native protocol which
+                        includes structured metadata in addition to log
+                        messages.This option is ignored if log_config_append
+                        is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.
-  --verbose, -v         If set to false, the logging level will be set to
-                        WARNING instead of the default INFO level.
   --watch-log-file      Uses logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path
