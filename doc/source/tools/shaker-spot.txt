@@ -3,12 +3,12 @@ usage: shaker-spot [-h] [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
                    [--log-config-append PATH] [--log-date-format DATE_FORMAT]
                    [--log-dir LOG_DIR] [--log-file PATH] [--matrix MATRIX]
                    [--no-report-on-error] [--nodebug] [--nono-report-on-error]
-                   [--nouse-syslog] [--noverbose] [--nowatch-log-file]
+                   [--nouse-journal] [--nouse-syslog] [--nowatch-log-file]
                    [--output OUTPUT] [--report REPORT]
                    [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
                    [--subunit SUBUNIT]
-                   [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
-                   [--verbose] [--watch-log-file]
+                   [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-journal]
+                   [--use-syslog] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -18,8 +18,8 @@ optional arguments:
                         to env[SHAKER_ARTIFACTS_DIR].
   --book BOOK           Generate report in ReST format and store it into the
                         specified folder, defaults to env[SHAKER_BOOK].
-  --config-dir DIR      Path to a config directory to pull *.conf files from.
-                        This file set is sorted, so as to provide a
+  --config-dir DIR      Path to a config directory to pull `*.conf` files
+                        from. This file set is sorted, so as to provide a
                         predictable parse order if individual options are
                         over-ridden. The set is parsed after the file(s)
                         specified via previous --config-file, arguments hence
@@ -29,7 +29,7 @@ optional arguments:
                         precedence. Defaults to None.
   --debug, -d           If set to true, the logging level will be set to DEBUG
                         instead of the default INFO level.
-  --log-config-append PATH, --log_config PATH
+  --log-config-append PATH, --log-config PATH, --log_config PATH
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.
                         For details about logging configuration files, see the
@@ -61,8 +61,8 @@ optional arguments:
   --nodebug             The inverse of --debug
   --nono-report-on-error
                         The inverse of --no-report-on-error
+  --nouse-journal       The inverse of --use-journal
   --nouse-syslog        The inverse of --use-syslog
-  --noverbose           The inverse of --verbose
   --nowatch-log-file    The inverse of --watch-log-file
   --output OUTPUT       File for output in JSON format, defaults to
                         env[SHAKER_OUTPUT]. If it is empty, then output will
@@ -107,11 +107,15 @@ optional arguments:
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines. This option is
                         ignored if log_config_append is set.
+  --use-journal         Enable journald for logging. If running in a systemd
+                        environment you may wish to enable journal support.
+                        Doing so will use the journal native protocol which
+                        includes structured metadata in addition to log
+                        messages.This option is ignored if log_config_append
+                        is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.
-  --verbose, -v         If set to false, the logging level will be set to
-                        WARNING instead of the default INFO level.
   --watch-log-file      Uses logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path
