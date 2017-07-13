@@ -8,7 +8,7 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
               [--log-file PATH] [--matrix MATRIX] [--no-report-on-error]
               [--nocleanup-on-error] [--nodebug] [--nono-report-on-error]
-              [--noos-insecure] [--nouse-syslog] [--noverbose]
+              [--noos-insecure] [--nouse-journal] [--nouse-syslog]
               [--nowatch-log-file] [--os-auth-url <auth-url>]
               [--os-cacert <auth-cacert>] [--os-insecure]
               [--os-password <auth-password>]
@@ -19,8 +19,8 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--polling-interval POLLING_INTERVAL] [--report REPORT]
               [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
               [--server-endpoint SERVER_ENDPOINT] [--subunit SUBUNIT]
-              [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-syslog]
-              [--verbose] [--watch-log-file]
+              [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-journal]
+              [--use-syslog] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -40,8 +40,8 @@ optional arguments:
                         specified folder, defaults to env[SHAKER_BOOK].
   --cleanup-on-error    Clean up the heat-stack upon any error occurred during
                         scenario execution.
-  --config-dir DIR      Path to a config directory to pull *.conf files from.
-                        This file set is sorted, so as to provide a
+  --config-dir DIR      Path to a config directory to pull `*.conf` files
+                        from. This file set is sorted, so as to provide a
                         predictable parse order if individual options are
                         over-ridden. The set is parsed after the file(s)
                         specified via previous --config-file, arguments hence
@@ -65,7 +65,7 @@ optional arguments:
   --image-name IMAGE_NAME
                         Name of image to use. The default is created by
                         shaker-image-builder.
-  --log-config-append PATH, --log_config PATH
+  --log-config-append PATH, --log-config PATH, --log_config PATH
                         The name of a logging configuration file. This file is
                         appended to any existing logging configuration files.
                         For details about logging configuration files, see the
@@ -99,8 +99,8 @@ optional arguments:
   --nono-report-on-error
                         The inverse of --no-report-on-error
   --noos-insecure       The inverse of --os-insecure
+  --nouse-journal       The inverse of --use-journal
   --nouse-syslog        The inverse of --use-syslog
-  --noverbose           The inverse of --verbose
   --nowatch-log-file    The inverse of --watch-log-file
   --os-auth-url <auth-url>
                         Authentication URL, defaults to env[OS_AUTH_URL].
@@ -172,11 +172,15 @@ optional arguments:
   --syslog-log-facility SYSLOG_LOG_FACILITY
                         Syslog facility to receive log lines. This option is
                         ignored if log_config_append is set.
+  --use-journal         Enable journald for logging. If running in a systemd
+                        environment you may wish to enable journal support.
+                        Doing so will use the journal native protocol which
+                        includes structured metadata in addition to log
+                        messages.This option is ignored if log_config_append
+                        is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.
-  --verbose, -v         If set to false, the logging level will be set to
-                        WARNING instead of the default INFO level.
   --watch-log-file      Uses logging handler designed to watch file system.
                         When log file is moved or removed this handler will
                         open a new log file with specified path

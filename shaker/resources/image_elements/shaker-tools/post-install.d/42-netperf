@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -eux
+set -o pipefail
+if [[ ${DISTRO_NAME} =~ "centos" ]]; then
+    cat<<'EOF' >> /etc/systemd/system/netperf.service
+[Unit]
+Description="Netperf netserver daemon"
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/netserver -D
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl enable netperf
+fi
+
