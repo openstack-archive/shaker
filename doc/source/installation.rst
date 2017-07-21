@@ -169,5 +169,5 @@ You may need to change values for variables defined in config files:
 
 .. references:
 
-.. _diskimage-builder: https://docs.openstack.org/developer/diskimage-builder/
-.. _diskimage-builder installation: https://docs.openstack.org/developer/diskimage-builder/user_guide/installation.html
+.. _diskimage-builder: https://docs.openstack.org/diskimage-builder/latest/
+.. _diskimage-builder installation: https://docs.openstack.org/diskimage-builder/latest/user_guide/installation.html
