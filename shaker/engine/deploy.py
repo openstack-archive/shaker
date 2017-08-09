@@ -66,9 +66,14 @@ def generate_agents(compute_nodes, accommodation, unique):
             # sort nodes to interleave hosts from different zones
             compute_nodes = prepare_for_cross_az(compute_nodes, zones)
 
-    if accommodation.get('compute_nodes'):
-        compute_nodes = random.sample(
-            compute_nodes, accommodation.get('compute_nodes'))
+    compute_nodes_requested = accommodation.get('compute_nodes')
+    if compute_nodes_requested:
+        if compute_nodes_requested > len(compute_nodes):
+            raise DeploymentException(
+                'Not enough compute nodes %(cn)s for requested '
+                'instance accommodation %(acc)s' %
+                dict(cn=compute_nodes, acc=accommodation))
+        compute_nodes = random.sample(compute_nodes, compute_nodes_requested)
 
     cn_count = len(compute_nodes)
     iterations = cn_count * density
