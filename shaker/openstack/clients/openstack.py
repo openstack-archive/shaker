@@ -20,6 +20,10 @@ from oslo_log import log as logging
 LOG = logging.getLogger(__name__)
 
 
+class OpenStackClientException(Exception):
+    pass
+
+
 class OpenStackClient(object):
     def __init__(self, openstack_params):
         LOG.debug('Establishing connection to OpenStack')
@@ -36,6 +40,9 @@ class OpenStackClient(object):
 
         # heat client wants endpoint to be always set
         endpoint = cloud_config.get_session_endpoint('orchestration')
+        if not endpoint:
+            raise OpenStackClientException(
+                'Endpoint for orchestration service is not found')
         self.heat = cloud_config.get_legacy_client('orchestration',
                                                    endpoint=endpoint)
 

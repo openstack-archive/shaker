@@ -29,6 +29,7 @@ from shaker.engine import messaging
 from shaker.engine import quorum as quorum_pkg
 from shaker.engine import report
 from shaker.engine import utils
+from shaker.openstack.clients import openstack as openstack_clients
 
 
 LOG = logging.getLogger(__name__)
@@ -160,9 +161,13 @@ def play_scenario(message_queue, scenario):
                     openstack_params, cfg.CONF.flavor_name,
                     cfg.CONF.image_name, cfg.CONF.external_net,
                     cfg.CONF.dns_nameservers)
+            except openstack_clients.OpenStackClientException:
+                raise
             except Exception as e:
                 LOG.warning('Failed to connect to OpenStack: %s. Please '
                             'verify parameters: %s', e, openstack_params)
+                # try to proceed even if OpenStack connection fails
+                # (in case scenario does not need it)
 
         base_dir = os.path.dirname(scenario['file_name'])
         scenario_deployment = scenario.get('deployment', {})
