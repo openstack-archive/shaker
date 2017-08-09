@@ -115,6 +115,11 @@ OPENSTACK_OPTS = [
                default=utils.env('OS_REGION_NAME') or 'RegionOne',
                help='Authentication region name, defaults to '
                     'env[OS_REGION_NAME].'),
+    cfg.StrOpt('os-profile', metavar='<hmac-key>',
+               default=utils.env('OS_PROFILE'),
+               sample_default='',
+               help='HMAC key for encrypting profiling context data, '
+                    'defaults to env[OS_PROFILE].'),
 
     cfg.StrOpt('external-net',
                default=utils.env('SHAKER_EXTERNAL_NET'),
