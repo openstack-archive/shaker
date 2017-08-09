@@ -83,6 +83,13 @@ class TestDeploy(testtools.TestCase):
         self.assertRaises(deploy.DeploymentException, deploy.generate_agents,
                           ['uno'], accommodation, unique)
 
+    def test_generate_agents_pair_single_room_compute_nodes_not_enough(self):
+        unique = 'UU1D'
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', {'compute_nodes': 2}])
+        self.assertRaises(deploy.DeploymentException, deploy.generate_agents,
+                          ['uno'], accommodation, unique)
+
     def test_generate_agents_pair_double_room(self):
         unique = 'UU1D'
         expected = {
