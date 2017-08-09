@@ -19,6 +19,7 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--os-auth-url <auth-url>]
                             [--os-cacert <auth-cacert>] [--os-insecure]
                             [--os-password <auth-password>]
+                            [--os-profile <hmac-key>]
                             [--os-project-name <auth-project-name>]
                             [--os-region-name <auth-region-name>]
                             [--os-tenant-name <auth-tenant-name>]
@@ -116,6 +117,9 @@ optional arguments:
                         defaults to env[OS_INSECURE].
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
+  --os-profile <hmac-key>
+                        HMAC key for encrypting profiling context data,
+                        defaults to env[OS_PROFILE].
   --os-project-name <auth-project-name>
                         Authentication project name. This option is mutually
                         exclusive with --os-tenant-name. Defaults to

@@ -275,6 +275,8 @@ def pack_openstack_params(conf):
         params['auth']['tenant_name'] = conf.os_tenant_name
     if conf.os_project_name:
         params['auth']['project_name'] = conf.os_project_name
+    if conf.os_profile:
+        params['os_profile'] = conf.os_profile
     return params
 
 

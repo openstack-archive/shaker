@@ -15,14 +15,29 @@
 
 import os_client_config
 from oslo_log import log as logging
-
+from oslo_utils import importutils
 
 LOG = logging.getLogger(__name__)
+
+
+def init_profiling(os_profile):
+    if os_profile:
+        osprofiler_profiler = importutils.try_import("osprofiler.profiler")
+
+        if osprofiler_profiler:  # lib is present
+            osprofiler_profiler.init(os_profile)
+            trace_id = osprofiler_profiler.get().get_base_id()
+            LOG.info('Profiling is enabled, trace id: %s', trace_id)
+        else:  # param is set, but lib is not present
+            LOG.warning('Profiling could not be enabled. To enable profiling '
+                        'please install "osprofiler" library')
 
 
 class OpenStackClient(object):
     def __init__(self, openstack_params):
         LOG.debug('Establishing connection to OpenStack')
+
+        init_profiling(openstack_params.get('os_profile'))
 
         config = os_client_config.OpenStackConfig()
         cloud_config = config.get_one_cloud(**openstack_params)
