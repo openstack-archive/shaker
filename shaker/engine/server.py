@@ -205,7 +205,7 @@ def play_scenario(message_queue, scenario):
             record = dict(id=utils.make_record_id(), status='interrupted')
         else:
             error_msg = 'Error while executing scenario: %s' % e
-            LOG.error(error_msg, exc_info=True)
+            LOG.exception(e)
             record = dict(id=utils.make_record_id(), status='error',
                           stderr=error_msg)
         output['records'][record['id']] = record
