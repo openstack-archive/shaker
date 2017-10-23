@@ -40,7 +40,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
              'datagram_size': 1470}, AGENT)
 
         expected = {'data': ('iperf --client %s --format m '
-                             '--udp --bandwidth 100M --len 1470 '
+                             '--udp --len 1470 --bandwidth 100M '
                              '--time 30 --parallel 1 --interval 1 --nodelay '
                              '--reportstyle C') % IP,
                     'type': 'program'}
@@ -138,7 +138,7 @@ class TestIperf3Executor(testtools.TestCase):
              'datagram_size': 1470}, AGENT)
 
         expected = {'data': ('iperf3 --client %s --format m '
-                             '--udp --bandwidth 100M --len 1470 '
+                             '--udp --len 1470 --bandwidth 100M '
                              '--time 30 --parallel 1 --interval 1 '
                              '--json') % IP,
                     'type': 'program'}
