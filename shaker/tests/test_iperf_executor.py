@@ -28,7 +28,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
     def test_get_command(self):
         executor = iperf.IperfGraphExecutor({}, AGENT)
 
-        expected = {'data': ('iperf --client %s --format m '
+        expected = {'data': ('iperf --client %s --format m --bandwidth 0 '
                              '--time 60 --parallel 1 --interval 1 --nodelay '
                              '--reportstyle C') % IP,
                     'type': 'program'}
@@ -40,7 +40,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
              'datagram_size': 1470}, AGENT)
 
         expected = {'data': ('iperf --client %s --format m '
-                             '--udp --bandwidth 100M --len 1470 '
+                             '--udp --len 1470 --bandwidth 100M '
                              '--time 30 --parallel 1 --interval 1 --nodelay '
                              '--reportstyle C') % IP,
                     'type': 'program'}
@@ -49,7 +49,7 @@ class TestIperfGraphExecutor(testtools.TestCase):
     def test_get_command_static_host(self):
         executor = iperf.IperfGraphExecutor({'host': '10.0.0.20'}, {})
 
-        expected = {'data': ('iperf --client %s --format m '
+        expected = {'data': ('iperf --client %s --format m --bandwidth 0 '
                              '--time 60 --parallel 1 --interval 1 --nodelay '
                              '--reportstyle C') % '10.0.0.20',
                     'type': 'program'}
@@ -126,7 +126,7 @@ class TestIperf3Executor(testtools.TestCase):
     def test_get_command(self):
         executor = iperf.Iperf3Executor({}, AGENT)
 
-        expected = {'data': ('iperf3 --client %s --format m '
+        expected = {'data': ('iperf3 --client %s --format m --bandwidth 0 '
                              '--time 60 --parallel 1 --interval 1 '
                              '--json') % IP,
                     'type': 'program'}
@@ -138,7 +138,7 @@ class TestIperf3Executor(testtools.TestCase):
              'datagram_size': 1470}, AGENT)
 
         expected = {'data': ('iperf3 --client %s --format m '
-                             '--udp --bandwidth 100M --len 1470 '
+                             '--udp --len 1470 --bandwidth 100M '
                              '--time 30 --parallel 1 --interval 1 '
                              '--json') % IP,
                     'type': 'program'}
@@ -156,7 +156,7 @@ class TestIperf3Executor(testtools.TestCase):
     def test_get_command_reverse(self):
         executor = iperf.Iperf3Executor({'reverse': 'yes'}, AGENT)
 
-        expected = {'data': ('iperf3 --client %s --format m '
+        expected = {'data': ('iperf3 --client %s --format m --bandwidth 0 '
                              '--time 60 --parallel 1 --interval 1 '
                              '--json --reverse') % IP,
                     'type': 'program'}
