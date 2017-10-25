@@ -33,7 +33,8 @@ def add_common_iperf_params(cmd, executor):
         cmd.add('--udp')
         if executor.test_definition.get('datagram_size'):
             cmd.add('--len', executor.test_definition.get('datagram_size'))
-    cmd.add('--bandwidth', executor.test_definition.get('bandwidth') or 0)
+    if executor.test_definition.get('bandwidth') is not None:
+        cmd.add('--bandwidth', executor.test_definition.get('bandwidth'))
     cmd.add('--time', executor.get_expected_duration())
     cmd.add('--parallel', executor.test_definition.get('threads') or 1)
     if executor.test_definition.get('interval'):
