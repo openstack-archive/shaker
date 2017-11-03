@@ -1,0 +1,8 @@
+Code-Review+2: Ilya Shakhat <shakhat@gmail.com>
+Workflow+1: Ilya Shakhat <shakhat@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 03 Nov 2017 13:35:37 +0000
+Reviewed-on: https://review.openstack.org/515014
+Project: openstack/shaker
+Branch: refs/heads/master
