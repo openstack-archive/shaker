@@ -24,7 +24,7 @@ Installation on fresh system requires additional libraries needed by some of dep
 
     $ sudo apt-add-repository "deb http://nova.clouds.archive.ubuntu.com/ubuntu/ trusty multiverse"
     $ sudo apt-get update
-    $ sudo apt-get -y install python-dev libzmq-dev
+    $ sudo apt-get install python-dev libzmq-dev
     $ wget -O get-pip.py https://bootstrap.pypa.io/get-pip.py && sudo python get-pip.py
     $ sudo pip install pbr pyshaker
     $ shaker --help
