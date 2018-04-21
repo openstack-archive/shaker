@@ -5,7 +5,7 @@ Installation
 Installation in Python environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Shaker is distributed as Python package and available through PyPi (https://pypi.python.org/pypi/pyshaker/).
+Shaker is distributed as Python package and available through PyPi (https://pypi.org/project/pyshaker/).
 It is recommended to be installed inside virtualenv.
 
 .. code::

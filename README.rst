@@ -62,7 +62,7 @@ where:
 
 Links
 -----
-* PyPi - https://pypi.python.org/pypi/pyshaker/
+* PyPi - https://pypi.org/project/pyshaker/
 * Docker - https://hub.docker.com/r/shakhat/shaker/
 * Docs - http://pyshaker.readthedocs.io/
 * Bugtracker - https://launchpad.net/shaker/
