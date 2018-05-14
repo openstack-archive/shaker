@@ -3,5 +3,4 @@ install-types
 package-installs
 source-repositories
 pip-and-virtualenv
-
-
+python-brickclient
