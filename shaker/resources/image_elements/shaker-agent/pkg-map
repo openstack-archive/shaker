@@ -10,7 +10,7 @@
     "debian": {
       "g++": "g++",
       "screen": "screen",
-      "libzmq-dev": "libzmq-dev",
+      "libzmq-dev": "libzmq3-dev",
       "python-dev": "python-dev",
       "wget": "wget"
     }
