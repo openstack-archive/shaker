@@ -1,0 +1,8 @@
+Code-Review+2: Sai Sindhur Malleni <smalleni@redhat.com>
+Workflow+1: Ilya Shakhat <shakhat@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 18 May 2018 15:36:48 +0000
+Reviewed-on: https://review.openstack.org/569340
+Project: openstack/shaker
+Branch: refs/heads/master
