@@ -4,6 +4,8 @@
       "g++": "gcc-c++",
       "screen": "screen",
       "libzmq-dev": "zeromq-devel",
+      "libssl-dev": "openssl-devel",
+      "libffi-dev": "libffi-devel",
       "pyhton-dev": "python-devel",
       "wget": "wget"
     },
@@ -11,6 +13,8 @@
       "g++": "g++",
       "screen": "screen",
       "libzmq-dev": "libzmq3-dev",
+      "libssl-dev": "libssl-dev",
+      "libffi-dev": "libffi-dev",
       "python-dev": "python-dev",
       "wget": "wget"
     }
@@ -19,6 +23,8 @@
     "g++": "g++",
     "screen": "screen",
     "libzmq-dev": "libzmq-dev",
+    "libssl-dev": "libssl-dev",
+    "libffi-dev": "libffi-dev",
     "python-dev": "python-dev",
     "wget": "wget"
 

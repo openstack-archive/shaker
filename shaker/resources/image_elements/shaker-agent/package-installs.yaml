@@ -1,5 +1,7 @@
 g++:
 screen:
 libzmq-dev:
+libssl-dev:
+libffi-dev:
 python-dev:
 wget:
