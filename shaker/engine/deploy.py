@@ -233,11 +233,13 @@ class Deployment(object):
 
         self.flavor_name = flavor_name
         self.image_name = image_name
+        self.stack_name = 'shaker_%s' % utils.random_string()
+        self.dns_nameservers = dns_nameservers
+        # intiailizing self.external_net last so that other attributes don't
+        # remain uninitialized in case user forgets to create external network
         self.external_net = (external_net or
                              neutron.choose_external_net(
                                  self.openstack_client.neutron))
-        self.stack_name = 'shaker_%s' % utils.random_string()
-        self.dns_nameservers = dns_nameservers
 
     def _get_compute_nodes(self, accommodation):
         try:
@@ -277,13 +279,18 @@ class Deployment(object):
         LOG.debug('Rendered template: %s', rendered_template)
 
         # create stack by Heat
-        merged_parameters = {
-            'server_endpoint': server_endpoint,
-            'external_net': self.external_net,
-            'image': self.image_name,
-            'flavor': self.flavor_name,
-            'dns_nameservers': self.dns_nameservers,
-        }
+        try:
+            merged_parameters = {
+                'server_endpoint': server_endpoint,
+                'external_net': self.external_net,
+                'image': self.image_name,
+                'flavor': self.flavor_name,
+                'dns_nameservers': self.dns_nameservers,
+            }
+        except AttributeError as e:
+            LOG.error('Failed to gather required parameters to create '
+                      'heat stack: %s', e)
+            exit(1)
         merged_parameters.update(specification.get('template_parameters', {}))
 
         self.has_stack = True
