@@ -141,6 +141,8 @@ def build_image_with_dib(openstack_client, image_name):
         env = {}
         env.update(os.environ)
         env.update({'ELEMENTS_PATH': elements, 'PATH': ':'.join(sys_path)})
+        if cfg.CONF.image_builder_distro == 'dentos7':
+            env.update({'DIB_INSTALLTYPE_pip_and_virtualenv' : 'package'})
 
         command_stdout, command_stderr = None, None
         try:
