@@ -173,6 +173,9 @@ class TestServerPlayScenario(testtools.TestCase):
         self.config_fixture.config(os_password='password')
         self.config_fixture.config(os_tenant_name='tenant')
         self.config_fixture.config(os_auth_url='auth-url')
+        self.config_fixture.config(os_project_domain_name='Default')
+        self.config_fixture.config(os_user_domain_name='Default')
+        self.config_fixture.config(os_identity_api_version='3')
 
         deploy_obj.deploy.return_value = {
             'ID': {'id': 'ID', 'mode': 'alone'}
@@ -188,7 +191,10 @@ class TestServerPlayScenario(testtools.TestCase):
             server_endpoint='127.0.0.1:5999')
         openstack_params = dict(
             auth=dict(username='user', password='password',
-                      tenant_name='tenant', auth_url='auth-url'),
+                      tenant_name='tenant', auth_url='auth-url',
+                      project_domain_name='Default',
+                      user_domain_name='Default'),
+            identity_api_version='3',
             os_region_name='RegionOne',
             os_cacert=None, os_insecure=False)
         deploy_obj.connect_to_openstack.assert_called_once_with(
