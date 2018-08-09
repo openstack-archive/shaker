@@ -94,10 +94,25 @@ OPENSTACK_OPTS = [
                help='Authentication project name. This option is '
                     'mutually exclusive with --os-tenant-name. '
                     'Defaults to env[OS_PROJECT_NAME].'),
+    cfg.StrOpt('os-project-domain-name', metavar='<auth-project-domain-name>',
+               default=utils.env('OS_PROJECT_DOMAIN_NAME'),
+               sample_default='Default',
+               help='Authentication project domain name. '
+                    'Defaults to env[OS_PROJECT_DOMAIN_NAME].'),
     cfg.StrOpt('os-username', metavar='<auth-username>',
                default=utils.env('OS_USERNAME'),
                sample_default='',
                help='Authentication username, defaults to env[OS_USERNAME].'),
+    cfg.StrOpt('os-user-domain-name', metavar='<auth-user-domain-name>',
+               default=utils.env('OS_USER_DOMAIN_NAME'),
+               sample_default='',
+               help='Authentication username. Defaults to '
+                    'env[OS_USER_DOMAIN_NAME].'),
+    cfg.StrOpt('os-identity-api-version', metavar='<identity-api-version>',
+               default=utils.env('OS_IDENTITY_API_VERSION'),
+               sample_default='3',
+               help='Identity API version, defaults to '
+                    'env[OS_IDENTITY_API_VERSION].'),
     cfg.StrOpt('os-password', metavar='<auth-password>',
                default=utils.env('OS_PASSWORD'),
                sample_default='',
