@@ -271,12 +271,18 @@ def pack_openstack_params(conf):
                   os_region_name=conf.os_region_name,
                   os_cacert=conf.os_cacert,
                   os_insecure=conf.os_insecure)
-    if conf.os_tenant_name:
-        params['auth']['tenant_name'] = conf.os_tenant_name
-    if conf.os_project_name:
-        params['auth']['project_name'] = conf.os_project_name
+    possible_attrs = ['tenant_name', 'project_name', 'project_domain_name',
+                      'user_domain_name']
+    for attr in possible_attrs:
+        value = conf.get('os_{}'.format(attr), None)
+        if value:
+            params['auth'][attr] = value
+
+    if conf.os_identity_api_version:
+        params['identity_api_version'] = conf.os_identity_api_version
     if conf.os_profile:
         params['os_profile'] = conf.os_profile
+
     return params
 
 
