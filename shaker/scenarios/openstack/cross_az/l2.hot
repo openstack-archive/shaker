@@ -68,7 +68,7 @@ resources:
     type: OS::Nova::Server
     properties:
       name: {{ agent.id }}
-      image: {% if agent.zone == 'nova' %} shaker-image-nova {% else %} shaker-image-vcenter {% endif %}
+      image: {% if agent.zone == 'vcenter' %} shaker-image-vcenter {% else %} shaker-image-nova {% endif %}
       flavor: { get_param: flavor }
       availability_zone: "{{ agent.availability_zone }}"
       networks:
