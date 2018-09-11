@@ -8,19 +8,23 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
               [--log-file PATH] [--matrix MATRIX] [--no-report-on-error]
               [--nocleanup-on-error] [--nodebug] [--nono-report-on-error]
-              [--noos-insecure] [--nouse-journal] [--nouse-syslog]
-              [--nowatch-log-file] [--os-auth-url <auth-url>]
-              [--os-cacert <auth-cacert>] [--os-insecure]
-              [--os-password <auth-password>] [--os-profile <hmac-key>]
+              [--noos-insecure] [--nouse-journal] [--nouse-json]
+              [--nouse-syslog] [--nowatch-log-file] [--os-auth-url <auth-url>]
+              [--os-cacert <auth-cacert>]
+              [--os-identity-api-version <identity-api-version>]
+              [--os-insecure] [--os-password <auth-password>]
+              [--os-profile <hmac-key>]
+              [--os-project-domain-name <auth-project-domain-name>]
               [--os-project-name <auth-project-name>]
               [--os-region-name <auth-region-name>]
               [--os-tenant-name <auth-tenant-name>]
+              [--os-user-domain-name <auth-user-domain-name>]
               [--os-username <auth-username>] [--output OUTPUT]
               [--polling-interval POLLING_INTERVAL] [--report REPORT]
               [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
               [--server-endpoint SERVER_ENDPOINT] [--subunit SUBUNIT]
               [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-journal]
-              [--use-syslog] [--watch-log-file]
+              [--use-json] [--use-syslog] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -100,6 +104,7 @@ optional arguments:
                         The inverse of --no-report-on-error
   --noos-insecure       The inverse of --os-insecure
   --nouse-journal       The inverse of --use-journal
+  --nouse-json          The inverse of --use-json
   --nouse-syslog        The inverse of --use-syslog
   --nowatch-log-file    The inverse of --watch-log-file
   --os-auth-url <auth-url>
@@ -107,6 +112,9 @@ optional arguments:
   --os-cacert <auth-cacert>
                         Location of CA Certificate, defaults to
                         env[OS_CACERT].
+  --os-identity-api-version <identity-api-version>
+                        Identity API version, defaults to
+                        env[OS_IDENTITY_API_VERSION].
   --os-insecure         When using SSL in connections to the registry server,
                         do not require validation via a certifying authority,
                         defaults to env[OS_INSECURE].
@@ -115,6 +123,9 @@ optional arguments:
   --os-profile <hmac-key>
                         HMAC key for encrypting profiling context data,
                         defaults to env[OS_PROFILE].
+  --os-project-domain-name <auth-project-domain-name>
+                        Authentication project domain name. Defaults to
+                        env[OS_PROJECT_DOMAIN_NAME].
   --os-project-name <auth-project-name>
                         Authentication project name. This option is mutually
                         exclusive with --os-tenant-name. Defaults to
@@ -125,6 +136,9 @@ optional arguments:
   --os-tenant-name <auth-tenant-name>
                         Authentication tenant name, defaults to
                         env[OS_TENANT_NAME].
+  --os-user-domain-name <auth-user-domain-name>
+                        Authentication username. Defaults to
+                        env[OS_USER_DOMAIN_NAME].
   --os-username <auth-username>
                         Authentication username, defaults to env[OS_USERNAME].
   --output OUTPUT       File for output in JSON format, defaults to
@@ -181,6 +195,8 @@ optional arguments:
                         includes structured metadata in addition to log
                         messages.This option is ignored if log_config_append
                         is set.
+  --use-json            Use JSON formatting for logging. This option is
+                        ignored if log_config_append is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.

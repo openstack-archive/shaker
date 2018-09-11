@@ -2,11 +2,12 @@ usage: shaker-agent [-h] [--agent-id AGENT_ID] [--config-dir DIR]
                     [--config-file PATH] [--debug] [--log-config-append PATH]
                     [--log-date-format DATE_FORMAT] [--log-dir LOG_DIR]
                     [--log-file PATH] [--nodebug] [--nouse-journal]
-                    [--nouse-syslog] [--nowatch-log-file]
+                    [--nouse-json] [--nouse-syslog] [--nowatch-log-file]
                     [--polling-interval POLLING_INTERVAL]
                     [--server-endpoint SERVER_ENDPOINT]
                     [--syslog-log-facility SYSLOG_LOG_FACILITY]
-                    [--use-journal] [--use-syslog] [--watch-log-file]
+                    [--use-journal] [--use-json] [--use-syslog]
+                    [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -46,6 +47,7 @@ optional arguments:
                         log_config_append is set.
   --nodebug             The inverse of --debug
   --nouse-journal       The inverse of --use-journal
+  --nouse-json          The inverse of --use-json
   --nouse-syslog        The inverse of --use-syslog
   --nowatch-log-file    The inverse of --watch-log-file
   --polling-interval POLLING_INTERVAL
@@ -62,6 +64,8 @@ optional arguments:
                         includes structured metadata in addition to log
                         messages.This option is ignored if log_config_append
                         is set.
+  --use-json            Use JSON formatting for logging. This option is
+                        ignored if log_config_append is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.

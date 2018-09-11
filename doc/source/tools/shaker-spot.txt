@@ -3,12 +3,12 @@ usage: shaker-spot [-h] [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
                    [--log-config-append PATH] [--log-date-format DATE_FORMAT]
                    [--log-dir LOG_DIR] [--log-file PATH] [--matrix MATRIX]
                    [--no-report-on-error] [--nodebug] [--nono-report-on-error]
-                   [--nouse-journal] [--nouse-syslog] [--nowatch-log-file]
-                   [--output OUTPUT] [--report REPORT]
+                   [--nouse-journal] [--nouse-json] [--nouse-syslog]
+                   [--nowatch-log-file] [--output OUTPUT] [--report REPORT]
                    [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
                    [--subunit SUBUNIT]
                    [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-journal]
-                   [--use-syslog] [--watch-log-file]
+                   [--use-json] [--use-syslog] [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -62,6 +62,7 @@ optional arguments:
   --nono-report-on-error
                         The inverse of --no-report-on-error
   --nouse-journal       The inverse of --use-journal
+  --nouse-json          The inverse of --use-json
   --nouse-syslog        The inverse of --use-syslog
   --nowatch-log-file    The inverse of --watch-log-file
   --output OUTPUT       File for output in JSON format, defaults to
@@ -113,6 +114,8 @@ optional arguments:
                         includes structured metadata in addition to log
                         messages.This option is ignored if log_config_append
                         is set.
+  --use-json            Use JSON formatting for logging. This option is
+                        ignored if log_config_append is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.

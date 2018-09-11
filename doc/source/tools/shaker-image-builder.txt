@@ -14,18 +14,22 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--log-date-format DATE_FORMAT]
                             [--log-dir LOG_DIR] [--log-file PATH]
                             [--nocleanup-on-error] [--nodebug]
-                            [--noos-insecure] [--nouse-journal]
+                            [--noos-insecure] [--nouse-journal] [--nouse-json]
                             [--nouse-syslog] [--nowatch-log-file]
                             [--os-auth-url <auth-url>]
-                            [--os-cacert <auth-cacert>] [--os-insecure]
-                            [--os-password <auth-password>]
+                            [--os-cacert <auth-cacert>]
+                            [--os-identity-api-version <identity-api-version>]
+                            [--os-insecure] [--os-password <auth-password>]
                             [--os-profile <hmac-key>]
+                            [--os-project-domain-name <auth-project-domain-name>]
                             [--os-project-name <auth-project-name>]
                             [--os-region-name <auth-region-name>]
                             [--os-tenant-name <auth-tenant-name>]
+                            [--os-user-domain-name <auth-user-domain-name>]
                             [--os-username <auth-username>]
                             [--syslog-log-facility SYSLOG_LOG_FACILITY]
-                            [--use-journal] [--use-syslog] [--watch-log-file]
+                            [--use-journal] [--use-json] [--use-syslog]
+                            [--watch-log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -64,14 +68,16 @@ optional arguments:
                         to env[SHAKER_FLAVOR_VCPUS]
   --image-builder-distro IMAGE_BUILDER_DISTRO
                         Operating System Distribution for shaker image when
-                        using diskimage-builder, defaults to ubuntu
+                        using diskimage-builder, defaults to ubuntu Allowed
+                        values: ubuntu, centos7
   --image-builder-mode IMAGE_BUILDER_MODE
                         Image building mode: "heat" - using Heat template
                         (requires Glance v1 for base image upload); "dib" -
                         using diskimage-builder elements (requires qemu-utils
                         and debootstrap). If not set, switches to "dib" if
                         Glance v1 is not available. Can be specified as
-                        env[SHAKER_IMAGE_BUILDER_MODE]
+                        env[SHAKER_IMAGE_BUILDER_MODE] Allowed values: heat,
+                        dib
   --image-builder-template IMAGE_BUILDER_TEMPLATE
                         Heat template containing receipt of building the
                         image. Can be a file name or one of aliases: "centos",
@@ -105,6 +111,7 @@ optional arguments:
   --nodebug             The inverse of --debug
   --noos-insecure       The inverse of --os-insecure
   --nouse-journal       The inverse of --use-journal
+  --nouse-json          The inverse of --use-json
   --nouse-syslog        The inverse of --use-syslog
   --nowatch-log-file    The inverse of --watch-log-file
   --os-auth-url <auth-url>
@@ -112,6 +119,9 @@ optional arguments:
   --os-cacert <auth-cacert>
                         Location of CA Certificate, defaults to
                         env[OS_CACERT].
+  --os-identity-api-version <identity-api-version>
+                        Identity API version, defaults to
+                        env[OS_IDENTITY_API_VERSION].
   --os-insecure         When using SSL in connections to the registry server,
                         do not require validation via a certifying authority,
                         defaults to env[OS_INSECURE].
@@ -120,6 +130,9 @@ optional arguments:
   --os-profile <hmac-key>
                         HMAC key for encrypting profiling context data,
                         defaults to env[OS_PROFILE].
+  --os-project-domain-name <auth-project-domain-name>
+                        Authentication project domain name. Defaults to
+                        env[OS_PROJECT_DOMAIN_NAME].
   --os-project-name <auth-project-name>
                         Authentication project name. This option is mutually
                         exclusive with --os-tenant-name. Defaults to
@@ -130,6 +143,9 @@ optional arguments:
   --os-tenant-name <auth-tenant-name>
                         Authentication tenant name, defaults to
                         env[OS_TENANT_NAME].
+  --os-user-domain-name <auth-user-domain-name>
+                        Authentication username. Defaults to
+                        env[OS_USER_DOMAIN_NAME].
   --os-username <auth-username>
                         Authentication username, defaults to env[OS_USERNAME].
   --syslog-log-facility SYSLOG_LOG_FACILITY
@@ -141,6 +157,8 @@ optional arguments:
                         includes structured metadata in addition to log
                         messages.This option is ignored if log_config_append
                         is set.
+  --use-json            Use JSON formatting for logging. This option is
+                        ignored if log_config_append is set.
   --use-syslog          Use syslog for logging. Existing syslog format is
                         DEPRECATED and will be changed later to honor RFC5424.
                         This option is ignored if log_config_append is set.
