@@ -1,0 +1,8 @@
+- project:
+    check:
+      jobs:
+        - openstack-tox-docs
+    gate:
+      jobs:
+        - openstack-tox-docs
+
