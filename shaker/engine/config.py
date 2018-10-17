@@ -130,6 +130,12 @@ OPENSTACK_OPTS = [
                default=utils.env('OS_REGION_NAME') or 'RegionOne',
                help='Authentication region name, defaults to '
                     'env[OS_REGION_NAME].'),
+    cfg.StrOpt('os-interface', metavar='<os-interface>',
+               default=utils.env('OS_INTERFACE'),
+               sample_default='',
+               help='Interface type. Valid options are public, '
+                    'admin and internal. defaults to '
+                    'env[OS_INTERFACE].'),
     cfg.StrOpt('os-profile', metavar='<hmac-key>',
                default=utils.env('OS_PROFILE'),
                sample_default='',

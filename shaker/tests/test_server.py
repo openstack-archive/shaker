@@ -175,6 +175,7 @@ class TestServerPlayScenario(testtools.TestCase):
         self.config_fixture.config(os_auth_url='auth-url')
         self.config_fixture.config(os_project_domain_name='Default')
         self.config_fixture.config(os_user_domain_name='Default')
+        self.config_fixture.config(os_interface='public')
         self.config_fixture.config(os_identity_api_version='3')
 
         deploy_obj.deploy.return_value = {
@@ -196,7 +197,7 @@ class TestServerPlayScenario(testtools.TestCase):
                       user_domain_name='Default'),
             identity_api_version='3',
             os_region_name='RegionOne',
-            os_cacert=None, os_insecure=False)
+            os_cacert=None, os_insecure=False, os_interface='public')
         deploy_obj.connect_to_openstack.assert_called_once_with(
             openstack_params, 'shaker-flavor', 'shaker-image', None,
             ['8.8.8.8', '8.8.4.4'])
