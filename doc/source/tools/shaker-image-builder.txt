@@ -19,7 +19,8 @@ usage: shaker-image-builder [-h] [--cleanup-on-error] [--config-dir DIR]
                             [--os-auth-url <auth-url>]
                             [--os-cacert <auth-cacert>]
                             [--os-identity-api-version <identity-api-version>]
-                            [--os-insecure] [--os-password <auth-password>]
+                            [--os-insecure] [--os-interface <os-interface>]
+                            [--os-password <auth-password>]
                             [--os-profile <hmac-key>]
                             [--os-project-domain-name <auth-project-domain-name>]
                             [--os-project-name <auth-project-name>]
@@ -125,6 +126,9 @@ optional arguments:
   --os-insecure         When using SSL in connections to the registry server,
                         do not require validation via a certifying authority,
                         defaults to env[OS_INSECURE].
+  --os-interface <os-interface>
+                        Interface type. Valid options are public, admin and
+                        internal. defaults to env[OS_INTERFACE].
   --os-password <auth-password>
                         Authentication password, defaults to env[OS_PASSWORD].
   --os-profile <hmac-key>

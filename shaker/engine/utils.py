@@ -278,6 +278,8 @@ def pack_openstack_params(conf):
         if value:
             params['auth'][attr] = value
 
+    if conf.os_interface:
+        params['os_interface'] = conf.os_interface
     if conf.os_identity_api_version:
         params['identity_api_version'] = conf.os_identity_api_version
     if conf.os_profile:
