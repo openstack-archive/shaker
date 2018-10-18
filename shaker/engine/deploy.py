@@ -215,6 +215,17 @@ def normalize_accommodation(accommodation):
             result.update(s)
         else:
             result[s] = True
+    try:
+        # override scenario's availability zone accommodation
+        if cfg.CONF.availability_zone:
+            result['zones'] = [cfg.CONF.availability_zone]
+
+        # override scenario's compute_nodes accommodation
+        if cfg.CONF.compute_nodes:
+            result['compute_nodes'] = cfg.CONF.compute_nodes
+
+    except cfg.NoSuchOptError:
+        pass
 
     return result
 
