@@ -215,6 +215,18 @@ SCENARIO_OPTS = [
                 deprecated_for_removal=True,
                 default=(utils.env('SHAKER_NO_REPORT_ON_ERROR') or False),
                 help='Do not generate report for failed scenarios'),
+    cfg.ListOpt('scenario_availability_zone',
+                default=utils.env('SCENARIO_AVAILABILITY_ZONE'),
+                help='Comma-separated list of availability_zone. If specified '
+                     'this setting will override the availability_zone '
+                     'accomodation setting in the scenario test definition.'
+                     'Defaults to SCENARIO_AVAILABILITY_ZONE'),
+    cfg.IntOpt('scenario_compute_nodes',
+               default=utils.env('SCENARIO_COMPUTE_NODES'),
+               help='Number of compute_nodes. If specified this setting will '
+                    'override the compute_nodes accomodation setting in the '
+                    'scenario test definition. '
+                    'Defaults to SCENARIO_COMPUTE_NODES'),
 ]
 
 SERVER_OPTS = SCENARIO_OPTS + SERVER_AGENT_OPTS

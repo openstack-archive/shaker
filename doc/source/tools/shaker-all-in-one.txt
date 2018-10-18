@@ -33,6 +33,8 @@ usage: shaker-all-in-one [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
                          [--polling-interval POLLING_INTERVAL]
                          [--report REPORT] [--report-template REPORT_TEMPLATE]
                          [--scenario SCENARIO]
+                         [--scenario_availability_zone SCENARIO_AVAILABILITY_ZONE]
+                         [--scenario_compute_nodes SCENARIO_COMPUTE_NODES]
                          [--server-endpoint SERVER_ENDPOINT]
                          [--subunit SUBUNIT]
                          [--syslog-log-facility SYSLOG_LOG_FACILITY]
@@ -224,6 +226,16 @@ optional arguments:
                         "openstack/udp_l3_north_south", "spot/ping",
                         "spot/tcp", "spot/udp". Defaults to
                         env[SHAKER_SCENARIO].
+  --scenario_availability_zone SCENARIO_AVAILABILITY_ZONE
+                        Comma-separated list of availability_zone. If
+                        specified this setting will override the
+                        availability_zone accomodation setting in the scenario
+                        test definition.Defaults to SCENARIO_AVAILABILITY_ZONE
+  --scenario_compute_nodes SCENARIO_COMPUTE_NODES
+                        Number of compute_nodes. If specified this setting
+                        will override the compute_nodes accomodation setting
+                        in the scenario test definition. Defaults to
+                        SCENARIO_COMPUTE_NODES
   --server-endpoint SERVER_ENDPOINT
                         Address for server connections (host:port), defaults
                         to env[SHAKER_SERVER_ENDPOINT].

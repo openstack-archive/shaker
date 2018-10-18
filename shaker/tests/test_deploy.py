@@ -19,6 +19,9 @@ import itertools
 import mock
 import testtools
 
+from oslo_config import cfg
+from oslo_config import fixture as config_fixture_pkg
+from shaker.engine import config
 from shaker.engine import deploy
 from shaker.openstack.clients import nova
 
@@ -30,6 +33,16 @@ def nodes_helper(*nodes):
 
 
 class TestDeploy(testtools.TestCase):
+
+    def setUp(self):
+        super(TestDeploy, self).setUp()
+
+        conf = cfg.CONF
+        self.addCleanup(conf.reset)
+        self.config_fixture = self.useFixture(config_fixture_pkg.Config(conf))
+        conf.register_opts(
+            config.COMMON_OPTS + config.OPENSTACK_OPTS + config.SERVER_OPTS +
+            config.REPORT_OPTS)
 
     def test_generate_agents_alone_single_room(self):
         unique = 'UU1D'
@@ -607,6 +620,39 @@ class TestDeploy(testtools.TestCase):
         expected['pair'] = True
         expected['single_room'] = True
         expected['compute_nodes'] = 2
+
+        self.assertEqual(expected, deploy.normalize_accommodation(origin))
+
+    def test_override_single_scenario_availability_zone(self):
+        origin = ['pair', {'zones': ['nova']}]
+
+        self.config_fixture.config(scenario_availability_zone='test')
+
+        expected = collections.OrderedDict()
+        expected['pair'] = True
+        expected['zones'] = ['test']
+
+        self.assertEqual(expected, deploy.normalize_accommodation(origin))
+
+    def test_override_list_scenario_availability_zone(self):
+        origin = ['pair', {'zones': ['nova']}]
+
+        self.config_fixture.config(scenario_availability_zone='test1, test2')
+
+        expected = collections.OrderedDict()
+        expected['pair'] = True
+        expected['zones'] = ['test1', 'test2']
+
+        self.assertEqual(expected, deploy.normalize_accommodation(origin))
+
+    def test_override_scenario_compute_nodes(self):
+        origin = ['pair', {'compute_nodes': 1}]
+
+        self.config_fixture.config(scenario_compute_nodes=5)
+
+        expected = collections.OrderedDict()
+        expected['pair'] = True
+        expected['compute_nodes'] = 5
 
         self.assertEqual(expected, deploy.normalize_accommodation(origin))
 

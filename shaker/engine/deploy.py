@@ -216,6 +216,14 @@ def normalize_accommodation(accommodation):
         else:
             result[s] = True
 
+    # override scenario's availability zone accommodation
+    if cfg.CONF.scenario_availability_zone:
+        result['zones'] = cfg.CONF.scenario_availability_zone
+
+    # override scenario's compute_nodes accommodation
+    if cfg.CONF.scenario_compute_nodes:
+        result['compute_nodes'] = cfg.CONF.scenario_compute_nodes
+
     return result
 
 
