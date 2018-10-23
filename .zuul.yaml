@@ -10,7 +10,32 @@
     check:
       jobs:
         - openstack-tox-docs
+        - shaker-integration-py27
+        - shaker-integration-py35
     gate:
       jobs:
         - openstack-tox-docs
+        - shaker-integration-py27
+        - shaker-integration-py35
 
+- job:
+    name: shaker-integration-py27
+    parent: openstack-tox
+    voting: false
+    description: |
+      Run integration tests under Python 2.7
+
+      To run tests manually use ``tox -e integration-py27`` command.
+    vars:
+      tox_envlist: integration-py27
+
+- job:
+    name: shaker-integration-py35
+    parent: openstack-tox
+    voting: false
+    description: |
+      Run integration tests under Python 3.5
+
+      To run tests manually use ``tox -e integration-py35`` command.
+    vars:
+      tox_envlist: integration-py35

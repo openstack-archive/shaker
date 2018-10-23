@@ -1,0 +1,14 @@
+title: Static agents
+
+description:
+  In this scenario Shaker runs tests in spot mode.
+  The scenario can be used for Shaker integration testing.
+
+execution:
+  tests:
+  -
+    title: Verify spot mode
+    class: shell
+    program: echo "Hello, world!"
+    sla:
+    - "[type == 'agent'] >> (stdout & '.*Hello.*')"

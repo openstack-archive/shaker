@@ -13,16 +13,16 @@ deployment:
 execution:
   tests:
   -
-    title: List all files
+    title: Verify shell executor
     class: shell
-    program: ls -al
+    program: echo "Hello, world!"
     sla:
     - "[type == 'agent'] >> (stderr == '')"
   -
-    title: Run sample script
+    title: Verify script executor
     class: shell
     script: |
       #!/bin/bash
-      echo "hello world"
+      echo "Let us print hello world remotely"
     sla:
     - "[type == 'agent'] >> (stdout & '.*hello world.*')"
