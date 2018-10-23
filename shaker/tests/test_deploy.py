@@ -19,11 +19,13 @@ import itertools
 import mock
 import testtools
 
+
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture_pkg
 from shaker.engine import config
 from shaker.engine import deploy
 from shaker.openstack.clients import nova
+from shaker.tests import fakes
 
 ZONE = 'zone'
 
@@ -33,7 +35,6 @@ def nodes_helper(*nodes):
 
 
 class TestDeploy(testtools.TestCase):
-
     def setUp(self):
         super(TestDeploy, self).setUp()
 
@@ -551,8 +552,8 @@ class TestDeploy(testtools.TestCase):
         expected = {
             'agent': {'id': 'agent', 'mode': 'alone'}
         }
-        agents = deployment.deploy({'agents':
-                                    [{'id': 'agent', 'mode': 'alone'}]})
+        agents = deployment.deploy(
+            {'agents': [{'id': 'agent', 'mode': 'alone'}]})
 
         self.assertEqual(expected, agents)
 
@@ -562,12 +563,85 @@ class TestDeploy(testtools.TestCase):
         self.assertRaises(deploy.DeploymentException,
                           deployment.deploy, {'template': 'foo'})
 
+    @mock.patch('shaker.openstack.clients.openstack.OpenStackClient')
+    def test_get_compute_nodes_no_flavor_aggregate_match(self,
+                                                         nova_client_mock):
+        # setup fake nova api service list response
+        compute_host_1 = fakes.FakeNovaServiceList(host='host-1')
+        compute_host_2 = fakes.FakeNovaServiceList(host='host-2')
+        compute_host_3 = fakes.FakeNovaServiceList(host='host-3')
+
+        nova_client_mock.nova.services.list.return_value = [compute_host_1,
+                                                            compute_host_2,
+                                                            compute_host_3]
+
+        # seup fake nova api flavor list response
+        flavor_no_aggregate = fakes.FakeNovaFlavorList(
+            name='flavor_no_aggregate')
+
+        nova_client_mock.nova.flavors.list.return_value = [flavor_no_aggregate]
+
+        deployment = deploy.Deployment()
+        deployment.flavor_name = 'flavor_no_aggregate'
+        deployment.openstack_client = nova_client_mock
+
+        accommodation = {'compute_nodes': 3}
+        expected = [{'host': 'host-1', 'zone': 'nova'},
+                    {'host': 'host-2', 'zone': 'nova'},
+                    {'host': 'host-3', 'zone': 'nova'}]
+
+        observed = deployment._get_compute_nodes(accommodation)
+
+        self.assertEqual(expected, observed)
+
+    @mock.patch('shaker.openstack.clients.openstack.OpenStackClient')
+    def test_get_compute_nodes_flavor_aggregate_match(self,
+                                                      nova_client_mock):
+        # setup fake nova api service list response
+        compute_host_1 = fakes.FakeNovaServiceList(host='host-1')
+        compute_host_2 = fakes.FakeNovaServiceList(host='host-2')
+        compute_host_3 = fakes.FakeNovaServiceList(host='host-3')
+
+        nova_client_mock.nova.services.list.return_value = [compute_host_1,
+                                                            compute_host_2,
+                                                            compute_host_3]
+
+        # seup fake nova api flavor list response
+        flavor_with_aggregate = fakes.FakeNovaFlavorList(
+            name='flavor_aggregate',
+            extra_specs={'aggregate_instance_extra_specs:special_hw': 'true'})
+
+        nova_client_mock.nova.flavors.list.return_value = [
+            flavor_with_aggregate]
+
+        # seup fake nova api agregate list response
+        agg_host_1 = fakes.FakeNovaAggregateList(hosts=['host-1'])
+        agg_host_2 = fakes.FakeNovaAggregateList(hosts=['host-2'], metadata={
+            'special_hw': 'true'})
+        agg_host_3 = fakes.FakeNovaAggregateList(hosts=['host-3'])
+
+        nova_client_mock.nova.aggregates.list.return_value = [agg_host_1,
+                                                              agg_host_2,
+                                                              agg_host_3]
+
+        deployment = deploy.Deployment()
+        deployment.flavor_name = 'flavor_aggregate'
+        deployment.openstack_client = nova_client_mock
+
+        accommodation = {'compute_nodes': 3}
+        expected = [{'host': 'host-2', 'zone': 'nova'}]
+
+        observed = deployment._get_compute_nodes(accommodation)
+
+        self.assertEqual(expected, observed)
+
     @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
     def test_get_compute_nodes_non_admin(self, nova_nodes_mock):
         deployment = deploy.Deployment()
+        deployment.flavor_name = 'test.flavor'
         deployment.openstack_client = mock.Mock()
 
-        def raise_error(arg):
+        def raise_error(nova_client, flavor_name):
             raise nova.ForbiddenException('err')
 
         nova_nodes_mock.side_effect = raise_error
@@ -581,9 +655,10 @@ class TestDeploy(testtools.TestCase):
     @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
     def test_get_compute_nodes_non_admin_zones(self, nova_nodes_mock):
         deployment = deploy.Deployment()
+        deployment.flavor_name = 'test.flavor'
         deployment.openstack_client = mock.Mock()
 
-        def raise_error(arg):
+        def raise_error(nova_client, flavor_name):
             raise nova.ForbiddenException('err')
 
         nova_nodes_mock.side_effect = raise_error
@@ -602,9 +677,10 @@ class TestDeploy(testtools.TestCase):
     @mock.patch('shaker.openstack.clients.nova.get_available_compute_nodes')
     def test_get_compute_nodes_non_admin_not_configured(self, nova_nodes_mock):
         deployment = deploy.Deployment()
+        deployment.flavor_name = 'test.flavor'
         deployment.openstack_client = mock.Mock()
 
-        def raise_error(arg):
+        def raise_error(nova_client, flavor_name):
             raise nova.ForbiddenException('err')
 
         nova_nodes_mock.side_effect = raise_error

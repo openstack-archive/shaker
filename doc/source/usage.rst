@@ -87,7 +87,7 @@ that allow control the scheduling precisely:
     * ``single_room`` - 1 instance per compute node
     * ``double_room`` - 2 instances per compute node
     * ``density: N`` - the multiplier for number of instances per compute node
-    * ``compute_nodes: N`` - how many compute nodes should be used (by default Shaker use all of them)
+    * ``compute_nodes: N`` - how many compute nodes should be used (by default Shaker use all of them \*see note below)
     * ``zones: [Z1, Z2]`` - list of Nova availability zones to use
 
 Examples:
@@ -99,6 +99,12 @@ Examples:
 As result of deployment the set of agents is produced. For networking testing this set contains
 agents in ``master`` and ``slave`` roles. Master agents are controlled by ``shaker`` tool and execute commands.
 Slaves are used as back-ends and do not receive any commands directly.
+
+\*If a flavor is chosen, which has aggregate_instance_extra_specs metadata set to match a host aggregate, Shaker will only use matching computes for compute_nodes calculations.
+If no aggregate_instance_extra_specs is set on a flavor Shaker will use all computes by default.
+
+ For example if we have 10 computes in a host aggregate with metadata special_hardware=true and use a flavor with
+ aggregate_instance_extra_specs:special_hardware=true Shaker will only take into account the 10 matching computes, and by default try to use all of them
 
 Execution
 ^^^^^^^^^
