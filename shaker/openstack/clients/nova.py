@@ -20,7 +20,6 @@ import time
 from novaclient import client as nova_client_pkg
 from oslo_log import log as logging
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -28,11 +27,45 @@ class ForbiddenException(nova_client_pkg.exceptions.Forbidden):
     pass
 
 
-def get_available_compute_nodes(nova_client):
+def get_available_compute_nodes(nova_client, flavor_name):
     try:
-        return [dict(host=svc.host, zone=svc.zone)
-                for svc in nova_client.services.list(binary='nova-compute')
-                if svc.state == 'up' and svc.status == 'enabled']
+        host_list = [dict(host=svc.host, zone=svc.zone)
+                     for svc in
+                     nova_client.services.list(binary='nova-compute')
+                     if svc.state == 'up' and svc.status == 'enabled']
+
+        # If the flavor has aggregate_instance_extra_specs set then filter
+        # host_list to pick only the hosts matching the chosen flavor.
+        flavor = get_flavor(nova_client, flavor_name)
+
+        if flavor is not None:
+            extra_specs = flavor.get_keys()
+
+            for item in extra_specs:
+                if "aggregate_instance_extra_specs" in item:
+                    LOG.debug('Flavor contains %s, using compute node '
+                              'filtering', extra_specs)
+
+                    # getting the extra spec seting for flavor in the
+                    # standard format of extra_spec:value
+                    extra_spec = item.split(":")[1]
+                    extra_spec_value = extra_specs.get(item)
+
+                    # create a set of aggregate host which match
+                    agg_hosts = set(itertools.chain(
+                        *[agg.hosts for agg in
+                          nova_client.aggregates.list() if
+                          agg.metadata.get(extra_spec) == extra_spec_value]))
+
+                    # update list of available hosts with
+                    # host_aggregate cross-check
+                    host_list = [elem for elem in host_list if
+                                 elem['host'] in agg_hosts]
+
+        LOG.debug('Available compute nodes: %s ', host_list)
+
+        return host_list
+
     except nova_client_pkg.exceptions.Forbidden:
         msg = 'Forbidden to get list of compute nodes'
         raise ForbiddenException(msg)

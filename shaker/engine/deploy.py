@@ -251,7 +251,8 @@ class Deployment(object):
 
     def _get_compute_nodes(self, accommodation):
         try:
-            return nova.get_available_compute_nodes(self.openstack_client.nova)
+            return nova.get_available_compute_nodes(self.openstack_client.nova,
+                                                    self.flavor_name)
         except nova.ForbiddenException:
             # user has no permissions to list compute nodes
             LOG.info('OpenStack user does not have permission to list compute '
