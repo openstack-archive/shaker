@@ -17,12 +17,15 @@ import collections
 import copy
 import itertools
 import mock
+import os
+import re
 import testtools
 
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture_pkg
 from shaker.engine import config
 from shaker.engine import deploy
+from shaker.engine import utils
 from shaker.openstack.clients import nova
 from shaker.tests import fakes
 
@@ -561,6 +564,70 @@ class TestDeploy(testtools.TestCase):
 
         self.assertRaises(deploy.DeploymentException,
                           deployment.deploy, {'template': 'foo'})
+
+    @mock.patch('shaker.openstack.clients.heat.get_stack_outputs')
+    @mock.patch('shaker.openstack.clients.heat.create_stack')
+    @mock.patch('shaker.openstack.clients.openstack.OpenStackClient')
+    @mock.patch('shaker.engine.deploy.Deployment._get_compute_nodes')
+    def test_deploy_from_hot_with_env_file(self, nova_nodes_mock,
+                                           openstack_mock, create_stack_mock,
+                                           stack_output_mock):
+        test_file = 'shaker/scenarios/test/sample_with_env.yaml'
+        absolute_path = utils.resolve_relative_path(test_file)
+        scenario = utils.read_yaml_file(absolute_path)
+
+        heat_id = 'shaker_abcdefg'
+
+        server_endpoint = "127.0.0.01"
+        base_dir = os.path.dirname(absolute_path)
+
+        deployment = deploy.Deployment()
+        deployment.stack_name = heat_id
+        deployment.external_net = 'test-external_net'
+        deployment.image_name = 'test-image'
+        deployment.flavor_name = 'test-flavor'
+        deployment.dns_nameservers = '8.8.8.8'
+        deployment.openstack_client = openstack_mock
+
+        # read the env file to determine what cidr is set to
+        # minus the last digit
+        env_file = utils.read_file(scenario['deployment']['env_file'],
+                                   base_dir)
+        cidr = re.findall(r'[0-9]+(?:\.[0-9]+){2}', env_file)[0]
+
+        nova_nodes_mock.return_value = [{'host': 'host-1', 'zone': 'nova'}]
+
+        create_stack_mock.create_stack.return_value = heat_id
+
+        heat_outputs = {
+            heat_id + '_master_0_instance_name': 'instance-0000052f',
+            heat_id + '_master_0_ip': '192.0.0.3',
+            heat_id + '_slave_0_ip': '192.0.0.4',
+            heat_id + '_slave_0_instance_name': 'instance-0000052c'}
+
+        stack_output_mock.return_value = heat_outputs
+
+        expected = {
+            'shaker_abcdefg_master_0': {'availability_zone': 'nova:host-1',
+                                        'id': 'shaker_abcdefg_master_0',
+                                        'ip': cidr + '.3',
+                                        'mode': 'master',
+                                        'node': 'host-1',
+                                        'slave_id': 'shaker_abcdefg_slave_0',
+                                        'zone': 'nova'},
+            'shaker_abcdefg_slave_0': {'availability_zone': 'nova:host-1',
+                                       'id': 'shaker_abcdefg_slave_0',
+                                       'ip': cidr + '.4',
+                                       'master_id': 'shaker_abcdefg_master_0',
+                                       'mode': 'slave',
+                                       'node': 'host-1',
+                                       'zone': 'nova'}}
+
+        agents = deployment._deploy_from_hot(scenario['deployment'],
+                                             server_endpoint,
+                                             base_dir=base_dir)
+
+        self.assertEqual(expected, agents)
 
     @mock.patch('shaker.openstack.clients.openstack.OpenStackClient')
     def test_get_compute_nodes_flavor_no_extra_specs(self,

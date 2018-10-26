@@ -11,6 +11,8 @@ mapping:
     mapping:
       template:
         type: str
+      env_file:
+        type: str
       agents:
         type: any
       accommodation:
