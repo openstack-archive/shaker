@@ -136,12 +136,16 @@ def write_file(data, file_name, base_dir=''):
 
 def read_yaml_file(file_name):
     raw = read_file(file_name)
+    return read_yaml(raw)
+
+
+def read_yaml(raw):
     try:
         parsed = yaml.safe_load(raw)
         return parsed
     except Exception as e:
-        LOG.error('Failed to parse file %(file)s in YAML format: %(err)s',
-                  dict(file=file_name, err=e))
+        LOG.error('Failed to parse input %(yaml)s in YAML format: %(err)s',
+                  dict(yaml=raw, err=e))
         raise
 
 
