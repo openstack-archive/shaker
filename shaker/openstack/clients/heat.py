@@ -22,11 +22,12 @@ from oslo_log import log as logging
 LOG = logging.getLogger(__name__)
 
 
-def create_stack(heat_client, stack_name, template, parameters):
+def create_stack(heat_client, stack_name, template, parameters, environment):
     stack_params = {
         'stack_name': stack_name,
         'template': template,
         'parameters': parameters,
+        'environment': environment,
     }
 
     stack = heat_client.stacks.create(**stack_params)['stack']
