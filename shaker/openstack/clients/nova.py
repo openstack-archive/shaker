@@ -105,7 +105,12 @@ def get_server_host_id(nova_client, server_name):
 
 
 def check_server_console(nova_client, server_id, len_limit=100):
-    console = nova_client.servers.get(server_id).get_console_output(len_limit)
+    try:
+        console = (nova_client.servers.get(server_id)
+                   .get_console_output(len_limit))
+    except nova_client_pkg.exceptions.ClientException as e:
+        LOG.warning('Error retrieving console output: %s. Ignoring', e)
+        return None
 
     for line in console.splitlines():
         if (re.search(r'\[critical\]', line, flags=re.IGNORECASE) or
