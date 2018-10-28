@@ -76,15 +76,11 @@ def calculate_stats(records, tests):
 
 def verify_sla(records, tests):
     record_map = collections.defaultdict(list)  # test -> [record]
-    sla_records = []
-
     for r in records.values():
         if ('test' in r) and ('sla' in tests[r['test']]):
             record_map[r['test']].append(r)
-        if r.get('status') != 'ok':
-            sla_records.append(sla.SLAItem(r, sla.STATE_FALSE,
-                                           'status of all records is ok'))
 
+    sla_records = []
     for test_id, records_per_test in record_map.items():
         for sla_expr in tests[test_id]['sla']:
             sla_records += sla.eval_expr(sla_expr, records_per_test)
@@ -96,8 +92,8 @@ def log_sla(sla_records):
     if sla_records:
         LOG.info('*' * 80)
         for item in sla_records:
-            test_id = _get_location(item.record) + ': ' + item.expression
-            LOG.info('%-72s %7s' % (test_id, '[%s]' % item.state))
+            test_id = _get_location(item.record) + ':' + item.expression
+            LOG.info('%-73s %7s' % (test_id, '[%s]' % item.state))
         LOG.info('*' * 80)
 
 
