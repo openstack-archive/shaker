@@ -1,0 +1,9 @@
+Code-Review+1: Marie Delavergne <delavergnemarie@gmail.com>
+Code-Review+2: Ilya Shakhat <shakhat@gmail.com>
+Workflow+1: Ilya Shakhat <shakhat@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Mon, 29 Oct 2018 14:38:39 +0000
+Reviewed-on: https://review.openstack.org/613808
+Project: openstack/shaker
+Branch: refs/heads/master
