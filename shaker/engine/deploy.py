@@ -302,10 +302,14 @@ class Deployment(object):
             exit(1)
         merged_parameters.update(specification.get('template_parameters', {}))
 
+        env_file = specification.get('env_file', None)
+        if env_file is not None:
+            env_file = self._render_env_template(env_file, base_dir)
+
         self.has_stack = True
         stack_id = heat.create_stack(
             self.openstack_client.heat, self.stack_name, rendered_template,
-            merged_parameters)
+            merged_parameters, env_file)
 
         # get info about deployed objects
         outputs = heat.get_stack_outputs(self.openstack_client.heat, stack_id)
@@ -329,6 +333,20 @@ class Deployment(object):
             if override_spec.get('ip'):
                 return functools.partial(override_ip,
                                          ip_type=override_spec.get('ip'))
+
+    # translate jinja decorations in env files
+    def _render_env_template(self, env_file, base_dir):
+        env_template = utils.read_file(env_file,
+                                       base_dir=base_dir)
+        env_values = {
+            'CONF': cfg.CONF
+        }
+        compiled_env = jinja2.Template(env_template)
+        rendered_env = compiled_env.render(env_values)
+
+        environment = utils.read_yaml(rendered_env)
+
+        return environment
 
     def deploy(self, deployment, base_dir=None, server_endpoint=None):
         agents = {}
