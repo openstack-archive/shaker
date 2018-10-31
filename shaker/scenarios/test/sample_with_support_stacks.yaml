@@ -1,0 +1,35 @@
+title: Sample TCP Test with Support Stacks
+
+description:
+  This test definition demonstrates the use of support stacks
+
+  In this scenario Shaker launches pairs of instances in the same tenant
+  network. Each test VM is also connected to a previously launched
+  support network. The support neworks are part of their own support
+  heat stack. Every instance is hosted on a separate compute node,
+  1 compute node is utilized. The traffic goes within the tenant network
+  (L2 domain)
+
+deployment:
+  support_templates:
+  - name: support_1
+    template: templates/support_network.hot
+    env_file: env/support_1.env
+
+  - name: support_2
+    template: templates/support_network.hot
+    env_file: env/support_2.env
+
+  template: templates/l2_with_support.hot
+  env_file: env/l2_with_support.env
+
+  accommodation: [pair, compute_nodes: 1]
+
+execution:
+  tests:
+  -
+    title: tcp
+    class: iperf3
+
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.avg > 5000)"

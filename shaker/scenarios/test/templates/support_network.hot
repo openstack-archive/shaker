@@ -1,0 +1,26 @@
+heat_template_version: 2013-05-23
+
+description:
+  This Heat template creates a new Neutron network. This is used to demonstrate
+  a support stack in Shaker.
+
+parameters:
+  support_cidr:
+    type: string
+    description: set a cidr from the env file
+  network_name:
+    type: string
+    description: set the support network name
+
+resources:
+  private_net:
+    type: OS::Neutron::Net
+    properties:
+      name: { get_param: network_name }
+
+  private_subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: { get_resource: private_net }
+      cidr: { get_param: support_cidr }
+

@@ -414,6 +414,20 @@ traffic goes within the tenant network (L2 domain)
 To use this scenario specify parameter ``--scenario test/sample_with_env``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/sample_with_env.yaml
 
+.. _scenario_sample_tcp_test_with_support_stacks:
+
+Sample TCP Test with Support Stacks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This test definition demonstrates the use of support stacks In this scenario
+Shaker launches pairs of instances in the same tenant network. Each test VM is
+also connected to a previously launched support network. The support neworks
+are part of their own support heat stack. Every instance is hosted on a
+separate compute node, 1 compute node is utilized. The traffic goes within the
+tenant network (L2 domain)
+
+To use this scenario specify parameter ``--scenario test/sample_with_support_stacks``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/sample_with_support_stacks.yaml
+
 .. _scenario_static_agents:
 
 Static agents
@@ -552,4 +566,24 @@ network and plugs instances into this new network. All instances are located in
 the same L2 domain.
 
 Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/l2_with_env.hot
+
+.. _template_test_templates_l2_with_support:
+
+test/templates/l2_with_support
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This Heat template creates a new Neutron network, a router to the external
+network and plugs instances into this new network. All instances are located in
+the same L2 domain. The VMs are also connected to support networks that should
+exist before this template is spun up.
+
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/templates/l2_with_support.hot
+
+.. _template_test_templates_support_network:
+
+test/templates/support_network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This Heat template creates a new Neutron network. This is used to demonstrate a
+support stack in Shaker.
+
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/templates/support_network.hot
 

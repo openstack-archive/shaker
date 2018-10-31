@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import time
 
 from heatclient import exc
 from oslo_log import log as logging
-
+from timeout_decorator import timeout
+from timeout_decorator import TimeoutError
 
 LOG = logging.getLogger(__name__)
 
@@ -74,6 +76,31 @@ def wait_stack_completion(heat_client, stack_id):
         raise Exception('Failed to deploy Heat stack %(id)s. Expected status '
                         'COMPLETE, but got %(status)s. Reason: %(reason)s' %
                         dict(id=stack_id, status=status, reason=reason))
+
+
+# set the timeout for this method so we don't get stuck polling indefinitely
+# waiting for a delete
+@timeout(600)
+def wait_stack_deletion(heat_client, stack_id):
+    try:
+        heat_client.stacks.delete(stack_id)
+        while True:
+            status, reason = get_stack_status(heat_client, stack_id)
+            LOG.debug('Stack status: %s Stack reason: %s', status, reason)
+            if status == 'FAILED':
+                raise exc.StackFailure('Failed to delete stack %s' % stack_id)
+
+            time.sleep(5)
+
+    except TimeoutError:
+        LOG.error('Timed out waiting for deletion of stack %s' % stack_id)
+
+    except exc.HTTPNotFound:
+        # once the stack is gone we can assume it was successfully deleted
+        # clear the exception so it doesn't confuse the logs
+        if sys.version_info < (3, 0):
+            sys.exc_clear()
+        LOG.info('Stack %s was successfully deleted', stack_id)
 
 
 def get_stack_outputs(heat_client, stack_id):

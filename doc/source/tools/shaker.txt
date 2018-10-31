@@ -158,7 +158,8 @@ optional arguments:
                         "interactive".
   --scenario SCENARIO   Comma-separated list of scenarios to play. Each entity
                         can be a file name or one of aliases:
-                        "misc/instance_metadata",
+                        "misc/instance_metadata", "misc/static_agent",
+                        "misc/static_agents_pair",
                         "openstack/cross_az/full_l2",
                         "openstack/cross_az/full_l3_east_west",
                         "openstack/cross_az/full_l3_north_south",
