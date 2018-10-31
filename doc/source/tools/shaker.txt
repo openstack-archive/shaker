@@ -184,8 +184,10 @@ optional arguments:
                         "openstack/qos/perf_l2", "openstack/udp_l2",
                         "openstack/udp_l3_east_west",
                         "openstack/udp_l3_north_south", "spot/ping",
-                        "spot/tcp", "spot/udp". Defaults to
-                        env[SHAKER_SCENARIO].
+                        "spot/tcp", "spot/udp", "test/sample_with_env",
+                        "test/sample_with_support_stacks", "test/spot",
+                        "test/static_agent", "test/static_agents_pair".
+                        Defaults to env[SHAKER_SCENARIO].
   --scenario_availability_zone SCENARIO_AVAILABILITY_ZONE
                         Comma-separated list of availability_zone. If
                         specified this setting will override the

@@ -17,26 +17,6 @@ processes.
 To use this scenario specify parameter ``--scenario misc/instance_metadata``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/instance_metadata.yaml
 
-.. _scenario_static_agents:
-
-Static agents
-^^^^^^^^^^^^^
-In this scenario Shaker runs tests on pre-deployed static agents. The scenario
-can be used for Shaker integration testing.
-
-To use this scenario specify parameter ``--scenario misc/static_agent``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/static_agent.yaml
-
-.. _scenario_paired_static_agents:
-
-Paired static agents
-^^^^^^^^^^^^^^^^^^^^
-In this scenario Shaker runs tests on pre-deployed pair of static agents. The
-scenario can be used for Shaker integration testing.
-
-To use this scenario specify parameter ``--scenario misc/static_agents_pair``.
-Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/misc/static_agents_pair.yaml
-
 .. _scenario_openstack_l2_cross_az:
 
 OpenStack L2 Cross-AZ
@@ -422,6 +402,62 @@ overridden by command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 To use this scenario specify parameter ``--scenario spot/udp``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/spot/udp.yaml
 
+.. _scenario_sample_tcp_test_with_environment_file:
+
+Sample TCP Test with Environment File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This test definition demonstrates the use of an environment file. In this
+scenario Shaker launches pairs of instances in the same tenant network. Every
+instance is hosted on a separate compute node, 1 compute node is utilized. The
+traffic goes within the tenant network (L2 domain)
+
+To use this scenario specify parameter ``--scenario test/sample_with_env``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/sample_with_env.yaml
+
+.. _scenario_sample_tcp_test_with_support_stacks:
+
+Sample TCP Test with Support Stacks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This test definition demonstrates the use of support stacks In this scenario
+Shaker launches pairs of instances in the same tenant network. Each test VM is
+also connected to a previously launched support network. The support neworks
+are part of their own support heat stack. Every instance is hosted on a
+separate compute node, 1 compute node is utilized. The traffic goes within the
+tenant network (L2 domain)
+
+To use this scenario specify parameter ``--scenario test/sample_with_support_stacks``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/sample_with_support_stacks.yaml
+
+.. _scenario_static_agents:
+
+Static agents
+^^^^^^^^^^^^^
+In this scenario Shaker runs tests in spot mode. The scenario can be used for
+Shaker integration testing.
+
+To use this scenario specify parameter ``--scenario test/spot``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/spot.yaml
+
+.. _scenario_static_agents:
+
+Static agents
+^^^^^^^^^^^^^
+In this scenario Shaker runs tests on pre-deployed static agents. The scenario
+can be used for Shaker integration testing.
+
+To use this scenario specify parameter ``--scenario test/static_agent``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/static_agent.yaml
+
+.. _scenario_paired_static_agents:
+
+Paired static agents
+^^^^^^^^^^^^^^^^^^^^
+In this scenario Shaker runs tests on pre-deployed pair of static agents. The
+scenario can be used for Shaker integration testing.
+
+To use this scenario specify parameter ``--scenario test/static_agents_pair``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/static_agents_pair.yaml
+
 Heat Templates
 --------------
 
@@ -520,4 +556,34 @@ network and plugs instances into this new network. All instances are located in
 the same L2 domain.
 
 Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/openstack/qos/l2_qos.hot
+
+.. _template_test_l2_with_env:
+
+test/l2_with_env
+^^^^^^^^^^^^^^^^
+This Heat template creates a new Neutron network, a router to the external
+network and plugs instances into this new network. All instances are located in
+the same L2 domain.
+
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/l2_with_env.hot
+
+.. _template_test_templates_l2_with_support:
+
+test/templates/l2_with_support
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This Heat template creates a new Neutron network, a router to the external
+network and plugs instances into this new network. All instances are located in
+the same L2 domain. The VMs are also connected to support networks that should
+exist before this template is spun up.
+
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/templates/l2_with_support.hot
+
+.. _template_test_templates_support_network:
+
+test/templates/support_network
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This Heat template creates a new Neutron network. This is used to demonstrate a
+support stack in Shaker.
+
+Template source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/templates/support_network.hot
 

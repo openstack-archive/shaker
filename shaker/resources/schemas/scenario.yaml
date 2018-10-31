@@ -9,6 +9,18 @@ mapping:
   deployment:
     type: map
     mapping:
+      support_templates:
+        type: seq
+        sequence:
+          - type: map
+            mapping:
+              regex;(.+):
+                type: map
+                mapping:
+                  template:
+                    type: str
+                  env_file:
+                    type: str
       template:
         type: str
       env_file:

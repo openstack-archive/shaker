@@ -25,3 +25,4 @@ python-subunit>=0.0.18 # Apache-2.0/BSD
 PyYAML>=3.10.0 # MIT
 pyzmq>=16.0 # LGPL+BSD
 six>=1.9.0 # MIT
+timeout-decorator>=0.4.0 # MIT

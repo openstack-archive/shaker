@@ -16,6 +16,7 @@
 import collections
 import functools
 import random
+import sys
 
 import jinja2
 from oslo_config import cfg
@@ -26,7 +27,6 @@ from shaker.openstack.clients import heat
 from shaker.openstack.clients import neutron
 from shaker.openstack.clients import nova
 from shaker.openstack.clients import openstack
-
 
 LOG = logging.getLogger(__name__)
 
@@ -230,8 +230,13 @@ def normalize_accommodation(accommodation):
 class Deployment(object):
     def __init__(self):
         self.openstack_client = None
-        self.has_stack = False
+        self.stack_id = None
         self.privileged_mode = True
+
+        # The current run "owns" the support stacks, it is tracked
+        # so it can be deleted later.
+        self.support_stacks = []
+        self.TrackStack = collections.namedtuple('TrackStack', 'name id')
 
     def connect_to_openstack(self, openstack_params, flavor_name, image_name,
                              external_net, dns_nameservers):
@@ -300,19 +305,24 @@ class Deployment(object):
             LOG.error('Failed to gather required parameters to create '
                       'heat stack: %s', e)
             exit(1)
+
         merged_parameters.update(specification.get('template_parameters', {}))
 
         env_file = specification.get('env_file', None)
         if env_file is not None:
             env_file = self._render_env_template(env_file, base_dir)
 
-        self.has_stack = True
-        stack_id = heat.create_stack(
+        support_templates = specification.get('support_templates', None)
+        if support_templates is not None:
+            self._deploy_support_stacks(support_templates, base_dir)
+
+        self.stack_id = heat.create_stack(
             self.openstack_client.heat, self.stack_name, rendered_template,
             merged_parameters, env_file)
 
         # get info about deployed objects
-        outputs = heat.get_stack_outputs(self.openstack_client.heat, stack_id)
+        outputs = heat.get_stack_outputs(self.openstack_client.heat,
+                                         self.stack_id)
         override = self._get_override(specification.get('override'))
 
         agents = filter_agents(agents, outputs, override)
@@ -323,6 +333,46 @@ class Deployment(object):
             agents = distribute_agents(agents, get_host_fn)
 
         return agents
+
+    def _deploy_support_stacks(self, support_templates, base_dir):
+        for template in support_templates:
+            for key, value in template.items():
+                try:
+                    support_name = key
+                    support_template = utils.read_file(value['template'],
+                                                       base_dir=base_dir)
+
+                    support_env_file = value.get('env_file', None)
+                    if support_env_file is not None:
+                        support_env_file = self._render_env_template(
+                            support_env_file, base_dir)
+
+                    # user should set default values in supoort template
+                    # or provide a heat environment file to update
+                    # parameters for support templates
+                    support_template_params = {}
+
+                    support_id = heat.create_stack(
+                        self.openstack_client.heat, support_name,
+                        support_template, support_template_params,
+                        support_env_file)
+
+                    # track support stacks for cleanup
+                    current_stack = self.TrackStack(name=support_name,
+                                                    id=support_id)
+                    self.support_stacks.append(current_stack)
+                    LOG.debug('Tracking support stacks: %s',
+                              self.support_stacks)
+
+                except heat.exc.Conflict as err:
+                    # continue even if support stack already exists. This
+                    # allows re-use of existing support stacks if multiple
+                    # runs reference the same support stack.
+                    LOG.info('Ignoring stack exists errors: %s', err)
+                    # clear the exception so polling heat later doesn't
+                    # continue to show the exception in the logs
+                    if sys.version_info < (3, 0):
+                        sys.exc_clear()
 
     def _get_override(self, override_spec):
         def override_ip(agent, ip_type):
@@ -373,6 +423,20 @@ class Deployment(object):
         return agents
 
     def cleanup(self):
-        if self.has_stack and cfg.CONF.cleanup_on_error:
-            LOG.debug('Cleaning up the stack: %s', self.stack_name)
-            self.openstack_client.heat.stacks.delete(self.stack_name)
+        # cleanup the test stack first since it could be referencing resources
+        # in a support stack, and it was the last stack created.
+        if self.stack_id is not None and cfg.CONF.cleanup_on_error:
+            LOG.debug('Cleaning up the test stack: %s with id: %s',
+                      self.stack_name, self.stack_id)
+            heat.wait_stack_deletion(self.openstack_client.heat, self.stack_id)
+
+        # cleanup support stacks; reverse the order to prevent deletion errors
+        # due to possible dependencies between the support stacks.
+        # Only stacks tracked during the run are deleted. e.g. if a support
+        # stack already existed, the current run doesn't "own" it so it
+        # won't be cleaned up.
+        if len(self.support_stacks) > 0 and cfg.CONF.cleanup_on_error:
+            for stack in reversed(self.support_stacks):
+                LOG.debug('Cleaning up the support stack: %s with id: %s',
+                          stack.name, stack.id)
+                heat.wait_stack_deletion(self.openstack_client.heat, stack.id)
