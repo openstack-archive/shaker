@@ -190,7 +190,8 @@ SCENARIO_OPTS = [
                     'Comma-separated list of scenarios to play. Each entity '
                     'can be a file name or one of aliases: '
                     '%s. Defaults to env[SHAKER_SCENARIO].', SCENARIOS,
-                    type_filter=lambda x: x.endswith('.yaml'))),
+                    type_filter=lambda x: (x.endswith('.yaml')
+                                           and not x.startswith('test/')))),
     cfg.Opt('matrix',
             default=utils.env('SHAKER_MATRIX'),
             type=Yaml(),

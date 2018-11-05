@@ -193,11 +193,11 @@ def make_help_options(message, base, type_filter=None):
     files = itertools.chain.from_iterable(
         [map(functools.partial(os.path.join, root), files)
          for root, dirs, files in os.walk(path)])  # list of files in a tree
+    files = [os.path.relpath(f, start=path) for f in files]  # to relative
     if type_filter:
         files = (f for f in files if type_filter(f))  # filtered list
-    rel_files = map(functools.partial(os.path.relpath, start=path), files)
     return message % ', '.join('"%s"' % f.partition('.')[0]
-                               for f in sorted(rel_files))
+                               for f in sorted(files))
 
 
 def algebraic_product(**kwargs):
