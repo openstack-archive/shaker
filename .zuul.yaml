@@ -12,6 +12,7 @@
         - openstack-tox-docs
         - shaker-integration-py27
         - shaker-integration-py35
+        - shaker-docker-build  # todo: to be moved into gate pipeline
     gate:
       jobs:
         - openstack-tox-docs
@@ -39,3 +40,42 @@
       To run tests manually use ``tox -e integration-py35`` command.
     vars:
       tox_envlist: integration-py35
+
+- secret:
+    name: shaker_dockerhub_creds
+    data:
+      user: !encrypted/pkcs1-oaep
+        - q00snbaApNEUy0xwe4Zte8kEHz3t49hodqCk0WXik4iI9IKN4ZNKmIHpdMpepBWmbibXn
+          qOC788YN2AQFzFr0sisjg+YfuaEx5k2VoXii82ldcZj9fXuXhJkBu5DI+mQMcM9aFokpH
+          uoQDRq+al3FtY2iouSiObfLMdk/wkp8ZcD+IF2I9dt+dZI5evUzeb0mOleZxlyPCIF2Kg
+          /W7VoFn5XoCb/Aj6mPdE5hqYAsjMo9cejZ+SYzYiSy3rDy8q/P1tF0PQKDaGvd3Cg/qT/
+          BTwFEQ9XkD/OC0DqJmqgvcYqs8u1/l29IE8DwMmu8UKtlhcIx0AElfL6mwtY6d9wycuUT
+          dsDic9nuCQujI26LLliBhH9z88gDnJWRY05c4rHdymrrC8vfbBv/KGy+Tj3e3vOkrgqnp
+          ybRtf2N/Oc/Y3a6inTWxHAFPJOx8LIpXDKpw9Je7UjeVzTH4wLLPLoJUFlR4MbKLIntxg
+          yTz7VRGjEVDJ1FFyYn+1fBLL7f1xsI/r87BeAKAAH2aO6C7Smh++5G1DHVQI4YGhRvIhE
+          SKPZj5pBocIRdTszSayd7bRzYQfTGIXXGZLE0s7s0nQY4n0i5FBv4gUKs4AAn8AfGiPJJ
+          zrs9vDW+9SUX6JnXPmkz0+op7RVYWX4qjPkftOae6AtlUmYc0+4Xk2XkjTzlco=
+      password: !encrypted/pkcs1-oaep
+        - q00snbaApNEUy0xwe4Zte8kEHz3t49hodqCk0WXik4iI9IKN4ZNKmIHpdMpepBWmbibXn
+          qOC788YN2AQFzFr0sisjg+YfuaEx5k2VoXii82ldcZj9fXuXhJkBu5DI+mQMcM9aFokpH
+          uoQDRq+al3FtY2iouSiObfLMdk/wkp8ZcD+IF2I9dt+dZI5evUzeb0mOleZxlyPCIF2Kg
+          /W7VoFn5XoCb/Aj6mPdE5hqYAsjMo9cejZ+SYzYiSy3rDy8q/P1tF0PQKDaGvd3Cg/qT/
+          BTwFEQ9XkD/OC0DqJmqgvcYqs8u1/l29IE8DwMmu8UKtlhcIx0AElfL6mwtY6d9wycuUT
+          dsDic9nuCQujI26LLliBhH9z88gDnJWRY05c4rHdymrrC8vfbBv/KGy+Tj3e3vOkrgqnp
+          ybRtf2N/Oc/Y3a6inTWxHAFPJOx8LIpXDKpw9Je7UjeVzTH4wLLPLoJUFlR4MbKLIntxg
+          yTz7VRGjEVDJ1FFyYn+1fBLL7f1xsI/r87BeAKAAH2aO6C7Smh++5G1DHVQI4YGhRvIhE
+          SKPZj5pBocIRdTszSayd7bRzYQfTGIXXGZLE0s7s0nQY4n0i5FBv4gUKs4AAn8AfGiPJJ
+          zrs9vDW+9SUX6JnXPmkz0+op7RVYWX4qjPkftOae6AtlUmYc0+4Xk2XkjTzlco=
+
+- job:
+    name: shaker-docker-build
+    parent: base
+    nodeset: ubuntu-bionic
+    voting: false
+    description: |
+      Build Docker image for Shaker
+    post-run: tools/playbooks/dockerhub_publish.yml
+#    vars:
+#      publisher: true
+#    secrets:
+#      - shaker_dockerhub_creds
