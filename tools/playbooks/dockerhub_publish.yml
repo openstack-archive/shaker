@@ -1,0 +1,24 @@
+---
+- hosts: all
+  tasks:
+    - name: Install Docker
+      apt:
+        name: docker.io
+        state: present
+      become: yes
+
+    - name: changing permission of Docker socket to 666
+      file:
+        path: /run/docker.sock
+        mode: 666
+      become: true
+
+    - name: Build a container
+      command: "docker build -t performa/shaker:latest {{ zuul.project.src_dir }}"
+
+    - name: Login to Dockerhub
+      command: "docker login -u {{ shaker_dockerhub_creds.user }} -p {{ shaker_dockerhub_creds.password }}"
+      no_log: true
+
+    - name: Push images to Dockerhub
+      shell: "for img in $(docker images  --format '{% raw %}{{ .Repository }}:{{ .Tag }}{% endraw %}' | grep shaker ); do docker push $img; done"
