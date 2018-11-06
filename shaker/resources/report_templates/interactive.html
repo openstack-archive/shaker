@@ -451,6 +451,13 @@
       parseUrlToState();
       console.log(state);
 
+      // change the status of tests that have sla failures
+      // to "fail", only if they were previously marked "ok"
+      $.each(report.sla, function(_i, sla) {
+        if (sla.state == "FAIL" && report.records[sla.record].status == "ok") {
+          report.records[sla.record].status = "fail";
+        }
+      });
       // pre-process records
       $.each(report.records, function(_i, record) {
         if (record.status) {
@@ -458,6 +465,7 @@
           record["is_status_lost"] = record.status == "lost";
           record["is_status_interrupted"] = record.status == "interrupted";
           record["is_status_error"] = record.status == "error";
+          record["is_status_fail"] = record.status == "fail";
         }
       });
 
@@ -545,6 +553,7 @@
   {{#if is_status_lost}}<span class="label label-danger"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>lost</span>{{/if}}
   {{#if is_status_interrupted}}<span class="label label-warning"><span class="glyphicon glyphicon-stop" aria-hidden="true"></span>interrupted</span>{{/if}}
   {{#if is_status_error}}<span class="label label-danger"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>error</span>{{/if}}
+  {{#if is_status_fail}}<span class="label label-danger"><span class="glyphicon glyphicon-alert" aria-hidden="true"></span>sla fail</span>{{/if}}
   {{#if stats_yaml}}
     <h4>Stats</h4>
     <pre>{{ stats_yaml }}</pre>
@@ -637,6 +646,12 @@
           <span class="label label-danger">
             <span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
             error
+          </span>
+        {{/if}}
+        {{#if is_status_fail }}
+          <span class="label label-danger">
+            <span class="glyphicon glyphicon-alert" aria-hidden="true"></span>
+            sla fail
           </span>
         {{/if}}
       </td>
