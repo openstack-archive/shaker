@@ -1,5 +1,6 @@
 usage: shaker-spot [-h] [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
-                   [--config-dir DIR] [--config-file PATH] [--debug]
+                   [--config-dir DIR] [--config-file PATH]
+                   [--custom_user_opts CUSTOM_USER_OPTS] [--debug]
                    [--log-config-append PATH] [--log-date-format DATE_FORMAT]
                    [--log-dir LOG_DIR] [--log-file PATH] [--matrix MATRIX]
                    [--no-report-on-error] [--nodebug] [--nono-report-on-error]
@@ -29,6 +30,14 @@ optional arguments:
   --config-file PATH    Path to a config file to use. Multiple config files
                         can be specified, with values in later files taking
                         precedence. Defaults to None.
+  --custom_user_opts CUSTOM_USER_OPTS
+                        Set custom user option parameters for the scenario.
+                        The value is specified in YAML, e.g. custom_user_opts
+                        = { key1:value1, key2:value2} The values specified can
+                        be referenced in the usual python way. e.g. {{
+                        CONF.custom_user_opts['key1'] }}. This option is
+                        useful to inject custom values into heat environment
+                        files
   --debug, -d           If set to true, the logging level will be set to DEBUG
                         instead of the default INFO level.
   --log-config-append PATH, --log-config PATH, --log_config PATH

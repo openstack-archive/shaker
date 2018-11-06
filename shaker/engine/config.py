@@ -166,7 +166,6 @@ OPENSTACK_OPTS = [
                 default=(utils.env('SHAKER_CLEANUP_ON_ERROR') or True),
                 help='Clean up the heat-stack upon any error occurred during '
                      'scenario execution.'),
-
 ]
 
 SERVER_AGENT_OPTS = [
@@ -228,6 +227,16 @@ SCENARIO_OPTS = [
                     'override the compute_nodes accomodation setting in the '
                     'scenario test definition. '
                     'Defaults to SCENARIO_COMPUTE_NODES'),
+    cfg.Opt('custom_user_opts',
+            default=utils.env('CUSTOM_USER_OPTS'),
+            type=Yaml(),
+            help='Set custom user option parameters for the scenario. '
+                 'The value is specified in YAML, e.g. '
+                 'custom_user_opts = { key1:value1, key2:value2} '
+                 'The values specified can be referenced in the usual '
+                 'python way. e.g. {{ CONF.custom_user_opts[\'key1\'] }}. '
+                 'This option is useful to inject custom values into heat '
+                 'environment files'),
 ]
 
 SERVER_OPTS = SCENARIO_OPTS + SERVER_AGENT_OPTS
