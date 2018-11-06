@@ -2,7 +2,8 @@ usage: shaker-all-in-one [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
                          [--agent-loss-timeout AGENT_LOSS_TIMEOUT]
                          [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
                          [--cleanup] [--cleanup-on-error] [--config-dir DIR]
-                         [--config-file PATH] [--debug]
+                         [--config-file PATH]
+                         [--custom_user_opts CUSTOM_USER_OPTS] [--debug]
                          [--dns-nameservers DNS_NAMESERVERS]
                          [--external-net EXTERNAL_NET]
                          [--flavor-disk FLAVOR_DISK]
@@ -69,6 +70,13 @@ optional arguments:
   --config-file PATH    Path to a config file to use. Multiple config files
                         can be specified, with values in later files taking
                         precedence. Defaults to None.
+  --custom_user_opts CUSTOM_USER_OPTS
+                        key:string value dict of custom user options. Can be
+                        specified as: custom_user_opts = key1:value1,
+                        key2:value2 and referenced as {{
+                        CONF.custom_user_opts['key1'] }}. This option is
+                        useful to inject custom values into heat environment
+                        files
   --debug, -d           If set to true, the logging level will be set to DEBUG
                         instead of the default INFO level.
   --dns-nameservers DNS_NAMESERVERS

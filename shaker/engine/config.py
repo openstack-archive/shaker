@@ -228,6 +228,15 @@ SCENARIO_OPTS = [
                     'override the compute_nodes accomodation setting in the '
                     'scenario test definition. '
                     'Defaults to SCENARIO_COMPUTE_NODES'),
+    cfg.DictOpt('custom_user_opts',
+                default=(utils.env('CUSTOM_USER_OPTS') or {}),
+                help='key:string value dict of custom user options. '
+                     'Can be specified as: '
+                     'custom_user_opts = key1:value1, key2:value2 '
+                     'and referenced as '
+                     '{{ CONF.custom_user_opts[\'key1\'] }}. '
+                     'This option is useful to inject custom values into '
+                     'heat environment files'),
 ]
 
 SERVER_OPTS = SCENARIO_OPTS + SERVER_AGENT_OPTS
