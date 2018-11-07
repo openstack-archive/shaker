@@ -17,8 +17,11 @@ import csv
 import json
 import yaml
 
+from oslo_log import log as logging
 from shaker.engine.executors import base
 from shaker.engine import utils
+
+LOG = logging.getLogger(__name__)
 
 
 def add_common_iperf_params(cmd, executor):
@@ -35,7 +38,23 @@ def add_common_iperf_params(cmd, executor):
             cmd.add('--len', executor.test_definition.get('datagram_size'))
     if executor.test_definition.get('bandwidth') is not None:
         cmd.add('--bandwidth', executor.test_definition.get('bandwidth'))
-    cmd.add('--time', executor.get_expected_duration())
+
+    if executor.test_definition.get('args'):
+        args = executor.test_definition.get('args')
+        for arg in args.split(' '):
+            cmd.add(arg)
+
+    # if any of these arguments are present user is using advanced mode so
+    # these should overwrite the default addition of the time argument
+    mutually_exclusive_with_time = {"-k", "--blockcount", "-n", "--num", "-l",
+                                    "--length"}
+    if mutually_exclusive_with_time.isdisjoint(cmd.tokens):
+        cmd.add('--time', executor.get_expected_duration())
+    else:
+        LOG.info('Time argument was not added since it is '
+                 'mutually exclusive with %s',
+                 ",".join(mutually_exclusive_with_time))
+
     cmd.add('--parallel', executor.test_definition.get('threads') or 1)
     if executor.test_definition.get('interval'):
         cmd.add('--interval', executor.test_definition.get('interval'))

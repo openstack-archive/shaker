@@ -402,6 +402,19 @@ overridden by command-line parameter, e.g. ``--matrix "{host: 172.10.1.2}"``.
 To use this scenario specify parameter ``--scenario spot/udp``.
 Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/spot/udp.yaml
 
+.. _scenario_sample_tcp_test_with_advanced_iperf_arguments:
+
+Sample TCP Test with Advanced Iperf Arguments
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+This test definition demonstrates the use of advanced arguments with iperf. In
+this scenario Shaker launches pairs of instances in the same tenant network.
+Every instance is hosted on a separate compute node, 1 compute node is
+utilized. The traffic goes within the tenant network (L2 domain) and uses
+arguments not directly mapped by the iperf executor.
+
+To use this scenario specify parameter ``--scenario test/sample_with_advanced_iperf``.
+Scenario source is available at: https://github.com/openstack/shaker/blob/master/shaker/scenarios/test/sample_with_advanced_iperf.yaml
+
 .. _scenario_sample_tcp_test_with_environment_file:
 
 Sample TCP Test with Environment File
