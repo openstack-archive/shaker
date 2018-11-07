@@ -1,0 +1,25 @@
+title: Sample TCP Test with Advanced Iperf Arguments
+
+description:
+  This test definition demonstrates the use of advanced arguments with iperf.
+
+  In this scenario Shaker launches pairs of instances in the same tenant
+  network. Every instance is hosted on a separate compute node, 1 compute node
+  is utilized. The traffic goes within the tenant network (L2 domain) and uses
+  arguments not directly mapped by the iperf executor.
+
+deployment:
+  template: l2_with_env.hot
+  env_file: env/sample.env
+
+  accommodation: [pair, compute_nodes: 1]
+
+execution:
+  tests:
+  -
+    title: tcp
+    class: iperf3
+    buffer_size: 9000
+    args: "--blockcount 1M --zerocopy --omit 1"
+    sla:
+    - "[type == 'agent'] >> (stats.bandwidth.avg > 5000)"

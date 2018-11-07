@@ -121,6 +121,56 @@ class TestIperfGraphExecutor(testtools.TestCase):
             base.ExecutorException, executor.process_reply, message)
 
 
+class IperfExecutor(testtools.TestCase):
+
+    def test_add_common_iperf_params(self):
+        executor = iperf.IperfExecutor(
+            {'bandwidth': '100M', 'time': 30}, AGENT)
+
+        cmd = base.CommandLine('iperf')
+        iperf.add_common_iperf_params(cmd, executor)
+
+        expected = {'data': ('iperf --client %s --format m --bandwidth 100M'
+                             ' --time 30 --parallel 1 --nodelay') % IP,
+                    'type': 'program'}
+
+        self.assertEqual(expected, executor.get_command())
+
+    def test_add_common_iperf_params_with_args(self):
+        executor = iperf.IperfExecutor(
+            {'bandwidth': '100M', 'time': 30, 'args': '--zerocopy --omit 1', },
+            AGENT)
+
+        cmd = base.CommandLine('iperf')
+        iperf.add_common_iperf_params(cmd, executor)
+
+        expected = {'data': ('iperf --client %s --format m --bandwidth 100M'
+                             ' --zerocopy --omit 1 --time 30 --parallel 1 '
+                             '--nodelay') % IP,
+                    'type': 'program'}
+
+        self.assertEqual(expected, executor.get_command())
+
+    def test_add_common_iperf_params_args_with_exclusion(self):
+        executor = iperf.IperfExecutor(
+            # add time on purpose to make sure it is excluded
+            {'bandwidth': '100M', 'time': 30,
+             'args': '--blockcount 1M --zerocopy --omit 1', },
+            AGENT)
+
+        cmd = base.CommandLine('iperf')
+        iperf.add_common_iperf_params(cmd, executor)
+
+        # time should not be present since it is mutually exclusive with
+        # -k/blockcount
+        expected = {'data': ('iperf --client %s --format m --bandwidth 100M'
+                             ' --blockcount 1M --zerocopy --omit 1 '
+                             '--parallel 1 --nodelay') % IP,
+                    'type': 'program'}
+
+        self.assertEqual(expected, executor.get_command())
+
+
 class TestIperf3Executor(testtools.TestCase):
 
     def test_get_command(self):
