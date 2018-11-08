@@ -388,7 +388,8 @@ class Deployment(object):
         env_template = utils.read_file(env_file,
                                        base_dir=base_dir)
         env_values = {
-            'CONF': cfg.CONF
+            'CONF': cfg.CONF,
+            'unique': self.stack_name
         }
         compiled_env = jinja2.Template(env_template)
         rendered_env = compiled_env.render(env_values)

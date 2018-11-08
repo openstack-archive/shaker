@@ -703,6 +703,7 @@ class TestDeploy(testtools.TestCase):
         base_dir = os.path.dirname(absolute_path)
 
         deployment = deploy.Deployment()
+        deployment.stack_name = 'shaker_abcdefg'
         deployment.openstack_client = openstack_mock
 
         support_stack_1 = uuid.uuid4()
@@ -727,6 +728,7 @@ class TestDeploy(testtools.TestCase):
         base_dir = os.path.dirname(absolute_path)
 
         deployment = deploy.Deployment()
+        deployment.stack_name = 'shaker_abcdefg'
         deployment.openstack_client = openstack_mock
 
         support_stack_1 = heat.exc.Conflict
