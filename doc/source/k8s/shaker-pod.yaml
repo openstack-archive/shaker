@@ -22,7 +22,7 @@ spec:
       value: openstack/perf_l2
     - name: SHAKER_SERVER_ENDPOINT
       value: 172.20.9.7:31999
-    image: shakhat/shaker
+    image: performa/shaker
     imagePullPolicy: Always
     name: shaker
     securityContext:

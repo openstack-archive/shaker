@@ -1,5 +1,5 @@
 FROM python:3.5
-LABEL maintainer "Ilya Shakhat <shakhat@gmail.com>"
+LABEL maintainer="Ilya Shakhat <shakhat@gmail.com>"
 
 RUN echo "deb http://httpredir.debian.org/debian jessie non-free" >> /etc/apt/sources.list \
     && apt-get update \

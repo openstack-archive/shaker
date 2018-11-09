@@ -45,11 +45,11 @@ Shaker in Container
 -------------------
 
 Shaker is available as container at Docker Hub at
-`shakhat/shaker <https://hub.docker.com/r/shakhat/shaker/>`_
+`performa/shaker <https://hub.docker.com/r/performa/shaker/>`_
 
 .. code-block:: bash
 
-    $ docker run -p <port>:<port> -v <artifacts-dir>:/artifacts shakhat/shaker --scenario <scenario> --server-endpoint <host:port>
+    $ docker run -p <port>:<port> -v <artifacts-dir>:/artifacts performa/shaker --scenario <scenario> --server-endpoint <host:port>
       --os-auth-url <os-auth-url> --os-username <os-username> --os-password <os-password> --os-project-name <os-project-name>
 
 where:
@@ -63,6 +63,7 @@ where:
 Links
 -----
 * PyPi - https://pypi.org/project/pyshaker/
-* Docker - https://hub.docker.com/r/shakhat/shaker/
+* Docker - https://hub.docker.com/r/performa/shaker/
 * Docs - http://pyshaker.readthedocs.io/
 * Bugtracker - https://launchpad.net/shaker/
+
