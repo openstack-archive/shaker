@@ -61,7 +61,8 @@ def generate_agents(compute_nodes, accommodation, unique):
 
     zones = accommodation.get('zones')
     if zones:
-        compute_nodes = [c for c in compute_nodes if c['zone'] in zones]
+        compute_nodes = [c for c in compute_nodes if c['zone'] in zones or
+                         ':'.join(filter(None, [c['zone'], c['host']])) in zones]
         if 'cross_az' in accommodation:
             # sort nodes to interleave hosts from different zones
             compute_nodes = prepare_for_cross_az(compute_nodes, zones)
