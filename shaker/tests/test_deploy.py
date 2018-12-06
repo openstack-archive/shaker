@@ -72,6 +72,24 @@ class TestDeploy(testtools.TestCase):
                                         unique)
         self.assertEqual(expected, actual)
 
+    def test_generate_agents_alone_single_room_az_host(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_agent_0': {
+                'id': 'UU1D_agent_0',
+                'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
+                'zone': ZONE,
+                'node': 'uno'},
+        }
+        zones = ['%s:uno' % ZONE]
+        accommodation = deploy.normalize_accommodation(
+            ['single_room', {'zones': zones}])
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos'),
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
+
     def test_generate_agents_pair_single_room(self):
         unique = 'UU1D'
         expected = {
@@ -91,6 +109,32 @@ class TestDeploy(testtools.TestCase):
                 'node': 'dos'},
         }
         accommodation = deploy.normalize_accommodation(['pair', 'single_room'])
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
+
+    def test_generate_agents_pair_single_room_az_host(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
+                'node': 'uno',
+                'zone': ZONE,
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'availability_zone': '%s:dos' % ZONE,
+                'zone': ZONE,
+                'node': 'dos'},
+        }
+        zones = ['%s:uno' % ZONE, '%s:dos' % ZONE]
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', {'zones': zones}])
         actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
                                         accommodation,
                                         unique)
@@ -156,6 +200,46 @@ class TestDeploy(testtools.TestCase):
                 'node': 'tre'},
         }
         accommodation = deploy.normalize_accommodation(['pair', 'double_room'])
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
+
+    def test_generate_agents_pair_double_room_az_host(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
+                'node': 'uno',
+                'zone': ZONE,
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'availability_zone': '%s:uno' % ZONE,
+                'zone': ZONE,
+                'node': 'uno'},
+            'UU1D_master_1': {
+                'id': 'UU1D_master_1',
+                'mode': 'master',
+                'availability_zone': '%s:dos' % ZONE,
+                'node': 'dos',
+                'zone': ZONE,
+                'slave_id': 'UU1D_slave_1'},
+            'UU1D_slave_1': {
+                'id': 'UU1D_slave_1',
+                'master_id': 'UU1D_master_1',
+                'mode': 'slave',
+                'availability_zone': '%s:dos' % ZONE,
+                'zone': ZONE,
+                'node': 'dos'},
+        }
+        zones = ['%s:uno' % ZONE, '%s:dos' % ZONE]
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'double_room', {'zones': zones}])
         actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
                                         accommodation,
                                         unique)
