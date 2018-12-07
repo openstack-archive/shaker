@@ -1,0 +1,9 @@
+Code-Review+1: Roy Tang <rt7380@att.com>
+Code-Review+2: Ilya Shakhat <shakhat@gmail.com>
+Workflow+1: Ilya Shakhat <shakhat@gmail.com>
+Verified+2: Zuul
+Submitted-by: Zuul
+Submitted-at: Fri, 07 Dec 2018 16:57:42 +0000
+Reviewed-on: https://review.openstack.org/623342
+Project: openstack/shaker
+Branch: refs/heads/master
