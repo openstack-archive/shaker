@@ -31,7 +31,7 @@ mapping:
         matching: any
         sequence:
         - type: str
-          enum: [pair, alone, double_room, single_room, mixed_room, cross_az]
+          enum: [pair, alone, double_room, single_room, mixed_room, cross_az, best_effort]
         - type: map
           mapping:
             density:
