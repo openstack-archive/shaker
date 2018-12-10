@@ -2,7 +2,7 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--agent-loss-timeout AGENT_LOSS_TIMEOUT]
               [--artifacts-dir ARTIFACTS_DIR] [--book BOOK]
               [--cleanup-on-error] [--config-dir DIR] [--config-file PATH]
-              [--custom_user_opts CUSTOM_USER_OPTS] [--debug]
+              [--custom-user-opts CUSTOM_USER_OPTS] [--debug]
               [--dns-nameservers DNS_NAMESERVERS]
               [--external-net EXTERNAL_NET] [--flavor-name FLAVOR_NAME]
               [--image-name IMAGE_NAME] [--log-config-append PATH]
@@ -23,8 +23,8 @@ usage: shaker [-h] [--agent-join-timeout AGENT_JOIN_TIMEOUT]
               [--os-username <auth-username>] [--output OUTPUT]
               [--polling-interval POLLING_INTERVAL] [--report REPORT]
               [--report-template REPORT_TEMPLATE] [--scenario SCENARIO]
-              [--scenario_availability_zone SCENARIO_AVAILABILITY_ZONE]
-              [--scenario_compute_nodes SCENARIO_COMPUTE_NODES]
+              [--scenario-availability-zone SCENARIO_AVAILABILITY_ZONE]
+              [--scenario-compute-nodes SCENARIO_COMPUTE_NODES]
               [--server-endpoint SERVER_ENDPOINT] [--subunit SUBUNIT]
               [--syslog-log-facility SYSLOG_LOG_FACILITY] [--use-journal]
               [--use-json] [--use-syslog] [--watch-log-file]
@@ -56,7 +56,7 @@ optional arguments:
   --config-file PATH    Path to a config file to use. Multiple config files
                         can be specified, with values in later files taking
                         precedence. Defaults to None.
-  --custom_user_opts CUSTOM_USER_OPTS
+  --custom-user-opts CUSTOM_USER_OPTS
                         Set custom user option parameters for the scenario.
                         The value is specified in YAML, e.g. custom_user_opts
                         = { key1:value1, key2:value2} The values specified can
@@ -195,12 +195,12 @@ optional arguments:
                         "openstack/udp_l3_north_south", "spot/ping",
                         "spot/tcp", "spot/udp". Defaults to
                         env[SHAKER_SCENARIO].
-  --scenario_availability_zone SCENARIO_AVAILABILITY_ZONE
+  --scenario-availability-zone SCENARIO_AVAILABILITY_ZONE
                         Comma-separated list of availability_zone. If
                         specified this setting will override the
                         availability_zone accomodation setting in the scenario
                         test definition.Defaults to SCENARIO_AVAILABILITY_ZONE
-  --scenario_compute_nodes SCENARIO_COMPUTE_NODES
+  --scenario-compute-nodes SCENARIO_COMPUTE_NODES
                         Number of compute_nodes. If specified this setting
                         will override the compute_nodes accomodation setting
                         in the scenario test definition. Defaults to
