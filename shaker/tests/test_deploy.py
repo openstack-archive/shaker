@@ -146,12 +146,87 @@ class TestDeploy(testtools.TestCase):
         self.assertRaises(deploy.DeploymentException, deploy.generate_agents,
                           ['uno'], accommodation, unique)
 
+    def test_generate_agents_pair_single_room_best_effort(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
+                'node': 'uno',
+                'zone': ZONE,
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'availability_zone': '%s:uno' % ZONE,
+                'zone': ZONE,
+                'node': 'uno'},
+        }
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', 'best_effort'])
+        actual = deploy.generate_agents(nodes_helper('uno'),
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
+
+    def test_generate_agents_pair_single_room_best_effort_three_nodes(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
+                'node': 'uno',
+                'zone': ZONE,
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'availability_zone': '%s:dos' % ZONE,
+                'zone': ZONE,
+                'node': 'dos'},
+        }
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', 'best_effort'])
+        actual = deploy.generate_agents(nodes_helper('uno', 'dos', 'tre'),
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
+
     def test_generate_agents_pair_single_room_compute_nodes_not_enough(self):
         unique = 'UU1D'
         accommodation = deploy.normalize_accommodation(
             ['pair', 'single_room', {'compute_nodes': 2}])
         self.assertRaises(deploy.DeploymentException, deploy.generate_agents,
                           ['uno'], accommodation, unique)
+
+    def test_generate_agents_pair_single_room_compute_nodes_best_effort(self):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_master_0': {
+                'id': 'UU1D_master_0',
+                'mode': 'master',
+                'availability_zone': '%s:uno' % ZONE,
+                'node': 'uno',
+                'zone': ZONE,
+                'slave_id': 'UU1D_slave_0'},
+            'UU1D_slave_0': {
+                'id': 'UU1D_slave_0',
+                'master_id': 'UU1D_master_0',
+                'mode': 'slave',
+                'availability_zone': '%s:uno' % ZONE,
+                'zone': ZONE,
+                'node': 'uno'},
+        }
+        accommodation = deploy.normalize_accommodation(
+            ['pair', 'single_room', 'best_effort', {'compute_nodes': 2}])
+        actual = deploy.generate_agents(nodes_helper('uno'),
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
 
     def test_generate_agents_pair_double_room(self):
         unique = 'UU1D'
@@ -327,6 +402,41 @@ class TestDeploy(testtools.TestCase):
         mr.side_effect = lambda x, n: x[:n]
         accommodation = deploy.normalize_accommodation(
             ['single_room', {'compute_nodes': 2}])
+        actual = deploy.generate_agents(compute_nodes,
+                                        accommodation,
+                                        unique)
+        self.assertEqual(expected, actual)
+
+    def test_generate_agents_alone_single_room_compute_nodes_not_enough(self):
+        unique = 'UU1D'
+        compute_nodes = nodes_helper('uno', 'duo')
+        accommodation = deploy.normalize_accommodation(
+            ['single_room', {'compute_nodes': 3}])
+        self.assertRaises(deploy.DeploymentException, deploy.generate_agents,
+                          compute_nodes, accommodation, unique)
+
+    @mock.patch('random.sample')
+    def test_generate_agents_alone_single_room_compute_nodes_best_effort(self,
+                                                                         mr):
+        unique = 'UU1D'
+        expected = {
+            'UU1D_agent_0': {
+                'id': 'UU1D_agent_0',
+                'mode': 'alone',
+                'availability_zone': '%s:uno' % ZONE,
+                'zone': ZONE,
+                'node': 'uno'},
+            'UU1D_agent_1': {
+                'id': 'UU1D_agent_1',
+                'mode': 'alone',
+                'availability_zone': '%s:duo' % ZONE,
+                'zone': ZONE,
+                'node': 'duo'},
+        }
+        compute_nodes = nodes_helper('uno', 'duo')
+        mr.side_effect = lambda x, n: x[:n]
+        accommodation = deploy.normalize_accommodation(
+            ['single_room', 'best_effort', {'compute_nodes': 3}])
         actual = deploy.generate_agents(compute_nodes,
                                         accommodation,
                                         unique)

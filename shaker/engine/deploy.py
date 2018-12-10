@@ -68,20 +68,35 @@ def generate_agents(compute_nodes, accommodation, unique):
             # sort nodes to interleave hosts from different zones
             compute_nodes = prepare_for_cross_az(compute_nodes, zones)
 
+    best_effort = accommodation.get('best_effort', False)
     compute_nodes_requested = accommodation.get('compute_nodes')
     if compute_nodes_requested:
         if compute_nodes_requested > len(compute_nodes):
-            raise DeploymentException(
-                'Not enough compute nodes %(cn)s for requested '
-                'instance accommodation %(acc)s' %
-                dict(cn=compute_nodes, acc=accommodation))
-        compute_nodes = random.sample(compute_nodes, compute_nodes_requested)
+            if best_effort:
+                LOG.warn('Allowing best_effort accommodation: '
+                         'compute nodes requested: %(req)d: '
+                         'available: %(avail)d available' %
+                         dict(req=compute_nodes_requested,
+                              avail=len(compute_nodes)))
+            else:
+                raise DeploymentException(
+                    'Not enough compute nodes %(cn)s for requested '
+                    'instance accommodation %(acc)s' %
+                    dict(cn=compute_nodes, acc=accommodation))
+        else:
+            compute_nodes = random.sample(compute_nodes,
+                                          compute_nodes_requested)
 
     cn_count = len(compute_nodes)
     iterations = cn_count * density
 
     if 'single_room' in accommodation and 'pair' in accommodation:
-        iterations //= 2
+        # special case to allow pair, single_room on single compute node
+        if best_effort and iterations == 1:
+            LOG.warn('Allowing best_effort accommodation: '
+                     'single_room, pair on one compute node')
+        else:
+            iterations //= 2
     node_formula = lambda x: compute_nodes[x % cn_count]
 
     agents = {}
