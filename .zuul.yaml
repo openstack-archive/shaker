@@ -4,6 +4,7 @@
       - openstack-python-jobs
       - openstack-python35-jobs
       - openstack-python36-jobs
+      - openstack-python37-jobs
     vars:
       rtd_webhook_id: '47125'
       rtd_project_name: pyshaker
@@ -22,7 +23,6 @@
 - job:
     name: shaker-integration-py27
     parent: openstack-tox
-    voting: false
     description: |
       Run integration tests under Python 2.7
 
@@ -33,7 +33,6 @@
 - job:
     name: shaker-integration-py35
     parent: openstack-tox
-    voting: false
     description: |
       Run integration tests under Python 3.5
 
