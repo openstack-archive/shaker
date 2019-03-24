@@ -14,7 +14,7 @@ Start working
 
 1. Clone the repo::
 
-    $ git clone git://git.openstack.org/openstack/shaker
+    $ git clone https://git.openstack.org/openstack/shaker
 
 2. From the root of your workspace, check out a new branch to work on::
 
