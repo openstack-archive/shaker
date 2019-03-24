@@ -69,7 +69,7 @@ Shaker image can also be built using `diskimage-builder`_ tool.
 
     #. Install disk-image-builder. Refer to `diskimage-builder installation`_
     #. Clone Shaker repo:
-       ``git clone git://git.openstack.org/openstack/shaker``
+       ``git clone https://git.openstack.org/openstack/shaker``
     #. Add search path for diskimage-builder elements:
        ``export ELEMENTS_PATH=shaker/shaker/resources/image_elements``
     #. Build the image based on Ubuntu Xenial:
