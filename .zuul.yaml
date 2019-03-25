@@ -2,7 +2,6 @@
     templates:
       - docs-on-readthedocs
       - openstack-python-jobs
-      - openstack-python35-jobs
       - openstack-python36-jobs
       - openstack-python37-jobs
     vars:
@@ -12,12 +11,12 @@
       jobs:
         - openstack-tox-docs
         - shaker-integration-py27
-        - shaker-integration-py35
+        - shaker-integration-py36
     gate:
       jobs:
         - openstack-tox-docs
         - shaker-integration-py27
-        - shaker-integration-py35
+        - shaker-integration-py36
         - shaker-docker-build
 
 - job:
@@ -31,14 +30,14 @@
       tox_envlist: integration-py27
 
 - job:
-    name: shaker-integration-py35
+    name: shaker-integration-py36
     parent: openstack-tox
     description: |
-      Run integration tests under Python 3.5
+      Run integration tests under Python 3.6
 
-      To run tests manually use ``tox -e integration-py35`` command.
+      To run tests manually use ``tox -e integration-py36`` command.
     vars:
-      tox_envlist: integration-py35
+      tox_envlist: integration-py36
 
 - secret:
     name: shaker_dockerhub_creds
